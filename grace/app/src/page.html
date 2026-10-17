@@ -1,4 +1,4 @@
-<title>Grace Malibu Replay</title>
+<title>PowerUp Malibu Replay</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <style>
 /* DESIGN PLAN
@@ -328,18 +328,49 @@ canvas.chart { display: block; width: 100%; }
   .drawer-head .btn, .ladder .step { min-height: 40px; }
 }
 @media (prefers-reduced-motion: no-preference) { .btn, .map-ctl button { transition: border-color 0.12s; } }
+
+/* PowerUp: Interlock panel */
+.pnav { display: flex; gap: 6px; flex-wrap: wrap; }
+.pnav a { text-decoration: none; }
+.seg { display: flex; gap: 6px; flex-wrap: wrap; margin: 2px 0 6px; }
+.gscore { display: grid; grid-template-columns: minmax(0, 1fr) auto auto; gap: 0; font-size: 12.5px; margin: 8px 0 4px; border-top: 1px solid var(--line-2); }
+.gscore > div { padding: 4px 8px; border-bottom: 1px solid var(--line-2); font-variant-numeric: tabular-nums; }
+.gscore .gk { padding-left: 0; color: var(--muted); }
+.gscore .gv { font-family: var(--font-mono); text-align: right; white-space: nowrap; }
+.gscore .hd { font-family: var(--font-cond); text-transform: uppercase; letter-spacing: 0.06em; font-weight: 700; font-size: 11.5px; text-align: right; color: var(--muted); }
+.gscore .off.cur, .gscore .on.cur { background: var(--panel-2); color: var(--fg); }
+.gscore .gv.bad { color: var(--bad); font-weight: 600; }
+.gscore .gv.good { color: var(--ok); font-weight: 600; }
+.glog { list-style: none; margin: 4px 0 0; padding: 0; max-height: 340px; overflow: auto; border-top: 1px solid var(--line-2); }
+.ge { display: grid; grid-template-columns: 100px minmax(0, 1fr); gap: 8px; padding: 6px 0; border-bottom: 1px solid var(--line-2); font-size: 12.5px; }
+.ge.now { background: var(--accent-soft); }
+.ge.fail-row { border-left: 3px solid var(--bad); padding-left: 6px; grid-template-columns: 94px minmax(0, 1fr); }
+.ge .gt { white-space: nowrap; font-family: var(--font-mono); font-size: 11px; color: var(--muted); background: none; border: 0; padding: 0; text-align: left; text-decoration: underline dotted; cursor: pointer; align-self: start; }
+.ge .gh { display: flex; gap: 4px; flex-wrap: wrap; align-items: center; margin-bottom: 2px; }
+.ge .gtitle { line-height: 1.35; }
+.ge details { margin-top: 2px; }
+.ge summary { font-size: 11.5px; color: var(--muted); cursor: pointer; }
+.ge ul { margin: 3px 0 0; padding-left: 16px; color: var(--fg); font-size: 12px; }
+.ge ul li { margin: 2px 0; }
+.pill.who { background: var(--panel-2); }
+.pill.chaos { background: var(--bad); color: #fff; border-color: transparent; }
+.pill.legit { background: var(--panel-2); color: var(--muted); }
+.bulletin .guard .who { color: var(--ok); }
+.bulletin .guard.alarm .who { color: var(--bad); }
+@media (max-width: 560px) { .ge, .ge.fail-row { grid-template-columns: minmax(0, 1fr); gap: 2px; } .ge .gt { min-height: 40px; } .pnav { display: none; } .bulletin .bl.guard { display: none; } }
 </style>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600&family=Barlow+Condensed:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
 
 <div class="wrap" id="app">
   <header class="hdr">
     <div class="hdr-l">
-      <div class="brand">Grace <span>Malibu Replay</span></div>
-      <p class="tag">Replays the October 2026 Malibu shutoff hour by hour and shows what Grace, a dispatcher for a fleet of Base Core home batteries, would have done. Demo fleet on real circuits; every assumed number says so.</p>
+      <div class="brand">PowerUp <span>Malibu Replay</span></div>
+      <p class="tag"><b>Grace plans, Interlock guards.</b> The October 2026 Malibu shutoff hour by hour on real SCE circuits. Every order to the demo fleet, Grace's too, passes Interlock first.</p>
     </div>
     <div class="hdr-r">
       <div class="clock" id="clock" aria-live="off">Thu Oct 15, 4:00 PM</div>
       <span class="chip rung" id="rungChip" data-rung="hold">Hold</span>
+      <nav class="pnav" aria-label="PowerUp pages"><a class="btn sm" href="heatwave.html" title="Interlock on CAISO's record-peak evening, Sept 6 2022">Heat-wave replay</a><a class="btn sm" href="#islands">Islands</a></nav>
       <button class="btn sm" id="themeBtn" title="Theme: follows system">Theme: auto</button>
     </div>
   </header>
@@ -388,12 +419,26 @@ canvas.chart { display: block; width: 100%; }
         </div>
         <div class="bulletin" id="bulletin">
           <div class="bl"><span class="who">Grace this hour</span><span id="narrative"></span></div>
+          <div class="bl guard"><span class="who">Interlock</span><span id="guardLine"></span></div>
           <div class="bl real"><span class="who">Real event</span><span id="realEvent"></span></div>
         </div>
       </div>
     </div>
 
     <aside class="panels">
+      <section class="panel" id="guardPanel">
+        <h2>Interlock <span class="right">Every order is checked before it reaches a battery. Grace's reserve is its floor.</span></h2>
+        <div class="seg" role="group" aria-label="Failures">
+          <button class="btn sm" data-gmode="plan" aria-pressed="false">No failures</button>
+          <button class="btn sm" data-gmode="on" aria-pressed="true">Six failures, guard on</button>
+          <button class="btn sm" data-gmode="off" aria-pressed="false">Six failures, guard off</button>
+        </div>
+        <p class="note" id="guardNote"></p>
+        <div class="gscore" id="guardScore"></div>
+        <div class="lab sub">Orders so far, newest first <span class="muted" id="guardCount"></span></div>
+        <ol class="glog" id="guardLog"></ol>
+      </section>
+
       <section class="panel" id="fleetPanel">
         <h2>Fleet <span class="right" id="fleetSub"></span></h2>
         <div class="kpis" id="fleetKpis"></div>
@@ -500,6 +545,12 @@ const DATA = /*__DATA__*/;
 /*__ENGINE__*/
 </script>
 <script>
+/*__INTERLOCK__*/
+</script>
+<script>
+/*__BRIDGE__*/
+</script>
+<script>
 (function () {
 'use strict';
 const G = window.Grace;
@@ -544,14 +595,35 @@ const circColor = c => T['c-' + c.toLowerCase()];
 const statusColor = st => T['h-' + G.STATUS[st]];
 
 // ---------- simulation ----------
+// PowerUp: Grace's plan (baseSim) runs first; then every order goes through Interlock (bridge/powerup.js), and with the
+// failures on, Grace re-runs with what each order actually did to the batteries, guard on and guard off. The page shows
+// the run for the chosen mode.
+const IL = window.Interlock, PU = window.PowerUp;
+let guardMode = 'on', baseSim = null, guardRes = null;
+function computeGuard() {
+  const chaos = guardMode !== 'plan';
+  guardRes = PU.run({ G, I: IL, DATA, world, P, decisions, base: baseSim, chaos, variants: chaos ? ['on', 'off'] : [] });
+  guardRes.chaos = chaos;
+  sim = chaos ? guardRes.sims[guardMode] : baseSim;
+}
 function run() {
   world = G.buildHomes(DATA, P);
-  sim = G.simulate(DATA, world, P, decisions);
+  baseSim = G.simulate(DATA, world, P, decisions);
   // prune decisions on EV proposals that no longer exist
-  const ids = new Set(sim.proposals.ev.map(p => p.id));
+  const ids = new Set(baseSim.proposals.ev.map(p => p.id));
   for (const k of Object.keys(decisions.ev)) if (!ids.has(k)) delete decisions.ev[k];
+  computeGuard();
 }
-function resim() { sim = G.simulate(DATA, world, P, decisions); renderAll(); }
+function resim() { baseSim = G.simulate(DATA, world, P, decisions); computeGuard(); renderAll(); }
+function setGuardMode(m) {
+  if (m === guardMode) return;
+  const needChaos = m !== 'plan';
+  guardMode = m;
+  if (!guardRes || guardRes.chaos !== needChaos) computeGuard();
+  else sim = needChaos ? guardRes.sims[m] : baseSim;
+  document.querySelectorAll('[data-gmode]').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.gmode === m)));
+  renderAll();
+}
 
 // ---------- map ----------
 const mapWrap = $('mapWrap'), canvas = $('map'), ctx = canvas.getContext('2d');
@@ -1104,6 +1176,12 @@ function drawTl() {
     if (t.n > 1) { c.fillStyle = T.fg; c.fillText(String(t.n), t.x + 5, 1); }
     if (t.plan) { c.strokeStyle = col; c.setLineDash([2, 2]); c.beginPath(); c.moveTo(t.x, 10); c.lineTo(t.x, bot); c.stroke(); c.setLineDash([]); }
   }
+  // PowerUp: the simulated failures, as small squares along the bottom of the band
+  if (guardRes && guardRes.chaos) for (const e of guardRes.log) if (!e.order.plan) {
+    const x = xOf(e.order.h);
+    c.fillStyle = e.order.truth === 'legit' ? T['r-watch'] : (guardMode === 'off' ? T.bad : T.ok);
+    c.fillRect(x - 3, bot - 7, 6, 6);
+  }
   // this run's first planned restoration, when it differs from the pack's plan entry
   const run0 = sim.proposals.restore[0];
   if (run0 && run0.startH !== PLAN_EVENT_H && run0.startH < HOURS) { const x = xOf(run0.startH); c.strokeStyle = T.accent; c.setLineDash([2, 2]); c.beginPath(); c.moveTo(x, 10); c.lineTo(x, bot); c.stroke(); c.setLineDash([]); }
@@ -1245,9 +1323,75 @@ function renderHour() {
   for (const r of ['watch', 'ask', 'fill', 'hold', 'hand']) $('jump-' + r).setAttribute('aria-pressed', String(f.rung === r));
   renderLadder(f.rung);
   drawTl();
-  renderFleet(); renderCircuit(); renderApprovals(); renderMath();
+  renderFleet(); renderCircuit(); renderApprovals(); renderMath(); renderGuard();
   if (pinnedId >= 0 && pinnedPos) showCard(pinnedId, pinnedPos.x, pinnedPos.y, true);
 }
+
+// ---------- Interlock panel ----------
+const WHO_LABEL = { grace: 'Grace', optimizer: 'Base optimizer', utility: 'SCE', market: 'market', forged: 'unknown signer' };
+const shortTime = h => { const p = G.dateParts(h); const hh = h % 24; return `${p.wd} ${p.dom}, ${((hh + 11) % 12) + 1} ${hh < 12 ? 'AM' : 'PM'}`; };
+function verdictPill(e, mode) {
+  const failure = !e.order.plan;
+  if (mode === 'off' && failure) return '<span class="pill fail">ran as sent</span>';
+  if (!e.ran) return `<span class="pill fail">${e.rung === 'hand' ? 'held, to a person' : 'held'}</span>`;
+  if (e.verdict === 'clamp') return '<span class="pill hold">slowed to the safe part</span>';
+  return `<span class="pill pass">${e.canaried ? 'passed, as a canary' : 'passed'}</span>`;
+}
+// the reason a person needs first: skip bookkeeping (precedence, exclusions) when a real check fired
+function mainReason(e) {
+  const r = e.reasons.filter(x => x.check !== 'precedence' && x.code !== 'CANARY_DONE');
+  return (r[0] || e.reasons[0] || {}).detail || 'Every check passed.';
+}
+function guardLineText() {
+  if (!guardRes) return '';
+  const recent = guardRes.log.filter(e => e.order.h <= hour && e.order.h > hour - 3);
+  const fail = recent.filter(e => !e.order.plan);
+  const pick = fail[fail.length - 1] || recent[recent.length - 1];
+  const g = PU.graceSummary(guardRes.log.filter(e => e.order.h <= hour));
+  if (!pick) return { alarm: false, text: `No new orders this hour. ${g.orders} of Grace's orders checked so far; ${g.held + g.clamped ? g.held + g.clamped + ' stopped' : 'none stopped'}.` };
+  const when = pick.order.h === hour ? 'This hour' : `${hour - pick.order.h} h ago`;
+  if (guardMode === 'off' && !pick.order.plan) return { alarm: true, text: `${when}, guard off: "${pick.order.title}" ran exactly as sent.` };
+  const v = !pick.ran ? 'Held' : pick.verdict === 'clamp' ? 'Slowed' : 'Passed';
+  return { alarm: !pick.order.plan, text: `${when}: ${pick.order.title}. ${v}: ${mainReason(pick)}` };
+}
+function renderGuard() {
+  if (!guardRes) return;
+  const chaos = guardRes.chaos, mode = guardMode, M = guardRes.metrics, X = guardRes.exposure, N = sim.N;
+  const gs = PU.graceSummary(guardRes.log);
+  const gl = guardLineText(), line = $('guardLine');
+  // the bulletin carries Interlock only when a failure or the utility's event is in play; Grace's own orders stay in the log
+  line.textContent = gl.text; line.parentElement.classList.toggle('alarm', !!gl.alarm); line.parentElement.hidden = !gl.alarm;
+  $('guardNote').innerHTML = !chaos
+    ? `Grace's ${gs.orders} orders and Base's ordinary-day optimizer, all through Interlock's eight checks: <b>${gs.held + gs.clamped ? gs.held + gs.clamped + ' of Grace\'s orders stopped' : 'none of Grace\'s orders stopped'}</b>. Base's optimizer is trimmed wherever Grace holds a battery. Turn the failures on to see what the guard is for.`
+    : `Six <b>simulated</b> failures on the real timeline: a forged order, a replay, a sell-down three hours before power-off, export onto a dead line, a recharge rebound, and SCE's own emergency event. ${mode === 'off' ? '<b>Guard off:</b> every order runs exactly as sent, and the map and fleet show what that does.' : '<b>Guard on:</b> the map and fleet show Grace\'s plan, kept.'} The guard-off run counts a battery on a dead line as trying to export; IEEE 1547 anti-islanding should trip it, so Interlock is a second layer.`;
+  if (chaos) {
+    const row = (k, off, on, offBad, onGood) => `<div class="gk">${k}</div><div class="gv off ${mode === 'off' ? 'cur' : ''} ${offBad ? 'bad' : ''}">${off}</div><div class="gv on ${mode === 'on' ? 'cur' : ''} ${onGood ? 'good' : ''}">${on}</div>`;
+    const darkOff = M.off.darkHomes, darkOn = M.on.darkHomes;
+    $('guardScore').innerHTML = `<div class="gk hd" style="text-align:left">Same shutoff, same orders</div><div class="hd off ${mode === 'off' ? 'cur' : ''}">Guard off</div><div class="hd on ${mode === 'on' ? 'cur' : ''}">Guard on</div>` +
+      row('Battery homes dark during the shutoff', `${fmtInt(darkOff)} of ${fmtInt(N)}`, `${fmtInt(darkOn)}`, darkOff > darkOn, darkOn <= M.base.darkHomes) +
+      row('Medical Baseline homes dark (demo)', `${M.off.mbDarkHomes} <small>${fmtInt(M.off.mbDarkHomeHours)} h</small>`, `${M.on.mbDarkHomes}`, M.off.mbDarkHomes > 0, M.on.mbDarkHomes === 0) +
+      row('Fleet charge an hour into the shutoff', `${M.off.fleetSocAtShutoffPct.toFixed(0)}%`, `${M.on.fleetSocAtShutoffPct.toFixed(0)}%`, M.off.fleetSocAtShutoffPct < 50, true) +
+      row('Battery-hours pushing onto a dead line', fmtInt(X.off.deadLineBatteryH), fmtInt(X.on.deadLineBatteryH), X.off.deadLineBatteryH > 0, X.on.deadLineBatteryH === 0) +
+      row('Worst overload when a circuit comes back', X.off.worstOverMW > 0 ? `${X.off.worstOverMW.toFixed(1)} MW over ${X.off.worstOverCircuit}'s cap` : 'none', X.on.worstOverMW > 0 ? `${X.on.worstOverMW.toFixed(1)} MW` : 'none', X.off.worstOverMW > 0, X.on.worstOverMW === 0) +
+      row('Energy given to SCE\'s emergency event', `${X.off.eventMWh.toFixed(1)} MWh`, `${X.on.eventMWh.toFixed(1)} MWh`, false, false) +
+      row('Grace\'s own orders stopped', 'no guard', `${gs.held + gs.clamped} of ${gs.orders}`, false, gs.held + gs.clamped === 0);
+  } else $('guardScore').innerHTML = '';
+  const shown = guardRes.log.filter(e => e.order.h <= hour);
+  $('guardCount').textContent = `(${shown.length} of ${guardRes.log.length} by this hour)`;
+  const el = $('guardLog');
+  el.innerHTML = shown.length ? shown.slice().reverse().map(e => {
+    const o = e.order, failure = !o.plan;
+    const reasons = e.reasons.map(r => `<li>${r.detail}</li>`).join('') || '<li>Every check passed.</li>';
+    return `<li class="ge ${o.h === hour ? 'now' : ''} ${failure ? 'fail-row' : ''}">
+      <button class="gt" data-h="${o.h}" title="Jump to this hour">${shortTime(o.h)}</button>
+      <div><div class="gh"><span class="pill who">${WHO_LABEL[o.who] || o.who}</span>${failure ? `<span class="pill ${o.truth === 'legit' ? 'legit' : 'chaos'}">${o.truth === 'legit' ? 'utility event' : 'simulated failure'}</span>` : ''}${verdictPill(e, mode)}</div>
+      <div class="gtitle">${o.title}</div>
+      ${o.why ? `<div class="note" style="margin-top:2px">${o.why}</div>` : ''}
+      <details><summary>${mode === 'off' && failure ? 'What Interlock would have said' : 'Why'}</summary><ul>${reasons}</ul></details></div></li>`;
+  }).join('') : '<li class="ge"><span></span><div class="note">No orders yet. The first is Base\'s ordinary-day optimizer at 4 PM on Oct 7.</div></li>';
+  el.querySelectorAll('button[data-h]').forEach(b => b.addEventListener('click', () => setHour(+b.dataset.h)));
+}
+document.querySelectorAll('[data-gmode]').forEach(b => b.addEventListener('click', () => setGuardMode(b.dataset.gmode)));
 
 function renderFleet() {
   const f = sim.fleet[hour], N = sim.N;
@@ -1750,6 +1894,6 @@ window.addEventListener('resize', () => { labelTheme(); fitMap(); resizeTl(); dr
 document.addEventListener('visibilitychange', () => { if (document.hidden && playing) togglePlay(false); });
 requestAnimationFrame(frame);
 // small hook for the Playwright checks
-window.__grace = { get hour() { return hour; }, get view() { return view; }, get sim() { return sim; }, get world() { return world; }, get P() { return P; }, toPx, decisions, setHour, nearestHome, nearestLine };
+window.__grace = { get hour() { return hour; }, get view() { return view; }, get sim() { return sim; }, get baseSim() { return baseSim; }, get guard() { return guardRes; }, get guardMode() { return guardMode; }, setGuardMode, get world() { return world; }, get P() { return P; }, toPx, decisions, setHour, nearestHome, nearestLine };
 })();
 </script>
