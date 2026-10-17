@@ -23,7 +23,7 @@ for sub, names in (('src', ('engine.mjs', 'packs.mjs', 'silence.mjs', 'sim.mjs')
 page = open(os.path.join(il, 'index.html'), encoding='utf-8').read()
 brand = '<span class="wordmark">Interlock</span>'
 assert page.count(brand) == 1
-page = page.replace(brand, brand + '\n      <a class="brand-sub" href="index.html">Part of PowerUp: back to the Malibu replay</a>', 1)
+page = page.replace(brand, brand + '\n      <a class="brand-sub" href="index.html">Part of PowerUP: back to the Malibu replay</a>', 1)
 page = page.replace('<title>Interlock</title>', '<title>Interlock Heat Wave</title>', 1)
 # on the Artifact the main page gets the host's skeleton and the second page carries its own; on GitHub Pages both do
 head = ('<!doctype html>\n<html lang="en">\n<head>\n<meta charset="utf-8">\n'
