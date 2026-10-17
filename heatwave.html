@@ -418,7 +418,7 @@ button:disabled { cursor: not-allowed; }
     </div>
     <label class="theme-picker" for="themeSelect">Theme
       <select id="themeSelect" aria-label="Color theme">
-        <option value="system">System</option>
+        <option value="auto">Auto</option>
         <option value="light">Light</option>
         <option value="dark">Dark</option>
       </select>
@@ -637,10 +637,10 @@ const clockMin = (k) => START + k * STEP;
 const store = { get(k, d) { try { const v = localStorage.getItem('interlock:' + k); return v === null ? d : JSON.parse(v); } catch { return d; } },
   set(k, v) { try { localStorage.setItem('interlock:' + k, JSON.stringify(v)); } catch { /* storage unavailable */ } } };
 
-const savedTheme = store.get('theme', 'system');
+const savedTheme = store.get('theme', 'auto');
 function setTheme(theme) {
-  const next = theme === 'light' || theme === 'dark' ? theme : 'system';
-  if (next === 'system') delete document.documentElement.dataset.theme;
+  const next = theme === 'light' || theme === 'dark' ? theme : 'auto';
+  if (next === 'auto') delete document.documentElement.dataset.theme;
   else document.documentElement.dataset.theme = next;
   $('themeSelect').value = next;
   store.set('theme', next);
