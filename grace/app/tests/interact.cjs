@@ -174,7 +174,7 @@ function ok(name, cond, extra) { results.push({ name, ok: !!cond, extra }); if (
   await p.click('#jump-hand');
   ok('hand rung lists six plans', (await p.$$('#restoreList .plan')).length === 6);
   const planText = await text('restoreList');
-  ok('peak check shows without Grace vs with Grace vs cap', planText.includes('without Grace') && planText.includes('with Grace') && planText.includes('cap') && planText.includes('off the peak') && (await p.$$('#restoreList .pk')).length === 6);
+  ok('peak check shows without PowerUP vs with PowerUP vs cap', planText.includes('without PowerUP') && planText.includes('with PowerUP') && planText.includes('cap') && planText.includes('off the peak') && (await p.$$('#restoreList .pk')).length === 6);
   const firstPlan = await p.evaluate(() => { const q = window.__grace.sim.proposals.restore[0]; return { c: q.circuit, w: q.withoutKW, g: q.withKW, cap: q.capKW, under: q.underCap, start: q.startH, charge: q.chargeStartH }; });
   ok('with Grace is below without Grace and the plan starts 62 h after the shutoff', firstPlan.g < firstPlan.w && firstPlan.start === 270 && firstPlan.charge >= 272, JSON.stringify(firstPlan));
   ok('plans are staggered 1 h apart', await p.evaluate(() => { const r = window.__grace.sim.proposals.restore; return r.every((q, i) => q.startH === r[0].startH + i); }));
