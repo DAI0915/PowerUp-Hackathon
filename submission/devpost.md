@@ -44,6 +44,8 @@ PowerUp has three parts that share one ladder.
 | Battery-hours pushing power onto a de-energized line | 1,208 | 0 |
 | Worst circuit overload at restoration | 5.46 MW over Galahad's cap | none |
 
+The demo's 15 batteries per 100 homes is an assumption about a grown fleet. At Malibu's real share today, about 7.1 per 100 (482 batteries on 6,829 homes, SCE interconnection records), the same run has 484 battery homes: guard off, 483 go dark, including all 27 Medical Baseline homes; guard on, none do.
+
 With the guard on, the outcome equals Grace's plan with no failures. SCE's emergency event still delivers 86% of its energy; it stops at each home's planned reserve, so Medical Baseline homes give nothing.
 
 ### Proof 2: September 6, 2022, CAISO's record-peak evening
@@ -61,7 +63,7 @@ Four real SCE circuits, 2,000 simulated Base Core homes, the real EEA 3 emergenc
 
 ### Proof 3: an island behind Merlin's recloser
 
-For a 48-hour shutoff, the underground coast section (313 customers) can island; the overhead branch beside it is blocked. With a 400 kWh community battery: 32 battery donors, 41 solar-only homes, 147 receivers and 114 opt-outs, with every receiver carried at the critical budget for 44 of 48 hours. Without a grid-forming battery the island does not form, because home batteries are certified to island only their own house. On a 213-hour shutoff like January 2025, rooftop solar carries the island.
+For a 48-hour shutoff, the underground coast section (313 customers) can island; the overhead branch beside it is blocked. With a 400 kWh community battery: 32 battery donors, 41 solar-only homes, 147 receivers and 114 opt-outs, with every receiver carried at the critical budget for 44 of 48 hours. At Malibu's real battery and solar shares the same island runs about 20 of 48 hours on 400 kWh and about 29 on 1,000 kWh, so the community battery does most of the work and a pilot sizes it first. Without a grid-forming battery the island does not form, because home batteries are certified to island only their own house. On a 213-hour shutoff like January 2025, rooftop solar carries the island.
 
 ### Every day
 
@@ -74,7 +76,7 @@ The same battery earns its keep on ordinary days. Grace prices readiness with re
 - **Bridge:** turns each Grace decision into a signed order, runs every sender's orders through Interlock, and re-runs Grace with what each order actually did to the batteries. Wiring it also hardened Interlock: a validly signed order admitted days earlier could be re-sent and pass the freshness check, and it is now treated as a replay once its window has closed.
 - **Islands:** pure functions that classify segments, find islands under three hard rules (never re-energize overhead line in a fire area, a switch to every dead neighbor, one grid-forming source), plan donors and receivers, and settle the money.
 - **App:** one page that runs all of it live in the browser: the Malibu map, the guard panel with guard on and off, the island planner and SCE's switches on the map. A second page replays the heat wave.
-- **Tests:** 70 node tests (Grace 22, Interlock 28, islands 11, bridge 9) and 160 Playwright browser checks at desktop and phone width.
+- **Tests:** 71 node tests (Grace 22, Interlock 28, islands 11, bridge 10) and 160 Playwright browser checks at desktop and phone width.
 
 Every number in the apps is labelled real, assumed or simulated.
 
