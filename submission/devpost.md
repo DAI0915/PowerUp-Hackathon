@@ -2,7 +2,7 @@
 
 Paste-ready text for the Devpost form. Every number comes from `node bridge/cli.mjs`, `node interlock/cli.mjs` and `node islands/scenario.cjs`, and matches the README.
 
-- **Live demo:** https://claude.ai/artifact/1f2gVaMjYXvTs8xiqCi5Lu (the Malibu replay; the Heat-wave replay button opens the second page)
+- **Live demo:** https://mrbese.github.io/PowerUp/ (the Malibu replay; the Heat-wave replay button opens the second page). Same demo on claude.ai: https://claude.ai/artifact/1f2gVaMjYXvTs8xiqCi5Lu
 - **Code:** https://github.com/mrbese/PowerUp
 
 ## Name, lens and one-liner
