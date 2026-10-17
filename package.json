@@ -2,7 +2,7 @@
   "name": "powerup",
   "version": "0.1.0",
   "private": true,
-  "description": "PowerUp: the disaster layer for a home-battery fleet. Grace plans for wildfire shutoffs; Interlock guards every order; neighborhood islands share batteries behind SCE's switches.",
+  "description": "PowerUP: the disaster layer for a home-battery fleet. The planner prepares for wildfire shutoffs; Interlock guards every order; neighborhood islands share batteries behind SCE's switches.",
   "scripts": {
     "test": "node grace/app/tests/engine.test.cjs && node --test interlock/tests/*.test.mjs && node islands/island.test.cjs && node --test bridge/tests/*.test.mjs",
     "malibu": "node bridge/cli.mjs",
