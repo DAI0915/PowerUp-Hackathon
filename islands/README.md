@@ -96,3 +96,12 @@ Nothing in SCE's Malibu territory shares one home's battery with a neighbor. The
 - **Alabama Power Reynolds Landing**: a utility-owned neighborhood microgrid (shared battery and generator) for 62 new homes ([LBNL](https://connectedcommunities.lbl.gov/node/14)).
 
 The gap is a retrofit on existing homes behind the utility's existing switches, with per-home opt-in and money flowing from homes without batteries to battery owners. That is what `island.js` does (`planIsland` and `settle`).
+
+## 9. Map of switches and transformers (hypothetical layer)
+
+`malibu_switches_map.png` (built by `python3 -I hypothetical_assets.py`, then `NODE_PATH=$(npm root -g) node render_map.cjs`), with the data in `malibu_hypothetical_assets.geojson`.
+
+- **What is real**: SCE's line shapes for five circuits (Tuna isn't published), plus the name of each line device SCE opened in a Malibu shutoff and how many customers it cut.
+- **What is estimated**: where each device sits. SCE publishes no switch or transformer locations. Its DRPEP layers carry the whole circuit shape even for partial shutoffs (checked Merlin: RAR0775 events have the same shape length as breaker events), and the ICA circuit segments have no device or overhead/underground field. Each device is placed where the downstream share of line matches the share of customers it cut. Latigo substation is placed where four of its circuits converge.
+- **What is hypothetical**: 798 service transformers, one per 8 homes (a typical residential unit), spaced along the lines. Each one is tagged with the device it sits behind (`behind_device`), which is the transformer-island candidate list for the planner's `transformerIsland`.
+- **To make it real**: SCE's device and transformer locations (ask SCE under the pilot), or OpenStreetMap `power=pole/transformer` tags where mapped (not reachable from this container). Replace the hypothetical points with real ones, and `island.js` runs unchanged.

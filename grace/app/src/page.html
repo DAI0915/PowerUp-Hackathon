@@ -169,6 +169,7 @@ a { color: inherit; }
 .legend .sw.ring.check { border-color: var(--h-check); }
 .legend .sw.plain { width: 5px; height: 5px; margin: 0 2.5px; }
 .legend .sw.diamond { transform: rotate(45deg); border-radius: 1px; }
+.legend .sw.sq { border-radius: 1px; background: var(--halo); border: 1.5px solid var(--fg); width: 8px; height: 8px; margin: 0 1px; }
 .legend .circ { display: flex; flex-wrap: wrap; gap: 4px 8px; margin-top: 6px; }
 .legend .circ button { border: 0; background: none; padding: 0; display: inline-flex; align-items: center; gap: 5px; font-size: 11px; color: var(--fg); }
 .legend .circ button i { width: 14px; height: 3px; display: inline-block; border-radius: 1px; }
@@ -328,6 +329,24 @@ canvas.chart { display: block; width: 100%; }
   .drawer-head .btn, .ladder .step { min-height: 40px; }
 }
 @media (prefers-reduced-motion: no-preference) { .btn, .map-ctl button { transition: border-color 0.12s; } }
+
+/* PowerUp: islands band */
+.isl-lede { font-size: 13px; margin: 0 0 10px; max-width: 980px; }
+.itab { width: 100%; border-collapse: collapse; font-size: 12.5px; font-variant-numeric: tabular-nums; }
+.itab th { text-align: left; font-family: var(--font-cond); text-transform: uppercase; letter-spacing: 0.06em; font-size: 11px; color: var(--muted); font-weight: 700; padding: 4px 6px 4px 0; border-bottom: 1px solid var(--line); }
+.itab td { padding: 4px 6px 4px 0; border-bottom: 1px solid var(--line-2); vertical-align: top; }
+.itab td.n, .itab th.n { text-align: right; }
+.itab tr.pick { cursor: pointer; }
+.itab tr.pick:hover td, .itab tr.pick.cur td { background: var(--panel-2); }
+.itab button.lk { border: 0; background: none; color: var(--focus); padding: 0; font: inherit; cursor: pointer; text-align: left; }
+.ichips { display: flex; flex-wrap: wrap; gap: 4px 6px; margin: 6px 0; }
+.ichip { font-size: 11.5px; border: 1px solid var(--line); border-radius: 3px; padding: 2px 6px; }
+.ichip.risk { border-color: var(--bad); color: var(--bad); }
+.ichip.blk { color: var(--muted); }
+.ichip.isl { border-color: var(--ok); color: var(--ok); font-weight: 600; }
+.ires { margin: 6px 0 0; padding-left: 18px; font-size: 12.5px; }
+.ires li { margin: 2px 0; }
+@media (max-width: 560px) { .itab button.lk { min-height: 40px; } .itab .hide-s { display: none; } }
 
 /* PowerUp: Interlock panel */
 .pnav { display: flex; gap: 6px; flex-wrap: wrap; }
@@ -512,6 +531,31 @@ canvas.chart { display: block; width: 100%; }
     </aside>
   </div>
 
+  <section class="band" id="islands">
+    <h2>Islands: the homes that are dark only because of where their wire runs</h2>
+    <p class="isl-lede">SCE already cuts partial circuits: 13 of the 55 shutoffs on these six circuits since 2019 were opened at a switch out on the line, not at the substation (<b>real</b>, SCE PSPS records). Merlin's recloser RAR0775 cut the same 223 customers four times, once for 213.5 hours. The opposite case has no answer today: a stretch that is safe, often underground, goes dark only because its feed runs through a risky overhead one. PowerUp's island planner finds those homes and plans an opt-in neighborhood island behind SCE's existing switch, with one grid-forming community battery, home batteries that donate what is left after their own backup, and SCE opening and closing the switch.</p>
+    <div class="two">
+      <div>
+        <div class="lab">A Merlin-shaped island, planned live by <code>islands/island.js</code></div>
+        <div class="seg" role="group" aria-label="Shutoff length">
+          <button class="btn sm" data-ihours="48" aria-pressed="true">48 h shutoff</button>
+          <button class="btn sm" data-ihours="213" aria-pressed="false">213 h, like Jan 2025</button>
+        </div>
+        <div class="seg" role="group" aria-label="Community battery">
+          <button class="btn sm" data-icomm="1" aria-pressed="true">With a 400 kWh community battery</button>
+          <button class="btn sm" data-icomm="0" aria-pressed="false">Home batteries only</button>
+        </div>
+        <div id="islPlan"></div>
+        <p class="note">Real: Merlin's about 777 customers and the 223 behind RAR0775. Assumed: how the rest of Merlin splits into segments, which are underground, the homes (15% battery, 5% Medical Baseline), every opt-in choice, the community battery's size and every rate. The three hard rules: never re-energize overhead line in a fire area, a switch to every dead neighbor, one grid-forming source.</p>
+      </div>
+      <div>
+        <div class="lab">SCE line switches opened in Malibu shutoffs (tap one to find it on the map)</div>
+        <div id="islSwitches"></div>
+        <p class="note">Device names, customers cut and times opened are <b>real</b> (SCE PSPS records, 2019 to 2025). Positions are <b>estimated</b>: SCE publishes no switch locations, so each one sits where the share of line beyond it matches the share of customers it cut. The transformers count is <b>hypothetical</b> service transformers (one per 8 homes) behind each switch: the candidates for the smallest island, one transformer's 240 V secondary.</p>
+      </div>
+    </div>
+  </section>
+
   <section class="band" id="priorArt">
     <h2>What exists, what Grace adds</h2>
     <div class="pa" id="paRows"></div>
@@ -549,6 +593,9 @@ const DATA = /*__DATA__*/;
 </script>
 <script>
 /*__BRIDGE__*/
+</script>
+<script>
+/*__ISLANDS__*/
 </script>
 <script>
 (function () {
@@ -629,7 +676,7 @@ function setGuardMode(m) {
 const mapWrap = $('mapWrap'), canvas = $('map'), ctx = canvas.getContext('2d');
 const view = { cx: 0, cy: 0, scale: 10 };
 let W = 0, H = 0, dpr = 1;
-let coastKm = null, bandsKm = null, linesKm = null, placesKm = null, fireKm = null, contentBox = null;
+let coastKm = null, bandsKm = null, linesKm = null, placesKm = null, fireKm = null, switchesKm = [], contentBox = null;
 let hoverId = -1, pinnedId = -1, pinnedPos = null;
 let needsDraw = true;
 
@@ -648,6 +695,7 @@ function prepGeometry() {
   for (const p of bandsKm.Tuna) { if (p[0] < minx) minx = p[0]; if (p[0] > maxx) maxx = p[0]; if (p[1] < miny) miny = p[1]; if (p[1] > maxy) maxy = p[1]; }
   placesKm = DATA.places.map(p => ({ n: p.n, p: G.toKm(p.lon, p.lat, bb) }));
   fireKm = G.toKm(DATA.fire.lon, DATA.fire.lat, bb);
+  switchesKm = (DATA.switches || []).map(sw => ({ sw, p: G.toKm(sw.lon, sw.lat, bb) }));
   contentBox = { minx, miny, maxx, maxy };
 }
 function resetView(animate) {
@@ -898,6 +946,16 @@ function drawMap(now) {
     }
     if (q[0] < -40 || q[0] > W + 40 || q[1] < 0 || q[1] > H) continue;
     labelFit(`${k} (approx.)`, q[0], q[1], named ? T['c-tuna'] : T.muted, 'center', 11, named);
+  }
+
+  // SCE line switches that opened in a past Malibu shutoff (real names, estimated positions; see the Islands section)
+  for (const { sw, p } of switchesKm) {
+    const q = toPx(p[0], p[1]); if (q[0] < -10 || q[0] > W + 10 || q[1] < -10 || q[1] > H + 10) continue;
+    const hot = sw.device === islFocus, sz = hot ? 9 : 7;
+    ctx.fillStyle = T.halo; ctx.strokeStyle = hot ? T.accent : T.fg; ctx.lineWidth = hot ? 2.2 : 1.5;
+    ctx.fillRect(q[0] - sz / 2, q[1] - sz / 2, sz, sz); ctx.strokeRect(q[0] - sz / 2, q[1] - sz / 2, sz, sz);
+    if (sw.kind === 'line_device') { ctx.beginPath(); ctx.moveTo(q[0] - sz / 2 + 1.5, q[1] + sz / 2 - 1.5); ctx.lineTo(q[0] + sz / 2 - 1.5, q[1] - sz / 2 + 1.5); ctx.stroke(); }
+    if (view.scale > 70 || hot) labelFit(sw.kind === 'substation' ? `${sw.device[0]}${sw.device.slice(1).toLowerCase()} sub. (est.)` : `${sw.device} (est.)`, q[0] + 8, q[1], hot ? T.accent : T.muted, 'left', 10, hot, hot);
   }
 
   // scale bar
@@ -1811,7 +1869,7 @@ $('resetBtn').addEventListener('click', () => { P = G.defaultParams(DATA); for (
 function buildStatic() {
   const states = [[S.normal, 'ordinary day'], [S.watch, 'watch'], [S.held, 'held at 100%'], [S.filling, 'filling'], [S.islanded, 'islanded'], [S.restoring, 'recharging'], [S.standby, 'grid on, recharge pending'], [S.empty, 'empty'], [S.fault, 'fault']];
   $('legendStates').innerHTML = states.map(([st, n]) => `<li><span class="sw" style="background:${statusColor(st)}"></span>${n}</li>`).join('') +
-    `<li><span class="sw ring"></span>silent, tower down</li><li><span class="sw ring check"></span>silent, check</li><li><span class="sw diamond" style="background:${T['h-held']}"></span>Medical Baseline (demo)</li><li><span class="sw plain" style="background:${T['h-plain']}"></span>home, no battery</li>`;
+    `<li><span class="sw ring"></span>silent, tower down</li><li><span class="sw ring check"></span>silent, check</li><li><span class="sw diamond" style="background:${T['h-held']}"></span>Medical Baseline (demo)</li><li><span class="sw plain" style="background:${T['h-plain']}"></span>home, no battery</li><li><span class="sw sq"></span>SCE switch (est. position)</li>`;
   $('legendCircuits').innerHTML = Object.keys(DATA.circuits).map(c => `<button data-c="${c}" id="leg-${c}" aria-pressed="${c === selectedCircuit}" title="${DATA.circuits[c].named_oct_2026 ? `Select ${c}` : `${c}: not named this event, drawn grey for context (its line lies outside the default view)`}"><i style="background:${circColor(c)}"></i>${c}</button>`).join('');
   $('legendCircuits').querySelectorAll('button').forEach(b => b.addEventListener('click', () => selectCircuit(b.dataset.c, true)));
   $('circuitSel').innerHTML = Object.keys(DATA.circuits).map(c => `<option value="${c}">${c}${DATA.circuits[c].named_oct_2026 ? '' : ' (context)'}</option>`).join('');
@@ -1870,12 +1928,60 @@ matchMedia('(prefers-color-scheme: dark)').addEventListener('change', onTheme);
 new MutationObserver(onTheme).observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
 reduceMotion.addEventListener('change', () => { needsDraw = true; });
 
+// ---------- islands band ----------
+let islFocus = null, islHours = 48, islComm = true;
+const fmtUsd = v => '$' + Math.round(v).toLocaleString('en-US');
+function renderIslands() {
+  const IS = window.IslandScenario;
+  if (!IS) return;
+  const r = IS.run(islHours, islComm ? { community: { kwh: 400, kw: 200 } } : undefined);
+  const isl = r.islands.map((x, i) => ({ x, p: r.plans[i], m: r.money[i] }));
+  const segChips = IS.SEGMENTS.map(sg => {
+    const inIsl = isl.find(o => o.x.segments.includes(sg.id));
+    const cls = r.cls.state[sg.id] === 'risk' ? 'risk' : inIsl ? (inIsl.x.allowed ? 'isl' : 'blk') : '';
+    return `<span class="ichip ${cls}">${sg.id} ${sg.customers} &middot; ${sg.line}${cls === 'risk' ? ', risky' : cls === 'isl' ? ', island' : cls === 'blk' ? ', blocked' : ''}</span>`;
+  }).join('');
+  const ok = isl.find(o => o.x.allowed), blocked = isl.filter(o => !o.x.allowed);
+  let body = `<div class="ichips">${segChips}</div><ul class="ires">`;
+  body += `<li>SCE opens the breaker: ${fmtInt(r.cls.customers.risk)} customers are on risky line and ${fmtInt(r.cls.customers.collateral)} more go dark with them.</li>`;
+  for (const b of blocked) body += `<li>${b.x.id.replace('island-', '')} (${b.x.customers}): blocked, ${b.x.blockers.join('; ')}.</li>`;
+  if (ok) {
+    const p = ok.p, c = p.counts;
+    body += `<li>${ok.x.id.replace('island-', '')} (${ok.x.customers}) can island: ${c.donors} battery donors, ${c.solar_only} solar-only homes, ${c.receivers} receivers, ${c.self_backup} keep their own battery, ${c.opted_out} opt out.</li>`;
+    if (!p.feasible) body += `<li><b>Does not form:</b> ${p.problems.join('; ')}. Ordinary home batteries are certified to island only their own house.</li>`;
+    else {
+      body += `<li>Pool ${fmtInt(p.pool_kwh)} kWh. ${p.receiver_mode ? `Every receiver is carried at the ${p.receiver_mode} budget for <b>all ${islHours} h</b>` : `Every receiver is carried at the critical budget for <b>${p.receiver_hours} of ${islHours} h</b>`}${p.shortfall_kwh > 0 ? `; another ${fmtInt(p.shortfall_kwh)} kWh of storage would close the gap` : ''}. Peak ${Math.round(p.peak_kw)} kW against ${Math.round(p.export_kw)} kW of inverters.</li>`;
+      body += `<li>Money for this event (all <b>assumed</b> rates): donors earn ${fmtUsd(ok.m.paid_to_donors)}, receivers pay ${fmtUsd(ok.m.charged_to_receivers)}, SCE pays ${fmtUsd(ok.m.utility_payment)} for ${fmtInt(ok.m.customer_hours)} customer-hours kept on, and ${fmtUsd(ok.m.to_infrastructure)} goes toward the switch and battery.</li>`;
+      if (islHours > 100) body += `<li>On a shutoff this long, battery donors keep their batteries for themselves and rooftop solar carries the island: long shutoffs run on solar, not on stored energy.</li>`;
+    }
+  }
+  body += `<li>Siting: if only the ridge tap were risky, a new switch at its head would keep ${fmtInt(r.switches[0].customers_kept_on)} customers on.</li></ul>`;
+  $('islPlan').innerHTML = body;
+  document.querySelectorAll('[data-ihours]').forEach(b => b.setAttribute('aria-pressed', String(+b.dataset.ihours === islHours)));
+  document.querySelectorAll('[data-icomm]').forEach(b => b.setAttribute('aria-pressed', String((b.dataset.icomm === '1') === islComm)));
+  const rows = (DATA.switches || []).filter(sw => sw.kind === 'line_device').sort((a, b) => b.times_opened - a.times_opened || b.customers_cut - a.customers_cut);
+  $('islSwitches').innerHTML = `<table class="itab"><thead><tr><th>Switch</th><th>Circuit</th><th class="n">Cut</th><th class="n">Times</th><th class="n hide-s">Transformers</th></tr></thead><tbody>` +
+    rows.map(sw => `<tr class="pick${sw.device === islFocus ? ' cur' : ''}" data-dev="${sw.device}"><td><button class="lk" data-dev="${sw.device}" title="${sw.type}, position estimated">${sw.device}</button></td><td>${sw.circuit}</td><td class="n">${fmtInt(sw.customers_cut)}</td><td class="n">${sw.times_opened}</td><td class="n hide-s">${sw.transformers}</td></tr>`).join('') +
+    `</tbody></table>`;
+  $('islSwitches').querySelectorAll('button.lk').forEach(b => b.addEventListener('click', () => focusSwitch(b.dataset.dev)));
+}
+function focusSwitch(dev) {
+  const s = switchesKm.find(o => o.sw.device === dev); if (!s) return;
+  islFocus = dev;
+  setView({ cx: s.p[0], cy: s.p[1], scale: Math.min(400, Math.max(view.scale, 110)) }, !reduceMotion.matches);
+  needsDraw = true; renderIslands();
+  mapWrap.scrollIntoView({ behavior: reduceMotion.matches ? 'auto' : 'smooth', block: 'center' });
+}
+document.querySelectorAll('[data-ihours]').forEach(b => b.addEventListener('click', () => { islHours = +b.dataset.ihours; renderIslands(); }));
+document.querySelectorAll('[data-icomm]').forEach(b => b.addEventListener('click', () => { islComm = b.dataset.icomm === '1'; renderIslands(); }));
+
 // ---------- boot ----------
 readTokens();
 prepGeometry();
 run();
 buildDrawer();
 buildStatic();
+renderIslands();
 $('circuitSel').addEventListener('change', e => selectCircuit(e.target.value, false));
 if (window.innerWidth < 900) { $('mathBody').hidden = true; $('mathBtn').textContent = 'Open'; $('mathBtn').setAttribute('aria-expanded', 'false'); $('bulletin').title = 'Tap to expand'; }
 const hash = (location.hash || '').slice(1);
@@ -1894,6 +2000,6 @@ window.addEventListener('resize', () => { labelTheme(); fitMap(); resizeTl(); dr
 document.addEventListener('visibilitychange', () => { if (document.hidden && playing) togglePlay(false); });
 requestAnimationFrame(frame);
 // small hook for the Playwright checks
-window.__grace = { get hour() { return hour; }, get view() { return view; }, get sim() { return sim; }, get baseSim() { return baseSim; }, get guard() { return guardRes; }, get guardMode() { return guardMode; }, setGuardMode, get world() { return world; }, get P() { return P; }, toPx, decisions, setHour, nearestHome, nearestLine };
+window.__grace = { get hour() { return hour; }, get view() { return view; }, get sim() { return sim; }, get baseSim() { return baseSim; }, get guard() { return guardRes; }, get guardMode() { return guardMode; }, setGuardMode, get world() { return world; }, get islFocus() { return islFocus; }, focusSwitch, get P() { return P; }, toPx, decisions, setHour, nearestHome, nearestLine };
 })();
 </script>

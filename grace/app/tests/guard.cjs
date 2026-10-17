@@ -1,4 +1,4 @@
-// PowerUp checks for the Interlock panel in the Malibu replay. Run: NODE_PATH=$(npm root -g) node tests/guard.cjs
+// PowerUp checks for the Interlock panel and the islands band in the Malibu replay. Run: NODE_PATH=$(npm root -g) node tests/guard.cjs
 const { chromium } = require('playwright');
 const fs = require('fs'), path = require('path');
 const here = __dirname;
@@ -38,6 +38,15 @@ const ok = (name, cond, extra) => { if (cond) { pass++; console.log('ok  ', name
     ok(`${tag} log lists the stolen key as held for a person`, (await p.$eval('#guardLog', e => e.textContent)).includes('held, to a person'));
     const jump = await p.$('#guardLog button[data-h="205"]');
     if (jump) { await jump.click(); ok(`${tag} a log time jumps the replay`, (await p.evaluate(() => window.__grace.hour)) === 205); }
+    // islands band and the estimated switch layer
+    ok(`${tag} islands band plans the Merlin island`, (await p.$eval('#islPlan', e => e.textContent)).includes('COAST (313) can island'));
+    await p.click('[data-icomm="0"]');
+    ok(`${tag} without a community battery the island does not form`, (await p.$eval('#islPlan', e => e.textContent)).includes('no grid-forming source'));
+    await p.click('[data-icomm="1"]'); await p.click('[data-ihours="213"]');
+    ok(`${tag} a 213 h shutoff runs on solar`, (await p.$eval('#islPlan', e => e.textContent)).includes('rooftop solar carries the island'));
+    ok(`${tag} switch table lists SCE's eight line devices, positions estimated`, (await p.$$('#islSwitches tbody tr')).length === 8 && (await p.$eval('#islands', e => e.textContent)).includes('estimated'));
+    await p.click('#islSwitches button[data-dev="RAR0775"]');
+    ok(`${tag} tapping a switch focuses it on the map`, (await p.evaluate(() => window.__grace.islFocus)) === 'RAR0775');
     const ov = await p.evaluate(() => document.scrollingElement.scrollWidth <= document.scrollingElement.clientWidth);
     ok(`${tag} no horizontal overflow`, ov);
     ok(`${tag} no page errors`, errs.length === 0, errs.join(' | '));
