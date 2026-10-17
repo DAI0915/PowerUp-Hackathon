@@ -2,7 +2,7 @@
 
 **The disaster layer for a home-battery fleet.** PowerUp keeps the power on for the people who need it most when the grid is the disaster, and keeps the fleet's own software from becoming the disaster.
 
-**Live demo:** https://claude.ai/artifact/1f2gVaMjYXvTs8xiqCi5Lu (the Malibu replay, with the guard panel, the islands section and a link to the heat-wave replay)
+**Live demo:** https://mrbese.github.io/PowerUp/ (GitHub Pages, from `index.html` and `heatwave.html` at the repo root) or https://claude.ai/artifact/1f2gVaMjYXvTs8xiqCi5Lu. The Malibu replay has the guard panel, the islands section and a link to the heat-wave replay.
 
 Built for the InnovateLA Dual-Use Hackathon (USC, Oct 16 to 18, 2026), Energy & Grid Hardening lens with Base Power. The seat is the dispatcher of a fleet of Base Core home batteries (39.2 kWh, 20 kW).
 
@@ -86,7 +86,7 @@ node bridge/cli.mjs              # Malibu: Grace through Interlock, guard on vs 
 node interlock/cli.mjs           # Sept 6, 2022 replay -> interlock/out/results.json
 node islands/scenario.cjs        # Merlin-shaped neighborhood island
 python3 -I grace/app/build.py    # rebuilds the single-file Malibu app, grace/app/index.html
-python3 -I site.py               # assembles site/: the Malibu page plus the heat-wave page and its modules
+python3 -I site.py               # writes index.html and heatwave.html at the root (GitHub Pages) and site/ (the Artifact)
 ```
 
 Browser checks (Playwright, Chromium): `cd grace/app && NODE_PATH=$(npm root -g) node tests/interact.cjs` (126) and `node tests/guard.cjs` (34). Serve `site/` with any static server to open both pages (the heat-wave page loads ES modules, which do not load from `file://`).
