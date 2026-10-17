@@ -137,17 +137,17 @@
         command: { priority: 5, targets: { all: true }, payload: { type: 'DISCHARGE_KW', value: Math.round(load / bat.length * 10) / 10 }, durationMin: 300 } });
     }
     out.push({ h: R.watch, id: 'grace-watch', who: 'grace', truth: 'legit', tag: 'Watch', rung: 'watch',
-      title: 'Grace Watch: fill Medical Baseline homes to 100% and hold them',
+      title: 'PowerUP Watch: fill Medical Baseline homes to 100% and hold them',
       command: { priority: 4, targets: { homes: ids(b => b.tier === 1) }, payload: { type: 'SOC_TARGET', value: 100 }, durationMin: untilHold(R.watch) } });
     out.push({ h: R.ask, id: 'grace-ask', who: 'grace', truth: 'legit', tag: 'Ask', rung: 'ask',
-      title: `Grace Ask: fill registered critical-need homes on ${askC.join(', ')}; everyone else there keeps 50% and is asked to pre-fill`,
+      title: `PowerUP Ask: fill registered critical-need homes on ${askC.join(', ')}; everyone else there keeps 50% and is asked to pre-fill`,
       command: { priority: 4, targets: { homes: ids(b => b.tier === 2 && askC.includes(b.circuit)) }, payload: { type: 'SOC_TARGET', value: 100 }, durationMin: untilHold(R.ask) } });
     out.push({ h: R.fill, id: 'grace-fill', who: 'grace', truth: 'legit', tag: 'Fill', rung: 'fill',
-      title: 'Grace Fill: every battery whose owner said yes goes to 100% under each circuit\'s headroom',
+      title: 'PowerUP Fill: every battery whose owner said yes goes to 100% under each circuit\'s headroom',
       command: { priority: 4, targets: { homes: ids(b => (b.tier === 3 && Number.isFinite(b.consentDelay)) || (b.tier === 2 && fillC.includes(b.circuit))) },
         payload: { type: 'SOC_TARGET', value: 100 }, durationMin: untilHold(R.fill) } });
     out.push({ h: R.hold, id: 'grace-hold', who: 'grace', truth: 'legit', tag: 'Hold', rung: 'hold',
-      title: 'Grace Hold: every battery islands, never exports, and runs its home on the outage budget',
+      title: 'PowerUP Hold: every battery islands, never exports, and runs its home on the outage budget',
       command: { priority: 4, targets: { all: true }, payload: { type: 'IDLE', value: 0 }, durationMin: P.planned_outage_h * 60 } });
     for (const p of sim.proposals.restore || []) {
       if ((decisions.restore || {})[p.circuit] !== 'approved') continue;
@@ -156,7 +156,7 @@
       const room = cc.members.filter(bi => sim.soc[(h - 1) * ctx.N + bi] < ctx.cap - 1);
       if (!room.length) continue;
       out.push({ h, id: `grace-recharge-${p.circuit}`, who: 'grace', truth: 'legit', tag: 'Hand', rung: 'hand',
-        title: `Grace recharge on ${p.circuit}, approved by SCE's shutoff officer, after the cold-load pickup`,
+        title: `PowerUP recharge on ${p.circuit}, approved by SCE's shutoff officer, after the cold-load pickup`,
         command: { priority: 4, targets: { homes: room.map(bi => 'b' + bi) }, payload: { type: 'CHARGE_KW', value: Math.floor(cc.chargeKW[h] / room.length * 10) / 10 }, durationMin: 60 } });
     }
     for (const o of out) o.plan = true;

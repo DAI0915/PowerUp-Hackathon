@@ -1,4 +1,4 @@
-<title>PowerUp Malibu Replay</title>
+<title>PowerUP Malibu Replay</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <style>
 /* DESIGN PLAN
@@ -383,19 +383,19 @@ canvas.chart { display: block; width: 100%; }
 <div class="wrap" id="app">
   <header class="hdr">
     <div class="hdr-l">
-      <div class="brand">PowerUp <span>Malibu Replay</span></div>
-      <p class="tag"><b>Grace plans, Interlock guards.</b> The October 2026 Malibu shutoff hour by hour on real SCE circuits. Every order to the demo fleet, Grace's too, passes Interlock first.</p>
+      <div class="brand">PowerUP <span>Malibu Replay</span></div>
+      <p class="tag"><b>PowerUP plans, Interlock guards.</b> The October 2026 Malibu shutoff hour by hour on real SCE circuits. Every order to the demo fleet, PowerUP's too, passes Interlock first.</p>
     </div>
     <div class="hdr-r">
       <div class="clock" id="clock" aria-live="off">Thu Oct 15, 4:00 PM</div>
       <span class="chip rung" id="rungChip" data-rung="hold">Hold</span>
-      <nav class="pnav" aria-label="PowerUp pages"><a class="btn sm" href="heatwave.html" title="Interlock on CAISO's record-peak evening, Sept 6 2022">Heat-wave replay</a><a class="btn sm" href="#islands">Islands</a></nav>
+      <nav class="pnav" aria-label="PowerUP pages"><a class="btn sm" href="heatwave.html" title="Interlock on CAISO's record-peak evening, Sept 6 2022">Heat-wave replay</a><a class="btn sm" href="#islands">Islands</a></nav>
       <button class="btn sm" id="themeBtn" title="Theme: follows system">Theme: auto</button>
     </div>
   </header>
 
-  <section class="ladder" id="ladder" aria-label="Grace's ladder">
-    <div class="ladder-head"><span class="lab">Grace's ladder</span><p>Six steps, gentle before firm, each spent only when the risk and the need justify it. Every step is a button that jumps the replay to the first full hour after its event. The last step hands the decision to a person.</p></div>
+  <section class="ladder" id="ladder" aria-label="PowerUP's ladder">
+    <div class="ladder-head"><span class="lab">PowerUP's ladder</span><p>Six steps, gentle before firm, each spent only when the risk and the need justify it. Every step is a button that jumps the replay to the first full hour after its event. The last step hands the decision to a person.</p></div>
     <ol id="ladderSteps"></ol>
     <p class="ladder-now" id="ladderNow"></p>
   </section>
@@ -437,7 +437,7 @@ canvas.chart { display: block; width: 100%; }
           <div class="tl-tip" id="tlTip" hidden></div>
         </div>
         <div class="bulletin" id="bulletin">
-          <div class="bl"><span class="who">Grace this hour</span><span id="narrative"></span></div>
+          <div class="bl"><span class="who">PowerUP this hour</span><span id="narrative"></span></div>
           <div class="bl guard"><span class="who">Interlock</span><span id="guardLine"></span></div>
           <div class="bl real"><span class="who">Real event</span><span id="realEvent"></span></div>
         </div>
@@ -446,7 +446,7 @@ canvas.chart { display: block; width: 100%; }
 
     <aside class="panels">
       <section class="panel" id="guardPanel">
-        <h2>Interlock <span class="right">Every order is checked before it reaches a battery. Grace's reserve is its floor.</span></h2>
+        <h2>Interlock <span class="right">Every order is checked before it reaches a battery. PowerUP's reserve is its floor.</span></h2>
         <div class="seg" role="group" aria-label="Failures">
           <button class="btn sm" data-gmode="plan" aria-pressed="false">No failures</button>
           <button class="btn sm" data-gmode="on" aria-pressed="true">Six failures, guard on</button>
@@ -483,7 +483,7 @@ canvas.chart { display: block; width: 100%; }
       </section>
 
       <section class="panel" id="approvalsPanel">
-        <h2>Approvals <span class="right">The shutoff officer decides. Grace only proposes.</span></h2>
+        <h2>Approvals <span class="right">The shutoff officer decides. PowerUP only proposes.</span></h2>
         <div class="lab">a. Restoration recharge plans <span class="muted">(planned, not actual)</span></div>
         <div id="restoreList"></div>
         <div class="lab sub">b. Emergency EV dispatch to medical homes</div>
@@ -510,7 +510,7 @@ canvas.chart { display: block; width: 100%; }
 
       <section class="panel" id="mathPanel">
         <div class="drawer-head">
-          <h2 style="margin:0">How Grace decides</h2>
+          <h2 style="margin:0">How PowerUP decides</h2>
           <button class="btn sm" id="mathBtn" aria-expanded="true" aria-controls="mathBody">Close</button>
         </div>
         <p class="note">Five rules, with this hour's numbers for the selected circuit filled in. Nothing hidden: these are the whole engine.</p>
@@ -533,7 +533,7 @@ canvas.chart { display: block; width: 100%; }
 
   <section class="band" id="islands">
     <h2>Islands: the homes that are dark only because of where their wire runs</h2>
-    <p class="isl-lede">SCE already cuts partial circuits: 13 of the 55 shutoffs on these six circuits since 2019 were opened at a switch out on the line, not at the substation (<b>real</b>, SCE PSPS records). Merlin's recloser RAR0775 cut the same 223 customers four times, once for 213.5 hours. The opposite case has no answer today: a stretch that is safe, often underground, goes dark only because its feed runs through a risky overhead one. PowerUp's island planner finds those homes and plans an opt-in neighborhood island behind SCE's existing switch, with one grid-forming community battery, home batteries that donate what is left after their own backup, and SCE opening and closing the switch.</p>
+    <p class="isl-lede">SCE already cuts partial circuits: 13 of the 55 shutoffs on these six circuits since 2019 were opened at a switch out on the line, not at the substation (<b>real</b>, SCE PSPS records). Merlin's recloser RAR0775 cut the same 223 customers four times, once for 213.5 hours. The opposite case has no answer today: a stretch that is safe, often underground, goes dark only because its feed runs through a risky overhead one. PowerUP's island planner finds those homes and plans an opt-in neighborhood island behind SCE's existing switch, with one grid-forming community battery, home batteries that donate what is left after their own backup, and SCE opening and closing the switch.</p>
     <div class="two">
       <div>
         <div class="lab">A Merlin-shaped island, planned live by <code>islands/island.js</code></div>
@@ -557,7 +557,7 @@ canvas.chart { display: block; width: 100%; }
   </section>
 
   <section class="band" id="priorArt">
-    <h2>What exists, what Grace adds</h2>
+    <h2>What exists, what PowerUP adds</h2>
     <div class="pa" id="paRows"></div>
   </section>
 
@@ -1315,7 +1315,7 @@ const LADDER = [
   { r: 'ask', k: 'Step 2', name: 'Ask', col: 'var(--r-ask)', what: () => `SCE names Cuthbert, Galahad, Maguire, Merlin. Registered critical-need homes there fill and hold; Tier 3 floors rise to ${P.ask_floor_pct}% (assumed), consent to pre-fill is asked.` },
   { r: 'fill', k: 'Step 3', name: 'Fill', col: 'var(--r-fill)', what: () => 'Six circuits named, shutoff definite. Consenting homes fill to 100% inside each circuit\'s headroom, so no new peak.' },
   { r: 'hold', k: 'Step 4', name: 'Hold', col: 'var(--r-hold)', what: () => `Power off. Every battery islands, never exports, and runs a budget sized to the planned ${P.planned_outage_h} h, pushed before the towers fail.` },
-  { r: 'hand', k: 'Step 5', name: 'Hand to a person', col: 'var(--r-hand)', what: () => 'Winds ease (forecast). Grace proposes a restoration recharge plan per circuit. <b>The shutoff officer</b> approves or holds each one.' }
+  { r: 'hand', k: 'Step 5', name: 'Hand to a person', col: 'var(--r-hand)', what: () => 'Winds ease (forecast). PowerUP proposes a restoration recharge plan per circuit. <b>The shutoff officer</b> approves or holds each one.' }
 ];
 const PRICES = DATA.prices || null;
 function priceDayVal(dayKey, idx) { const v = PRICES && PRICES.daily[dayKey]; return v ? v[idx] : 0; }
@@ -1386,7 +1386,7 @@ function renderHour() {
 }
 
 // ---------- Interlock panel ----------
-const WHO_LABEL = { grace: 'Grace', optimizer: 'Base optimizer', utility: 'SCE', market: 'market', forged: 'unknown signer' };
+const WHO_LABEL = { grace: 'PowerUP', optimizer: 'Base optimizer', utility: 'SCE', market: 'market', forged: 'unknown signer' };
 const shortTime = h => { const p = G.dateParts(h); const hh = h % 24; return `${p.wd} ${p.dom}, ${((hh + 11) % 12) + 1} ${hh < 12 ? 'AM' : 'PM'}`; };
 function verdictPill(e, mode) {
   const failure = !e.order.plan;
@@ -1406,7 +1406,7 @@ function guardLineText() {
   const fail = recent.filter(e => !e.order.plan);
   const pick = fail[fail.length - 1] || recent[recent.length - 1];
   const g = PU.graceSummary(guardRes.log.filter(e => e.order.h <= hour));
-  if (!pick) return { alarm: false, text: `No new orders this hour. ${g.orders} of Grace's orders checked so far; ${g.held + g.clamped ? g.held + g.clamped + ' stopped' : 'none stopped'}.` };
+  if (!pick) return { alarm: false, text: `No new orders this hour. ${g.orders} of PowerUP's orders checked so far; ${g.held + g.clamped ? g.held + g.clamped + ' stopped' : 'none stopped'}.` };
   const when = pick.order.h === hour ? 'This hour' : `${hour - pick.order.h} h ago`;
   if (guardMode === 'off' && !pick.order.plan) return { alarm: true, text: `${when}, guard off: "${pick.order.title}" ran exactly as sent.` };
   const v = !pick.ran ? 'Held' : pick.verdict === 'clamp' ? 'Slowed' : 'Passed';
@@ -1420,8 +1420,8 @@ function renderGuard() {
   // the bulletin carries Interlock only when a failure or the utility's event is in play; Grace's own orders stay in the log
   line.textContent = gl.text; line.parentElement.classList.toggle('alarm', !!gl.alarm); line.parentElement.hidden = !gl.alarm;
   $('guardNote').innerHTML = !chaos
-    ? `Grace's ${gs.orders} orders and Base's ordinary-day optimizer, all through Interlock's eight checks: <b>${gs.held + gs.clamped ? gs.held + gs.clamped + ' of Grace\'s orders stopped' : 'none of Grace\'s orders stopped'}</b>. Base's optimizer is trimmed wherever Grace holds a battery. Turn the failures on to see what the guard is for.`
-    : `Six <b>simulated</b> failures on the real timeline: a forged order, a replay, a sell-down three hours before power-off, export onto a dead line, a recharge rebound, and SCE's own emergency event. ${mode === 'off' ? '<b>Guard off:</b> every order runs exactly as sent, and the map and fleet show what that does.' : '<b>Guard on:</b> the map and fleet show Grace\'s plan, kept.'} The guard-off run counts a battery on a dead line as trying to export; IEEE 1547 anti-islanding should trip it, so Interlock is a second layer.`;
+    ? `PowerUP's ${gs.orders} orders and Base's ordinary-day optimizer, all through Interlock's eight checks: <b>${gs.held + gs.clamped ? gs.held + gs.clamped + ' of PowerUP\'s orders stopped' : 'none of PowerUP\'s orders stopped'}</b>. Base's optimizer is trimmed wherever PowerUP holds a battery. Turn the failures on to see what the guard is for.`
+    : `Six <b>simulated</b> failures on the real timeline: a forged order, a replay, a sell-down three hours before power-off, export onto a dead line, a recharge rebound, and SCE's own emergency event. ${mode === 'off' ? '<b>Guard off:</b> every order runs exactly as sent, and the map and fleet show what that does.' : '<b>Guard on:</b> the map and fleet show PowerUP\'s plan, kept.'} The guard-off run counts a battery on a dead line as trying to export; IEEE 1547 anti-islanding should trip it, so Interlock is a second layer.`;
   if (chaos) {
     const row = (k, off, on, offBad, onGood) => `<div class="gk">${k}</div><div class="gv off ${mode === 'off' ? 'cur' : ''} ${offBad ? 'bad' : ''}">${off}</div><div class="gv on ${mode === 'on' ? 'cur' : ''} ${onGood ? 'good' : ''}">${on}</div>`;
     const darkOff = M.off.darkHomes, darkOn = M.on.darkHomes;
@@ -1432,7 +1432,7 @@ function renderGuard() {
       row('Battery-hours pushing onto a dead line', fmtInt(X.off.deadLineBatteryH), fmtInt(X.on.deadLineBatteryH), X.off.deadLineBatteryH > 0, X.on.deadLineBatteryH === 0) +
       row('Worst overload when a circuit comes back', X.off.worstOverMW > 0 ? `${X.off.worstOverMW.toFixed(1)} MW over ${X.off.worstOverCircuit}'s cap` : 'none', X.on.worstOverMW > 0 ? `${X.on.worstOverMW.toFixed(1)} MW` : 'none', X.off.worstOverMW > 0, X.on.worstOverMW === 0) +
       row('Energy given to SCE\'s emergency event', `${X.off.eventMWh.toFixed(1)} MWh`, `${X.on.eventMWh.toFixed(1)} MWh`, false, false) +
-      row('Grace\'s own orders stopped', 'no guard', `${gs.held + gs.clamped} of ${gs.orders}`, false, gs.held + gs.clamped === 0);
+      row('PowerUP\'s own orders stopped', 'no guard', `${gs.held + gs.clamped} of ${gs.orders}`, false, gs.held + gs.clamped === 0);
   } else $('guardScore').innerHTML = '';
   const shown = guardRes.log.filter(e => e.order.h <= hour);
   $('guardCount').textContent = `(${shown.length} of ${guardRes.log.length} by this hour)`;
@@ -1639,7 +1639,7 @@ function renderApprovals() {
   const f = sim.fleet[hour];
   const list = $('restoreList');
   if (hour < RUNGS.hand) {
-    list.innerHTML = `<p class="note">Proposals appear at the Hand rung, ${G.fmtTime(RUNGS.hand)}, when the Red Flag Warning ends and SCE begins patrols. Grace will rank the six circuits with Medical Baseline need first, stagger them ${P.stagger_h} h apart (assumed), and show for each the peak at pickup without Grace and with Grace against the cap.</p>`;
+    list.innerHTML = `<p class="note">Proposals appear at the Hand rung, ${G.fmtTime(RUNGS.hand)}, when the Red Flag Warning ends and SCE begins patrols. PowerUP will rank the six circuits with Medical Baseline need first, stagger them ${P.stagger_h} h apart (assumed), and show for each the peak at pickup without PowerUP and with PowerUP against the cap.</p>`;
   } else {
     const plan = sim.proposals.restore;
     const clock = hh => G.fmtTime(hh, { short: true }).split(', ')[1];
@@ -1654,17 +1654,17 @@ function renderApprovals() {
           <div class="meta">Restore ${G.fmtTime(p.startH)} (planned). ${p.reason}.</div>
           <div class="meta">Peak at pickup, every home at ${P.cold_load_factor}x for ${P.cold_load_hours} h (assumed):</div>
           <div class="pk">
-            <span class="l">without Grace</span>${bar(p.withoutKW, T.muted)}<span class="v ${p.withoutUnderCap ? '' : 'over'}">${mw(p.withoutKW)}</span>
-            <span class="l">with Grace</span>${bar(p.withKW, T['h-islanded'])}<span class="v ${p.underCap ? 'ok' : 'over'}">${mw(p.withKW)}</span>
+            <span class="l">without PowerUP</span>${bar(p.withoutKW, T.muted)}<span class="v ${p.withoutUnderCap ? '' : 'over'}">${mw(p.withoutKW)}</span>
+            <span class="l">with PowerUP</span>${bar(p.withKW, T['h-islanded'])}<span class="v ${p.underCap ? 'ok' : 'over'}">${mw(p.withKW)}</span>
           </div>
-          <div class="meta"><span class="pill ${p.underCap ? 'pass' : 'fail'}">${p.underCap ? 'under cap' : 'over cap'}, ${Math.round(p.pctWith * 100)}%</span> with Grace ${fmtInt(p.withKW)} kW against a cap of ${fmtInt(p.capKW)} kW (dashed). ${p.riding} of ${fmtInt(p.customers)} homes ride through on their batteries: <b>${mw(p.reductionKW)} off the peak</b>. Recharge from ${clock(p.chargeStartH)}, Medical Baseline first, inside the headroom; until approved the batteries hold at the ${P.reserve_floor_pct}% floor and the grid carries the homes.</div>
+          <div class="meta"><span class="pill ${p.underCap ? 'pass' : 'fail'}">${p.underCap ? 'under cap' : 'over cap'}, ${Math.round(p.pctWith * 100)}%</span> with PowerUP ${fmtInt(p.withKW)} kW against a cap of ${fmtInt(p.capKW)} kW (dashed). ${p.riding} of ${fmtInt(p.customers)} homes ride through on their batteries: <b>${mw(p.reductionKW)} off the peak</b>. Recharge from ${clock(p.chargeStartH)}, Medical Baseline first, inside the headroom; until approved the batteries hold at the ${P.reserve_floor_pct}% floor and the grid carries the homes.</div>
         </div>
         <div class="acts">
           <button class="btn sm ok" id="approve-${p.circuit}" data-c="${p.circuit}" data-d="approved" ${dec === 'approved' ? 'disabled' : ''}>Approve</button>
           <button class="btn sm hold" id="hold-${p.circuit}" data-c="${p.circuit}" data-d="hold" ${dec === 'hold' ? 'disabled' : ''}>Hold</button>
         </div>
       </div>`;
-    }).join('') + (plan.some(p => !p.underCap) ? `<p class="note">Where the pickup stays over the cap even with Grace, the batteries shrink it but ${P.adoption_pct}% adoption is not enough to bring it under the October peak; the recharge waits until the circuit is under the cap. Raise adoption in Assumptions to see every circuit pass.</p>` : '') +
+    }).join('') + (plan.some(p => !p.underCap) ? `<p class="note">Where the pickup stays over the cap even with PowerUP, the batteries shrink it but ${P.adoption_pct}% adoption is not enough to bring it under the October peak; the recharge waits until the circuit is under the cap. Raise adoption in Assumptions to see every circuit pass.</p>` : '') +
       `<div class="toolbar"><button class="btn sm" id="approveAllRestore">Approve all</button><button class="btn sm" id="holdAllRestore">Hold all</button></div>`;
     list.querySelectorAll('button[data-c]').forEach(b => b.addEventListener('click', () => { decisions.restore[b.dataset.c] = b.dataset.d; resim(); }));
     $('approveAllRestore').addEventListener('click', () => { for (const c of NAMED) decisions.restore[c] = 'approved'; resim(); });
@@ -1673,8 +1673,8 @@ function renderApprovals() {
   // EV dispatch
   const evs = sim.proposals.ev.filter(p => p.h <= hour), unmet = sim.proposals.unmet.filter(p => p.h <= hour);
   const sum = $('evSummary'), tb = $('evToolbar'), el = $('evList');
-  const tryNote = `At the defaults every Medical Baseline home lasts the planned ${P.planned_outage_h} h on its critical budget (the medical device is inside it). Serra's longest shutoff on record was ${Math.round(DATA.circuits.Serra.longest_hours)} h: set the planned outage to 96 h in Assumptions to see Grace ask for EV trips.`;
-  if (hour < RUNGS.hold) { sum.textContent = `During the shutoff, when a Medical Baseline home will not last to its planned restoration (under 20% and hours left shorter than hours to restoration), Grace proposes a charged EV from a nearby Tier 3 home whose own battery is above ${P.ev_donor_min_pct}%. Nothing to propose yet.`; tb.innerHTML = ''; el.innerHTML = ''; return; }
+  const tryNote = `At the defaults every Medical Baseline home lasts the planned ${P.planned_outage_h} h on its critical budget (the medical device is inside it). Serra's longest shutoff on record was ${Math.round(DATA.circuits.Serra.longest_hours)} h: set the planned outage to 96 h in Assumptions to see PowerUP ask for EV trips.`;
+  if (hour < RUNGS.hold) { sum.textContent = `During the shutoff, when a Medical Baseline home will not last to its planned restoration (under 20% and hours left shorter than hours to restoration), PowerUP proposes a charged EV from a nearby Tier 3 home whose own battery is above ${P.ev_donor_min_pct}%. Nothing to propose yet.`; tb.innerHTML = ''; el.innerHTML = ''; return; }
   const approved = evs.filter(p => decisions.ev[p.id] === 'approved').length;
   sum.innerHTML = `${evs.length} proposed, ${approved} approved, ${fmtInt(evs.filter(p => decisions.ev[p.id] === 'approved').reduce((s, p) => s + p.hoursBought, 0))} h bought. One trip delivers ${P.ev_trip_kwh} kWh from the EV's own pack (assumed); ${P.ev_pct}% of homes have an EV, a donor keeps at least ${P.ev_donor_min_pct}% of its own battery and is sought within ${P.ev_radius_km} km (all assumed).` +
     (unmet.length ? ` <b>${unmet.length} medical homes flagged with no donor</b>: ${unmet[0].reason}.` : '') +
@@ -1752,9 +1752,9 @@ function renderMath() {
     const plan = sim.proposals.restore;
     const p = plan ? (plan.find(q => q.circuit === c) || plan[0]) : null;
     if (p) rows.push([`5. Restoration peak check, ${p.circuit} (order ${p.order}, planned)`,
-      `pickup for ${P.cold_load_hours} h from ${G.fmtTime(p.startH, { short: true })} = ${P.cold_load_factor} x October high (${P.cold_load_factor}x for ${P.cold_load_hours} h and the ${P.stagger_h} h stagger are assumed). Without Grace: ${P.cold_load_factor} x ${mw(p.withoutKW / P.cold_load_factor)} = <b>${mw(p.withoutKW)}</b>. With Grace: x (1 - ${p.riding} riding / ${fmtInt(p.customers)} homes) = <b>${mw(p.withKW)}</b> (${Math.round(p.pctWith * 100)}% of cap ${mw(p.capKW)}, ${p.underCap ? 'under' : 'over'}). Reduction <b>${mw(p.reductionKW)}</b>. Recharge starts when the circuit is under the cap: ${G.fmtTime(p.chargeStartH, { short: true })}, Tier 1 first inside the headroom, only once the officer approves. Order: Medical Baseline need first, ${P.stagger_h} h apart from winds ease ${G.fmtTime(RUNGS.hand, { short: true })} + ${P.restore_patrol_h} h patrol${P.planned_outage_h > RUNGS.hand - RUNGS.hold + P.restore_patrol_h ? `, held to the planned ${P.planned_outage_h} h` : ''}.`]);
+      `pickup for ${P.cold_load_hours} h from ${G.fmtTime(p.startH, { short: true })} = ${P.cold_load_factor} x October high (${P.cold_load_factor}x for ${P.cold_load_hours} h and the ${P.stagger_h} h stagger are assumed). Without PowerUP: ${P.cold_load_factor} x ${mw(p.withoutKW / P.cold_load_factor)} = <b>${mw(p.withoutKW)}</b>. With PowerUP: x (1 - ${p.riding} riding / ${fmtInt(p.customers)} homes) = <b>${mw(p.withKW)}</b> (${Math.round(p.pctWith * 100)}% of cap ${mw(p.capKW)}, ${p.underCap ? 'under' : 'over'}). Reduction <b>${mw(p.reductionKW)}</b>. Recharge starts when the circuit is under the cap: ${G.fmtTime(p.chargeStartH, { short: true })}, Tier 1 first inside the headroom, only once the officer approves. Order: Medical Baseline need first, ${P.stagger_h} h apart from winds ease ${G.fmtTime(RUNGS.hand, { short: true })} + ${P.restore_patrol_h} h patrol${P.planned_outage_h > RUNGS.hand - RUNGS.hold + P.restore_patrol_h ? `, held to the planned ${P.planned_outage_h} h` : ''}.`]);
     else rows.push([`5. Restoration peak check (from the Hand rung, ${G.fmtTime(RUNGS.hand, { short: true })})`,
-      `pickup for ${P.cold_load_hours} h = ${P.cold_load_factor} x October high at the start hour (${P.cold_load_factor}x for ${P.cold_load_hours} h and the ${P.stagger_h} h stagger are assumed). Without Grace: every home at ${P.cold_load_factor}x. With Grace: x (1 - share of homes still on battery), those ride through and draw nothing. Compared with the cap; recharge waits until the circuit is under it. First planned restoration ${G.fmtTime(Math.max(RUNGS.hand + P.restore_patrol_h, RUNGS.hold + P.planned_outage_h))}, circuits ${P.stagger_h} h apart. ${UNIT_NOTE}`]);
+      `pickup for ${P.cold_load_hours} h = ${P.cold_load_factor} x October high at the start hour (${P.cold_load_factor}x for ${P.cold_load_hours} h and the ${P.stagger_h} h stagger are assumed). Without PowerUP: every home at ${P.cold_load_factor}x. With PowerUP: x (1 - share of homes still on battery), those ride through and draw nothing. Compared with the cap; recharge waits until the circuit is under it. First planned restoration ${G.fmtTime(Math.max(RUNGS.hand + P.restore_patrol_h, RUNGS.hold + P.planned_outage_h))}, circuits ${P.stagger_h} h apart. ${UNIT_NOTE}`]);
   }
   body.innerHTML = rows.map(([t, d]) => `<div><dt>${t}</dt><dd>${d}</dd></div>`).join('');
 }
@@ -1763,7 +1763,7 @@ $('mathBtn').addEventListener('click', () => { const b = $('mathBody'); b.hidden
 // ---------- assumptions drawer ----------
 const A = DATA.assumptions;
 const CONTROLS = [
-  { k: 'planned_outage_h', label: 'Planned outage length', unit: ' h', min: 12, max: 168, step: 1, hi: true, note: `Grace sizes every outage budget to this at the shutoff, and the simulated restoration waits at least this long. 62 h = Oct 15 16:00 to Oct 18 06:00 (winds ease Oct 17 20:00 plus 10 h patrol). Shorter than that and the estimate passes with the circuits still off: Grace then extends it 24 h, steps budgets down and flags medical homes that will not last. Serra's longest shutoff on record was ${Math.round(DATA.circuits.Serra.longest_hours)} h; try 96 h to see Grace ask for EV trips.` },
+  { k: 'planned_outage_h', label: 'Planned outage length', unit: ' h', min: 12, max: 168, step: 1, hi: true, note: `PowerUP sizes every outage budget to this at the shutoff, and the simulated restoration waits at least this long. 62 h = Oct 15 16:00 to Oct 18 06:00 (winds ease Oct 17 20:00 plus 10 h patrol). Shorter than that and the estimate passes with the circuits still off: PowerUP then extends it 24 h, steps budgets down and flags medical homes that will not last. Serra's longest shutoff on record was ${Math.round(DATA.circuits.Serra.longest_hours)} h; try 96 h to see PowerUP ask for EV trips.` },
   { k: 'adoption_pct', label: 'Battery adoption', unit: '%', min: A.adoption_pct.min, max: A.adoption_pct.max, step: 1, note: A.adoption_pct.note },
   { k: 'medical_baseline_pct', label: 'Medical Baseline share', unit: '%', min: A.medical_baseline_pct.min, max: A.medical_baseline_pct.max, step: 1, note: A.medical_baseline_pct.note },
   { k: 'tier2_pct', label: 'Tier 2 registered critical need', unit: '%', min: 0, max: 30, step: 1, note: 'Well pumps, infants, elderly. Assumed.' },
@@ -1883,8 +1883,8 @@ function buildStatic() {
     ['Neighbourhood mesh radio with a Starlink uplink', 'Exists, not for batteries: Meshtastic for wildfire crews, Starlink for community brigades.', 'Using that link to carry battery plans and status.'],
     ['Daily time-of-use arbitrage with a backup floor', 'Base keeps a 20% floor during market dispatch. Sunrun runs a 5 MW VPP for SCE. Tesla offers this on every Powerwall.', 'Nothing new. The everyday half of dual-use, credited to Base and Tesla.']
   ];
-  $('paRows').innerHTML = `<div class="row head" style="border-top:0;padding-top:0"><div class="lab">Grace piece</div><div class="lab">Who does something close today</div><div class="lab">What Grace adds</div></div>` +
-    pa.map(r => `<div class="row"><div class="piece">${r[0]}</div><div class="today"><span class="lab">Who does something close today</span>${r[1]}</div><div class="adds"><span class="lab">What Grace adds</span>${r[2]}</div></div>`).join('');
+  $('paRows').innerHTML = `<div class="row head" style="border-top:0;padding-top:0"><div class="lab">PowerUP piece</div><div class="lab">Who does something close today</div><div class="lab">What PowerUP adds</div></div>` +
+    pa.map(r => `<div class="row"><div class="piece">${r[0]}</div><div class="today"><span class="lab">Who does something close today</span>${r[1]}</div><div class="adds"><span class="lab">What PowerUP adds</span>${r[2]}</div></div>`).join('');
   $('srcList').innerHTML = DATA.sources.map(s => `<li><a href="${s.url}" target="_blank" rel="noopener">${s.name}</a> <span class="muted">${s.used}</span></li>`).join('');
 }
 

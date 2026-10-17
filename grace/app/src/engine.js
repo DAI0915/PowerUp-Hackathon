@@ -661,7 +661,7 @@
       else s += `${f.zonesDown} of 6 tower zones down, ${f.byChan[C.silent_tower]} homes silent and running their last signed plan.`;
       if (f.replanned > 0) s += ` The planned ${P.planned_outage_h} h passed with circuits still off: estimate extended ${P.replan_h} h, budgets stepped down where needed.`;
       s += evLine();
-      s += ' Grace proposes; the officer decides at Step 5.';
+      s += ' PowerUP proposes; the officer decides at Step 5.';
       return s;
     }
     // hand
@@ -669,7 +669,7 @@
     const first = plan[0];
     const anyRestored = plan.filter(p => h >= p.startH);
     if (anyRestored.length === 0) {
-      return `Hand: winds eased. Grace proposes recharge plans for 6 circuits, ${first.circuit} first (${first.reason}). Waiting for the shutoff officer; first planned restoration ${fmtTime(first.startH)}.` + evLine();
+      return `Hand: winds eased. PowerUP proposes recharge plans for 6 circuits, ${first.circuit} first (${first.reason}). Waiting for the shutoff officer; first planned restoration ${fmtTime(first.startH)}.` + evLine();
     }
     const last = anyRestored[anyRestored.length - 1];
     const standby = f.byStatus[S.standby], restoring = f.byStatus[S.restoring], islanded = f.byStatus[S.islanded];
