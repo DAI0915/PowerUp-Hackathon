@@ -1,0 +1,12 @@
+{
+  "name": "interlock",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Safety guard between a home-battery fleet's software and its batteries (InnovateLA Dual-Use Hackathon, Energy & Grid).",
+  "type": "module",
+  "scripts": {
+    "start": "node cli.mjs",
+    "test": "node --test tests/*.test.mjs",
+    "prep": "python3 -I data/prep_circuits.py"
+  }
+}

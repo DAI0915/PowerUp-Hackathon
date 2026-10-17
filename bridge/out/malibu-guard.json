@@ -1,0 +1,932 @@
+{
+ "generated": "node bridge/cli.mjs",
+ "decisions": {
+  "restore": {
+   "Galahad": "approved",
+   "Maguire": "approved",
+   "Cuthbert": "approved",
+   "Merlin": "approved",
+   "Serra": "approved",
+   "Tuna": "approved"
+  },
+  "ev": {}
+ },
+ "grace": {
+  "orders": 10,
+  "held": 0,
+  "clamped": 0,
+  "canaried": 1,
+  "passed": 10
+ },
+ "metrics": {
+  "base": {
+   "darkHomes": 0,
+   "darkHomeHours": 0,
+   "mbDarkHomes": 0,
+   "mbDarkHomeHours": 0,
+   "mbBelowHalfAtShutoff": 0,
+   "mbSocAtShutoffPct": 98.75290111619599,
+   "fleetSocAtShutoffPct": 98.69611515046071,
+   "protectedHomeHours": 65081,
+   "evProposed": 0,
+   "unmet": 0
+  },
+  "on": {
+   "darkHomes": 0,
+   "darkHomeHours": 0,
+   "mbDarkHomes": 0,
+   "mbDarkHomeHours": 0,
+   "mbBelowHalfAtShutoff": 0,
+   "mbSocAtShutoffPct": 98.75290111619599,
+   "fleetSocAtShutoffPct": 98.69611515046071,
+   "protectedHomeHours": 65081,
+   "evProposed": 0,
+   "unmet": 0
+  },
+  "off": {
+   "darkHomes": 1028,
+   "darkHomeHours": 50404,
+   "mbDarkHomes": 50,
+   "mbDarkHomeHours": 2374,
+   "mbBelowHalfAtShutoff": 50,
+   "mbSocAtShutoffPct": 8.971853888764672,
+   "fleetSocAtShutoffPct": 8.998086878443761,
+   "protectedHomeHours": 5154,
+   "evProposed": 0,
+   "unmet": 50
+  }
+ },
+ "exposure": {
+  "on": {
+   "deadLineBatteryH": 0,
+   "worstOverMW": 0,
+   "worstOverCircuit": null,
+   "homesDrained": 0,
+   "mbDrained": 0,
+   "eventMWh": 8.84
+  },
+  "off": {
+   "deadLineBatteryH": 1208,
+   "worstOverMW": 5.463796697692869,
+   "worstOverCircuit": "Galahad",
+   "homesDrained": 1032,
+   "mbDrained": 50,
+   "eventMWh": 10.32
+  }
+ },
+ "log": [
+  {
+   "h": 16,
+   "id": "opt-evening-oct7",
+   "who": "optimizer",
+   "truth": "legit",
+   "tag": "Every day",
+   "title": "Base optimizer, Oct 7: cover evening load from batteries (ordinary-day arbitrage)",
+   "why": null,
+   "verdict": "pass",
+   "rung": "slow",
+   "canaried": true,
+   "reasons": [
+    {
+     "check": "ramp",
+     "code": "CANARY_DONE",
+     "detail": "Large order (1,032 homes): rolled out as a canary, 1% of homes, then 10%, then all, five minutes apart; each step delivered on target.",
+     "rung": "slow"
+    }
+   ],
+   "stats": {
+    "homesTargeted": 1032,
+    "homesTouched": 1032,
+    "kwRequested": 1651.2,
+    "kwExecuted": 1651.2
+   },
+   "on": null,
+   "off": null
+  },
+  {
+   "h": 40,
+   "id": "opt-evening-oct8",
+   "who": "optimizer",
+   "truth": "legit",
+   "tag": "Every day",
+   "title": "Base optimizer, Oct 8: cover evening load from batteries (ordinary-day arbitrage)",
+   "why": null,
+   "verdict": "pass",
+   "rung": "slow",
+   "canaried": true,
+   "reasons": [
+    {
+     "check": "ramp",
+     "code": "CANARY_DONE",
+     "detail": "Large order (1,032 homes): rolled out as a canary, 1% of homes, then 10%, then all, five minutes apart; each step delivered on target.",
+     "rung": "slow"
+    }
+   ],
+   "stats": {
+    "homesTargeted": 1032,
+    "homesTouched": 1032,
+    "kwRequested": 1651.2,
+    "kwExecuted": 1651.2
+   },
+   "on": null,
+   "off": null
+  },
+  {
+   "h": 51,
+   "id": "grace-watch",
+   "who": "grace",
+   "truth": "legit",
+   "tag": "Watch",
+   "title": "Grace Watch: fill Medical Baseline homes to 100% and hold them",
+   "why": null,
+   "verdict": "pass",
+   "rung": "none",
+   "canaried": false,
+   "reasons": [],
+   "stats": {
+    "homesTargeted": 50,
+    "homesTouched": 50,
+    "kwRequested": 0,
+    "kwExecuted": 0
+   },
+   "on": null,
+   "off": null
+  },
+  {
+   "h": 64,
+   "id": "opt-evening-oct9",
+   "who": "optimizer",
+   "truth": "legit",
+   "tag": "Every day",
+   "title": "Base optimizer, Oct 9: cover evening load from batteries (ordinary-day arbitrage)",
+   "why": null,
+   "verdict": "pass",
+   "rung": "slow",
+   "canaried": true,
+   "reasons": [
+    {
+     "check": "ramp",
+     "code": "CANARY_DONE",
+     "detail": "Large order (982 homes): rolled out as a canary, 1% of homes, then 10%, then all, five minutes apart; each step delivered on target.",
+     "rung": "slow"
+    },
+    {
+     "check": "precedence",
+     "code": "SUPERSEDED",
+     "detail": "50 home(s) already follow higher-priority command \"grace-watch\" (priority 4 vs 5); this command does not run there.",
+     "rung": "watch"
+    }
+   ],
+   "stats": {
+    "homesTargeted": 1032,
+    "homesTouched": 982,
+    "kwRequested": 1651.2,
+    "kwExecuted": 1571.2
+   },
+   "on": null,
+   "off": null
+  },
+  {
+   "h": 88,
+   "id": "opt-evening-oct10",
+   "who": "optimizer",
+   "truth": "legit",
+   "tag": "Every day",
+   "title": "Base optimizer, Oct 10: cover evening load from batteries (ordinary-day arbitrage)",
+   "why": null,
+   "verdict": "pass",
+   "rung": "slow",
+   "canaried": true,
+   "reasons": [
+    {
+     "check": "ramp",
+     "code": "CANARY_DONE",
+     "detail": "Large order (982 homes): rolled out as a canary, 1% of homes, then 10%, then all, five minutes apart; each step delivered on target.",
+     "rung": "slow"
+    },
+    {
+     "check": "precedence",
+     "code": "SUPERSEDED",
+     "detail": "50 home(s) already follow higher-priority command \"grace-watch\" (priority 4 vs 5); this command does not run there.",
+     "rung": "watch"
+    }
+   ],
+   "stats": {
+    "homesTargeted": 1032,
+    "homesTouched": 982,
+    "kwRequested": 1651.2,
+    "kwExecuted": 1571.2
+   },
+   "on": null,
+   "off": null
+  },
+  {
+   "h": 112,
+   "id": "opt-evening-oct11",
+   "who": "optimizer",
+   "truth": "legit",
+   "tag": "Every day",
+   "title": "Base optimizer, Oct 11: cover evening load from batteries (ordinary-day arbitrage)",
+   "why": null,
+   "verdict": "pass",
+   "rung": "slow",
+   "canaried": true,
+   "reasons": [
+    {
+     "check": "ramp",
+     "code": "CANARY_DONE",
+     "detail": "Large order (982 homes): rolled out as a canary, 1% of homes, then 10%, then all, five minutes apart; each step delivered on target.",
+     "rung": "slow"
+    },
+    {
+     "check": "precedence",
+     "code": "SUPERSEDED",
+     "detail": "50 home(s) already follow higher-priority command \"grace-watch\" (priority 4 vs 5); this command does not run there.",
+     "rung": "watch"
+    }
+   ],
+   "stats": {
+    "homesTargeted": 1032,
+    "homesTouched": 982,
+    "kwRequested": 1651.2,
+    "kwExecuted": 1571.2
+   },
+   "on": null,
+   "off": null
+  },
+  {
+   "h": 129,
+   "id": "grace-ask",
+   "who": "grace",
+   "truth": "legit",
+   "tag": "Ask",
+   "title": "Grace Ask: fill registered critical-need homes on Galahad, Maguire, Cuthbert, Merlin; everyone else there keeps 50% and is asked to pre-fill",
+   "why": null,
+   "verdict": "pass",
+   "rung": "none",
+   "canaried": false,
+   "reasons": [],
+   "stats": {
+    "homesTargeted": 98,
+    "homesTouched": 98,
+    "kwRequested": 0,
+    "kwExecuted": 0
+   },
+   "on": null,
+   "off": null
+  },
+  {
+   "h": 136,
+   "id": "opt-evening-oct12",
+   "who": "optimizer",
+   "truth": "legit",
+   "tag": "Every day",
+   "title": "Base optimizer, Oct 12: cover evening load from batteries (ordinary-day arbitrage)",
+   "why": null,
+   "verdict": "pass",
+   "rung": "slow",
+   "canaried": true,
+   "reasons": [
+    {
+     "check": "ramp",
+     "code": "CANARY_DONE",
+     "detail": "Large order (884 homes): rolled out as a canary, 1% of homes, then 10%, then all, five minutes apart; each step delivered on target.",
+     "rung": "slow"
+    },
+    {
+     "check": "precedence",
+     "code": "SUPERSEDED",
+     "detail": "98 home(s) already follow higher-priority command \"grace-ask\" (priority 4 vs 5); this command does not run there.",
+     "rung": "watch"
+    },
+    {
+     "check": "precedence",
+     "code": "SUPERSEDED",
+     "detail": "50 home(s) already follow higher-priority command \"grace-watch\" (priority 4 vs 5); this command does not run there.",
+     "rung": "watch"
+    }
+   ],
+   "stats": {
+    "homesTargeted": 1032,
+    "homesTouched": 884,
+    "kwRequested": 1651.2,
+    "kwExecuted": 1414.4
+   },
+   "on": null,
+   "off": null
+  },
+  {
+   "h": 160,
+   "id": "opt-evening-oct13",
+   "who": "optimizer",
+   "truth": "legit",
+   "tag": "Every day",
+   "title": "Base optimizer, Oct 13: cover evening load from batteries (ordinary-day arbitrage)",
+   "why": null,
+   "verdict": "pass",
+   "rung": "slow",
+   "canaried": true,
+   "reasons": [
+    {
+     "check": "ramp",
+     "code": "CANARY_DONE",
+     "detail": "Large order (884 homes): rolled out as a canary, 1% of homes, then 10%, then all, five minutes apart; each step delivered on target.",
+     "rung": "slow"
+    },
+    {
+     "check": "precedence",
+     "code": "SUPERSEDED",
+     "detail": "98 home(s) already follow higher-priority command \"grace-ask\" (priority 4 vs 5); this command does not run there.",
+     "rung": "watch"
+    },
+    {
+     "check": "precedence",
+     "code": "SUPERSEDED",
+     "detail": "50 home(s) already follow higher-priority command \"grace-watch\" (priority 4 vs 5); this command does not run there.",
+     "rung": "watch"
+    }
+   ],
+   "stats": {
+    "homesTargeted": 1032,
+    "homesTouched": 884,
+    "kwRequested": 1651.2,
+    "kwExecuted": 1414.4
+   },
+   "on": null,
+   "off": null
+  },
+  {
+   "h": 161,
+   "id": "sce-event",
+   "who": "utility",
+   "truth": "legit",
+   "tag": "Utility event",
+   "title": "SCE emergency event: export 5 kW per home for 2 hours",
+   "why": "A hot, dry Santa Ana evening two days before the shutoff, with the grid tight. Valid, signed, top priority.",
+   "verdict": "clamp",
+   "rung": "slow",
+   "canaried": true,
+   "reasons": [
+    {
+     "check": "ramp",
+     "code": "CANARY_DONE",
+     "detail": "Large order (1,032 homes): rolled out as a canary, 1% of homes, then 10%, then all, five minutes apart; each step delivered on target.",
+     "rung": "slow"
+    },
+    {
+     "check": "floor",
+     "code": "FLOOR_CLAMP",
+     "detail": "Discharge slowed on 148 home(s) so backup never drops below the floor over the next 110 min (50 medical homes keep 50% or their planned reserve); 909 home(s) are held at a planned reserve above the floor.",
+     "rung": "slow"
+    }
+   ],
+   "stats": {
+    "homesTargeted": 1032,
+    "homesTouched": 1032,
+    "kwRequested": 6787.3,
+    "kwExecuted": 5814.7
+   },
+   "on": {
+    "energyKWh": 8840,
+    "homesMoved": 884,
+    "deadLineBatteryH": 0,
+    "overMW": 0,
+    "mbDrained": 0
+   },
+   "off": {
+    "energyKWh": 10320,
+    "homesMoved": 1032,
+    "deadLineBatteryH": 0,
+    "overMW": 0,
+    "mbDrained": 50
+   }
+  },
+  {
+   "h": 175,
+   "id": "grace-fill",
+   "who": "grace",
+   "truth": "legit",
+   "tag": "Fill",
+   "title": "Grace Fill: every battery whose owner said yes goes to 100% under each circuit's headroom",
+   "why": null,
+   "verdict": "pass",
+   "rung": "slow",
+   "canaried": true,
+   "reasons": [
+    {
+     "check": "ramp",
+     "code": "CANARY_DONE",
+     "detail": "Large order (775 homes): rolled out as a canary, 1% of homes, then 10%, then all, five minutes apart; each step delivered on target.",
+     "rung": "slow"
+    }
+   ],
+   "stats": {
+    "homesTargeted": 775,
+    "homesTouched": 775,
+    "kwRequested": 0,
+    "kwExecuted": 0
+   },
+   "on": null,
+   "off": null
+  },
+  {
+   "h": 184,
+   "id": "opt-evening-oct14",
+   "who": "optimizer",
+   "truth": "legit",
+   "tag": "Every day",
+   "title": "Base optimizer, Oct 14: cover evening load from batteries (ordinary-day arbitrage)",
+   "why": null,
+   "verdict": "clamp",
+   "rung": "slow",
+   "canaried": false,
+   "reasons": [
+    {
+     "check": "precedence",
+     "code": "SUPERSEDED",
+     "detail": "775 home(s) already follow higher-priority command \"grace-fill\" (priority 4 vs 5); this command does not run there.",
+     "rung": "watch"
+    },
+    {
+     "check": "precedence",
+     "code": "SUPERSEDED",
+     "detail": "98 home(s) already follow higher-priority command \"grace-ask\" (priority 4 vs 5); this command does not run there.",
+     "rung": "watch"
+    },
+    {
+     "check": "precedence",
+     "code": "SUPERSEDED",
+     "detail": "50 home(s) already follow higher-priority command \"grace-watch\" (priority 4 vs 5); this command does not run there.",
+     "rung": "watch"
+    },
+    {
+     "check": "floor",
+     "code": "FLOOR_CLAMP",
+     "detail": "Discharge slowed on 109 home(s) so backup never drops below the floor over the next 300 min; 109 home(s) are held at a planned reserve above the floor.",
+     "rung": "slow"
+    }
+   ],
+   "stats": {
+    "homesTargeted": 1032,
+    "homesTouched": 109,
+    "kwRequested": 1651.2,
+    "kwExecuted": 0
+   },
+   "on": null,
+   "off": null
+  },
+  {
+   "h": 185,
+   "id": "replay",
+   "who": "optimizer",
+   "truth": "malicious",
+   "tag": "Replay",
+   "title": "Replay: a captured Oct 8 evening discharge order is sent again",
+   "why": "Someone recorded a real, validly signed order and re-sends it the evening before the shutoff.",
+   "verdict": "hold",
+   "rung": "hold",
+   "canaried": false,
+   "reasons": [
+    {
+     "check": "freshness",
+     "code": "STALE",
+     "detail": "Looks like a replay or a stale order: issued 8700 min ago (limit 15 min). Held.",
+     "rung": "hold"
+    },
+    {
+     "check": "freshness",
+     "code": "REPLAY",
+     "detail": "Looks like a replay or a stale order: command id \"opt-evening-oct8\" was already received. Held.",
+     "rung": "hold"
+    }
+   ],
+   "stats": {
+    "homesTargeted": 0,
+    "homesTouched": 0,
+    "kwRequested": 0,
+    "kwExecuted": 0
+   },
+   "on": {
+    "energyKWh": 0,
+    "homesMoved": 0,
+    "deadLineBatteryH": 0,
+    "overMW": 0,
+    "mbDrained": 0
+   },
+   "off": {
+    "energyKWh": 662.6420856519514,
+    "homesMoved": 1032,
+    "deadLineBatteryH": 0,
+    "overMW": 0,
+    "mbDrained": 50
+   }
+  },
+  {
+   "h": 205,
+   "id": "sell-down",
+   "who": "market",
+   "truth": "unsafe",
+   "tag": "Unsafe",
+   "title": "Market bid: sell every battery down to 10% by 4 PM",
+   "why": "A market optimizer that does not know a shutoff starts at 4 PM. Valid signer, terrible timing.",
+   "verdict": "clamp",
+   "rung": "slow",
+   "canaried": false,
+   "reasons": [
+    {
+     "check": "precedence",
+     "code": "SUPERSEDED",
+     "detail": "775 home(s) already follow higher-priority command \"grace-fill\" (priority 4 vs 7); this command does not run there.",
+     "rung": "watch"
+    },
+    {
+     "check": "precedence",
+     "code": "SUPERSEDED",
+     "detail": "98 home(s) already follow higher-priority command \"grace-ask\" (priority 4 vs 7); this command does not run there.",
+     "rung": "watch"
+    },
+    {
+     "check": "precedence",
+     "code": "SUPERSEDED",
+     "detail": "50 home(s) already follow higher-priority command \"grace-watch\" (priority 4 vs 7); this command does not run there.",
+     "rung": "watch"
+    },
+    {
+     "check": "floor",
+     "code": "SOC_TARGET_RAISED",
+     "detail": "SOC target 10% is below the backup floor; raised to 20% (50% for medical homes, each home's planned reserve where higher) on 109 home(s).",
+     "rung": "slow"
+    }
+   ],
+   "stats": {
+    "homesTargeted": 1032,
+    "homesTouched": 109,
+    "kwRequested": 12136.3,
+    "kwExecuted": 0
+   },
+   "on": {
+    "energyKWh": 0,
+    "homesMoved": 0,
+    "deadLineBatteryH": 0,
+    "overMW": 0,
+    "mbDrained": 0
+   },
+   "off": {
+    "energyKWh": 36408.960787354474,
+    "homesMoved": 1032,
+    "deadLineBatteryH": 0,
+    "overMW": 0,
+    "mbDrained": 50
+   }
+  },
+  {
+   "h": 208,
+   "id": "grace-hold",
+   "who": "grace",
+   "truth": "legit",
+   "tag": "Hold",
+   "title": "Grace Hold: every battery islands, never exports, and runs its home on the outage budget",
+   "why": null,
+   "verdict": "pass",
+   "rung": "none",
+   "canaried": false,
+   "reasons": [],
+   "stats": {
+    "homesTargeted": 1032,
+    "homesTouched": 0,
+    "kwRequested": 0,
+    "kwExecuted": 0
+   },
+   "on": null,
+   "off": null
+  },
+  {
+   "h": 212,
+   "id": "stolen-key",
+   "who": "forged",
+   "truth": "malicious",
+   "tag": "Forged",
+   "title": "Stolen key posing as SCE: discharge every battery at 20 kW",
+   "why": "Four hours into the shutoff an unknown signer claims to be the utility.",
+   "verdict": "hold",
+   "rung": "hand",
+   "canaried": false,
+   "reasons": [
+    {
+     "check": "auth",
+     "code": "UNKNOWN_SIGNER",
+     "detail": "Signed by \"sce-drms-backup\", which is not on the trusted-sender list. Held; a person must review it.",
+     "rung": "hand"
+    }
+   ],
+   "stats": {
+    "homesTargeted": 0,
+    "homesTouched": 0,
+    "kwRequested": 0,
+    "kwExecuted": 0
+   },
+   "on": {
+    "energyKWh": 0,
+    "homesMoved": 0,
+    "deadLineBatteryH": 0,
+    "overMW": 0,
+    "mbDrained": 0
+   },
+   "off": {
+    "energyKWh": 19035.025721207505,
+    "homesMoved": 1032,
+    "deadLineBatteryH": 1032,
+    "overMW": 0,
+    "mbDrained": 50
+   }
+  },
+  {
+   "h": 228,
+   "id": "dead-line",
+   "who": "market",
+   "truth": "unsafe",
+   "tag": "Dead line",
+   "title": "Market export onto the de-energized Tuna line",
+   "why": "A market award asks Tuna's batteries to export while SCE crews patrol a line they believe is dead.",
+   "verdict": "hold",
+   "rung": "hold",
+   "canaried": false,
+   "reasons": [
+    {
+     "check": "precedence",
+     "code": "SUPERSEDED",
+     "detail": "86 home(s) already follow higher-priority command \"grace-hold\" (priority 4 vs 7); this command does not run there.",
+     "rung": "watch"
+    },
+    {
+     "check": "precedence",
+     "code": "EXCLUDED",
+     "detail": "2 home(s) skipped and not counted as capacity: 1 faulted, 1 quiet, needs a check. They run their last safe plan.",
+     "rung": "watch"
+    },
+    {
+     "check": "circuit",
+     "code": "DEAD_LINE",
+     "detail": "Circuit Tuna (Tuna) is open (de-energized). Its homes island and serve themselves; this order's export or charge on 88 home(s) there is held.",
+     "rung": "hold"
+    }
+   ],
+   "stats": {
+    "homesTargeted": 88,
+    "homesTouched": 0,
+    "kwRequested": 582.6,
+    "kwExecuted": 0
+   },
+   "on": {
+    "energyKWh": 0,
+    "homesMoved": 0,
+    "deadLineBatteryH": 0,
+    "overMW": 0,
+    "mbDrained": 0
+   },
+   "off": {
+    "energyKWh": 880,
+    "homesMoved": 88,
+    "deadLineBatteryH": 176,
+    "overMW": 0,
+    "mbDrained": 7
+   }
+  },
+  {
+   "h": 270,
+   "id": "rebound",
+   "who": "optimizer",
+   "truth": "unsafe",
+   "tag": "Rebound",
+   "title": "Optimizer rebound: recharge every battery at 20 kW the moment the first circuit is back",
+   "why": "The daily optimizer sees empty batteries and cheap power, and orders a full-speed recharge into cold-load pickup.",
+   "verdict": "clamp",
+   "rung": "hold",
+   "canaried": false,
+   "reasons": [
+    {
+     "check": "precedence",
+     "code": "EXCLUDED",
+     "detail": "183 home(s) skipped and not counted as capacity: 174 quiet behind a dead cell tower, 9 faulted. They run their last safe plan.",
+     "rung": "watch"
+    },
+    {
+     "check": "inverter",
+     "code": "INVERTER_CLAMP",
+     "detail": "Capped 74 home(s) at the 20 kW inverter limit or the battery's remaining room this step.",
+     "rung": "slow"
+    },
+    {
+     "check": "circuit",
+     "code": "DEAD_LINE",
+     "detail": "Circuit Maguire (Maguire) is open (de-energized). Its homes island and serve themselves; this order's export or charge on 100 home(s) there is held.",
+     "rung": "hold"
+    },
+    {
+     "check": "circuit",
+     "code": "DEAD_LINE",
+     "detail": "Circuit Cuthbert (Cuthbert) is open (de-energized). Its homes island and serve themselves; this order's export or charge on 357 home(s) there is held.",
+     "rung": "hold"
+    },
+    {
+     "check": "circuit",
+     "code": "DEAD_LINE",
+     "detail": "Circuit Merlin (Merlin) is open (de-energized). Its homes island and serve themselves; this order's export or charge on 130 home(s) there is held.",
+     "rung": "hold"
+    },
+    {
+     "check": "circuit",
+     "code": "DEAD_LINE",
+     "detail": "Circuit Serra (Serra) is open (de-energized). Its homes island and serve themselves; this order's export or charge on 42 home(s) there is held.",
+     "rung": "hold"
+    },
+    {
+     "check": "circuit",
+     "code": "DEAD_LINE",
+     "detail": "Circuit Tuna (Tuna) is open (de-energized). Its homes island and serve themselves; this order's export or charge on 88 home(s) there is held.",
+     "rung": "hold"
+    },
+    {
+     "check": "circuit",
+     "code": "IMPORT_LIMIT",
+     "detail": "Charging on circuit Galahad (Galahad) would push it to 10.25 MW, over its 7.59 MW limit. All 175 home(s) slowed pro-rata to 24%.",
+     "rung": "slow"
+    }
+   ],
+   "stats": {
+    "homesTargeted": 1032,
+    "homesTouched": 175,
+    "kwRequested": -20640,
+    "kwExecuted": -836.2
+   },
+   "on": {
+    "energyKWh": -1672.406604614255,
+    "homesMoved": 175,
+    "deadLineBatteryH": 0,
+    "overMW": 0,
+    "mbDrained": 0
+   },
+   "off": {
+    "energyKWh": -12600,
+    "homesMoved": 315,
+    "deadLineBatteryH": 0,
+    "overMW": 5.463796697692869,
+    "mbDrained": 0
+   }
+  },
+  {
+   "h": 272,
+   "id": "grace-recharge-Galahad",
+   "who": "grace",
+   "truth": "legit",
+   "tag": "Hand",
+   "title": "Grace recharge on Galahad, approved by SCE's shutoff officer, after the cold-load pickup",
+   "why": null,
+   "verdict": "pass",
+   "rung": "watch",
+   "canaried": false,
+   "reasons": [
+    {
+     "check": "precedence",
+     "code": "EXCLUDED",
+     "detail": "4 home(s) skipped and not counted as capacity: 4 faulted. They run their last safe plan.",
+     "rung": "watch"
+    }
+   ],
+   "stats": {
+    "homesTargeted": 314,
+    "homesTouched": 310,
+    "kwRequested": -1413,
+    "kwExecuted": -1395
+   },
+   "on": null,
+   "off": null
+  },
+  {
+   "h": 273,
+   "id": "grace-recharge-Cuthbert",
+   "who": "grace",
+   "truth": "legit",
+   "tag": "Hand",
+   "title": "Grace recharge on Cuthbert, approved by SCE's shutoff officer, after the cold-load pickup",
+   "why": null,
+   "verdict": "pass",
+   "rung": "none",
+   "canaried": false,
+   "reasons": [],
+   "stats": {
+    "homesTargeted": 357,
+    "homesTouched": 357,
+    "kwRequested": -357,
+    "kwExecuted": -357
+   },
+   "on": null,
+   "off": null
+  },
+  {
+   "h": 274,
+   "id": "grace-recharge-Tuna",
+   "who": "grace",
+   "truth": "legit",
+   "tag": "Hand",
+   "title": "Grace recharge on Tuna, approved by SCE's shutoff officer, after the cold-load pickup",
+   "why": null,
+   "verdict": "pass",
+   "rung": "watch",
+   "canaried": false,
+   "reasons": [
+    {
+     "check": "precedence",
+     "code": "EXCLUDED",
+     "detail": "1 home(s) skipped and not counted as capacity: 1 faulted. They run their last safe plan.",
+     "rung": "watch"
+    }
+   ],
+   "stats": {
+    "homesTargeted": 88,
+    "homesTouched": 87,
+    "kwRequested": -448.8,
+    "kwExecuted": -443.7
+   },
+   "on": null,
+   "off": null
+  },
+  {
+   "h": 275,
+   "id": "grace-recharge-Maguire",
+   "who": "grace",
+   "truth": "legit",
+   "tag": "Hand",
+   "title": "Grace recharge on Maguire, approved by SCE's shutoff officer, after the cold-load pickup",
+   "why": null,
+   "verdict": "pass",
+   "rung": "watch",
+   "canaried": false,
+   "reasons": [
+    {
+     "check": "precedence",
+     "code": "EXCLUDED",
+     "detail": "2 home(s) skipped and not counted as capacity: 2 faulted. They run their last safe plan.",
+     "rung": "watch"
+    }
+   ],
+   "stats": {
+    "homesTargeted": 100,
+    "homesTouched": 98,
+    "kwRequested": -320,
+    "kwExecuted": -313.6
+   },
+   "on": null,
+   "off": null
+  },
+  {
+   "h": 276,
+   "id": "grace-recharge-Merlin",
+   "who": "grace",
+   "truth": "legit",
+   "tag": "Hand",
+   "title": "Grace recharge on Merlin, approved by SCE's shutoff officer, after the cold-load pickup",
+   "why": null,
+   "verdict": "pass",
+   "rung": "none",
+   "canaried": false,
+   "reasons": [],
+   "stats": {
+    "homesTargeted": 130,
+    "homesTouched": 130,
+    "kwRequested": -130,
+    "kwExecuted": -130
+   },
+   "on": null,
+   "off": null
+  },
+  {
+   "h": 277,
+   "id": "grace-recharge-Serra",
+   "who": "grace",
+   "truth": "legit",
+   "tag": "Hand",
+   "title": "Grace recharge on Serra, approved by SCE's shutoff officer, after the cold-load pickup",
+   "why": null,
+   "verdict": "pass",
+   "rung": "watch",
+   "canaried": false,
+   "reasons": [
+    {
+     "check": "precedence",
+     "code": "EXCLUDED",
+     "detail": "1 home(s) skipped and not counted as capacity: 1 faulted. They run their last safe plan.",
+     "rung": "watch"
+    }
+   ],
+   "stats": {
+    "homesTargeted": 42,
+    "homesTouched": 41,
+    "kwRequested": -84,
+    "kwExecuted": -82
+   },
+   "on": null,
+   "off": null
+  }
+ ]
+}

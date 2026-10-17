@@ -1,0 +1,749 @@
+{
+ "source": "/mnt/project-files/data/grace/sce/Circuit_Load_Profile.csv",
+ "dataset": "SCE Circuit Load Profile (open data)",
+ "selection": "Substations ['Victor', 'Corona', 'Apple Valley', 'Moreno']; YEAR = 2024 (latest in file); all 12 months and all 24 September hours present; >= 12 kV; September max between 250 and 500 (inferred A); closest September max to 400 A.",
+ "labels": {
+  "loads": "REAL (SCE open data, hourly Sept min/max per circuit)",
+  "units": "INFERENCE: values treated as amps per phase; MW = sqrt(3) x kV x A / 1000",
+  "importLimitMW": "ASSUMED: highest recorded load across the year x 1.05",
+  "exportCapMW": "ASSUMED: -1.5 MW reverse-flow cap (full-fleet export unsafe, moderate event export safe)"
+ },
+ "circuits": [
+  {
+   "id": "c1",
+   "name": "Latimer",
+   "substation": "Victor",
+   "voltage": "12KV",
+   "kv": 12.0,
+   "year": 2024,
+   "septHourly": [
+    {
+     "hour": 0,
+     "minA": 111.3,
+     "maxA": 271.7,
+     "minMW": 2.313,
+     "maxMW": 5.647
+    },
+    {
+     "hour": 1,
+     "minA": 102.7,
+     "maxA": 242.0,
+     "minMW": 2.135,
+     "maxMW": 5.03
+    },
+    {
+     "hour": 2,
+     "minA": 94.0,
+     "maxA": 220.3,
+     "minMW": 1.954,
+     "maxMW": 4.579
+    },
+    {
+     "hour": 3,
+     "minA": 90.0,
+     "maxA": 195.0,
+     "minMW": 1.871,
+     "maxMW": 4.053
+    },
+    {
+     "hour": 4,
+     "minA": 84.3,
+     "maxA": 180.0,
+     "minMW": 1.752,
+     "maxMW": 3.741
+    },
+    {
+     "hour": 5,
+     "minA": 83.0,
+     "maxA": 172.7,
+     "minMW": 1.725,
+     "maxMW": 3.59
+    },
+    {
+     "hour": 6,
+     "minA": 88.6,
+     "maxA": 167.7,
+     "minMW": 1.842,
+     "maxMW": 3.486
+    },
+    {
+     "hour": 7,
+     "minA": 79.3,
+     "maxA": 154.7,
+     "minMW": 1.648,
+     "maxMW": 3.215
+    },
+    {
+     "hour": 8,
+     "minA": 51.0,
+     "maxA": 152.3,
+     "minMW": 1.06,
+     "maxMW": 3.165
+    },
+    {
+     "hour": 9,
+     "minA": 26.8,
+     "maxA": 165.3,
+     "minMW": 0.557,
+     "maxMW": 3.436
+    },
+    {
+     "hour": 10,
+     "minA": 24.0,
+     "maxA": 163.0,
+     "minMW": 0.499,
+     "maxMW": 3.388
+    },
+    {
+     "hour": 11,
+     "minA": 28.3,
+     "maxA": 225.3,
+     "minMW": 0.588,
+     "maxMW": 4.683
+    },
+    {
+     "hour": 12,
+     "minA": 35.3,
+     "maxA": 288.7,
+     "minMW": 0.734,
+     "maxMW": 6.001
+    },
+    {
+     "hour": 13,
+     "minA": 44.0,
+     "maxA": 316.7,
+     "minMW": 0.915,
+     "maxMW": 6.582
+    },
+    {
+     "hour": 14,
+     "minA": 41.7,
+     "maxA": 335.7,
+     "minMW": 0.867,
+     "maxMW": 6.977
+    },
+    {
+     "hour": 15,
+     "minA": 46.7,
+     "maxA": 368.3,
+     "minMW": 0.971,
+     "maxMW": 7.655
+    },
+    {
+     "hour": 16,
+     "minA": 73.0,
+     "maxA": 395.0,
+     "minMW": 1.517,
+     "maxMW": 8.21
+    },
+    {
+     "hour": 17,
+     "minA": 100.0,
+     "maxA": 405.8,
+     "minMW": 2.078,
+     "maxMW": 8.434
+    },
+    {
+     "hour": 18,
+     "minA": 120.3,
+     "maxA": 406.7,
+     "minMW": 2.5,
+     "maxMW": 8.453
+    },
+    {
+     "hour": 19,
+     "minA": 130.0,
+     "maxA": 386.3,
+     "minMW": 2.702,
+     "maxMW": 8.029
+    },
+    {
+     "hour": 20,
+     "minA": 136.3,
+     "maxA": 377.7,
+     "minMW": 2.833,
+     "maxMW": 7.85
+    },
+    {
+     "hour": 21,
+     "minA": 136.3,
+     "maxA": 373.0,
+     "minMW": 2.833,
+     "maxMW": 7.753
+    },
+    {
+     "hour": 22,
+     "minA": 128.7,
+     "maxA": 337.3,
+     "minMW": 2.675,
+     "maxMW": 7.011
+    },
+    {
+     "hour": 23,
+     "minA": 120.0,
+     "maxA": 305.7,
+     "minMW": 2.494,
+     "maxMW": 6.354
+    }
+   ],
+   "septMaxMW": 8.453,
+   "septMinMW": 0.499,
+   "yearMaxA": 451.3,
+   "yearMaxMW": 9.38,
+   "importLimitMW": 9.849,
+   "exportCapMW": -1.5
+  },
+  {
+   "id": "c2",
+   "name": "Glacier",
+   "substation": "Corona",
+   "voltage": "12KV",
+   "kv": 12.0,
+   "year": 2024,
+   "septHourly": [
+    {
+     "hour": 0,
+     "minA": 121.3,
+     "maxA": 258.7,
+     "minMW": 2.521,
+     "maxMW": 5.377
+    },
+    {
+     "hour": 1,
+     "minA": 114.6,
+     "maxA": 233.7,
+     "minMW": 2.382,
+     "maxMW": 4.857
+    },
+    {
+     "hour": 2,
+     "minA": 113.3,
+     "maxA": 210.8,
+     "minMW": 2.355,
+     "maxMW": 4.381
+    },
+    {
+     "hour": 3,
+     "minA": 106.0,
+     "maxA": 203.7,
+     "minMW": 2.203,
+     "maxMW": 4.234
+    },
+    {
+     "hour": 4,
+     "minA": 104.0,
+     "maxA": 193.0,
+     "minMW": 2.162,
+     "maxMW": 4.011
+    },
+    {
+     "hour": 5,
+     "minA": 103.0,
+     "maxA": 201.7,
+     "minMW": 2.141,
+     "maxMW": 4.192
+    },
+    {
+     "hour": 6,
+     "minA": 105.7,
+     "maxA": 213.0,
+     "minMW": 2.197,
+     "maxMW": 4.427
+    },
+    {
+     "hour": 7,
+     "minA": 106.3,
+     "maxA": 221.7,
+     "minMW": 2.209,
+     "maxMW": 4.608
+    },
+    {
+     "hour": 8,
+     "minA": 103.0,
+     "maxA": 222.0,
+     "minMW": 2.141,
+     "maxMW": 4.614
+    },
+    {
+     "hour": 9,
+     "minA": 100.3,
+     "maxA": 229.0,
+     "minMW": 2.085,
+     "maxMW": 4.76
+    },
+    {
+     "hour": 10,
+     "minA": 97.7,
+     "maxA": 262.0,
+     "minMW": 2.031,
+     "maxMW": 5.446
+    },
+    {
+     "hour": 11,
+     "minA": 103.7,
+     "maxA": 293.5,
+     "minMW": 2.155,
+     "maxMW": 6.1
+    },
+    {
+     "hour": 12,
+     "minA": 113.7,
+     "maxA": 329.7,
+     "minMW": 2.363,
+     "maxMW": 6.853
+    },
+    {
+     "hour": 13,
+     "minA": 125.0,
+     "maxA": 359.0,
+     "minMW": 2.598,
+     "maxMW": 7.462
+    },
+    {
+     "hour": 14,
+     "minA": 136.0,
+     "maxA": 394.0,
+     "minMW": 2.827,
+     "maxMW": 8.189
+    },
+    {
+     "hour": 15,
+     "minA": 157.3,
+     "maxA": 408.0,
+     "minMW": 3.269,
+     "maxMW": 8.48
+    },
+    {
+     "hour": 16,
+     "minA": 175.0,
+     "maxA": 415.3,
+     "minMW": 3.637,
+     "maxMW": 8.632
+    },
+    {
+     "hour": 17,
+     "minA": 191.0,
+     "maxA": 413.7,
+     "minMW": 3.97,
+     "maxMW": 8.599
+    },
+    {
+     "hour": 18,
+     "minA": 196.3,
+     "maxA": 388.3,
+     "minMW": 4.08,
+     "maxMW": 8.071
+    },
+    {
+     "hour": 19,
+     "minA": 185.0,
+     "maxA": 378.2,
+     "minMW": 3.845,
+     "maxMW": 7.861
+    },
+    {
+     "hour": 20,
+     "minA": 182.0,
+     "maxA": 379.7,
+     "minMW": 3.783,
+     "maxMW": 7.892
+    },
+    {
+     "hour": 21,
+     "minA": 174.7,
+     "maxA": 355.3,
+     "minMW": 3.631,
+     "maxMW": 7.385
+    },
+    {
+     "hour": 22,
+     "minA": 152.7,
+     "maxA": 317.2,
+     "minMW": 3.174,
+     "maxMW": 6.593
+    },
+    {
+     "hour": 23,
+     "minA": 140.7,
+     "maxA": 284.7,
+     "minMW": 2.924,
+     "maxMW": 5.917
+    }
+   ],
+   "septMaxMW": 8.632,
+   "septMinMW": 2.031,
+   "yearMaxA": 415.3,
+   "yearMaxMW": 8.632,
+   "importLimitMW": 9.064,
+   "exportCapMW": -1.5
+  },
+  {
+   "id": "c3",
+   "name": "Pahute",
+   "substation": "Apple Valley",
+   "voltage": "12KV",
+   "kv": 12.0,
+   "year": 2024,
+   "septHourly": [
+    {
+     "hour": 0,
+     "minA": 114.0,
+     "maxA": 219.0,
+     "minMW": 2.369,
+     "maxMW": 4.552
+    },
+    {
+     "hour": 1,
+     "minA": 103.7,
+     "maxA": 187.3,
+     "minMW": 2.155,
+     "maxMW": 3.893
+    },
+    {
+     "hour": 2,
+     "minA": 93.4,
+     "maxA": 171.0,
+     "minMW": 1.941,
+     "maxMW": 3.554
+    },
+    {
+     "hour": 3,
+     "minA": 88.0,
+     "maxA": 151.0,
+     "minMW": 1.829,
+     "maxMW": 3.138
+    },
+    {
+     "hour": 4,
+     "minA": 88.7,
+     "maxA": 149.0,
+     "minMW": 1.844,
+     "maxMW": 3.097
+    },
+    {
+     "hour": 5,
+     "minA": 101.0,
+     "maxA": 163.3,
+     "minMW": 2.099,
+     "maxMW": 3.394
+    },
+    {
+     "hour": 6,
+     "minA": 118.0,
+     "maxA": 176.7,
+     "minMW": 2.453,
+     "maxMW": 3.673
+    },
+    {
+     "hour": 7,
+     "minA": 113.2,
+     "maxA": 177.3,
+     "minMW": 2.353,
+     "maxMW": 3.685
+    },
+    {
+     "hour": 8,
+     "minA": 80.3,
+     "maxA": 166.0,
+     "minMW": 1.669,
+     "maxMW": 3.45
+    },
+    {
+     "hour": 9,
+     "minA": 53.4,
+     "maxA": 161.7,
+     "minMW": 1.11,
+     "maxMW": 3.361
+    },
+    {
+     "hour": 10,
+     "minA": 44.7,
+     "maxA": 169.0,
+     "minMW": 0.929,
+     "maxMW": 3.513
+    },
+    {
+     "hour": 11,
+     "minA": 51.4,
+     "maxA": 184.3,
+     "minMW": 1.068,
+     "maxMW": 3.831
+    },
+    {
+     "hour": 12,
+     "minA": 54.3,
+     "maxA": 285.3,
+     "minMW": 1.129,
+     "maxMW": 5.93
+    },
+    {
+     "hour": 13,
+     "minA": 53.3,
+     "maxA": 306.3,
+     "minMW": 1.108,
+     "maxMW": 6.366
+    },
+    {
+     "hour": 14,
+     "minA": 49.7,
+     "maxA": 317.0,
+     "minMW": 1.033,
+     "maxMW": 6.589
+    },
+    {
+     "hour": 15,
+     "minA": 54.0,
+     "maxA": 309.8,
+     "minMW": 1.122,
+     "maxMW": 6.439
+    },
+    {
+     "hour": 16,
+     "minA": 86.0,
+     "maxA": 332.3,
+     "minMW": 1.787,
+     "maxMW": 6.907
+    },
+    {
+     "hour": 17,
+     "minA": 122.3,
+     "maxA": 365.3,
+     "minMW": 2.542,
+     "maxMW": 7.593
+    },
+    {
+     "hour": 18,
+     "minA": 154.0,
+     "maxA": 373.3,
+     "minMW": 3.201,
+     "maxMW": 7.759
+    },
+    {
+     "hour": 19,
+     "minA": 160.3,
+     "maxA": 364.7,
+     "minMW": 3.332,
+     "maxMW": 7.58
+    },
+    {
+     "hour": 20,
+     "minA": 156.0,
+     "maxA": 338.7,
+     "minMW": 3.242,
+     "maxMW": 7.04
+    },
+    {
+     "hour": 21,
+     "minA": 153.3,
+     "maxA": 321.3,
+     "minMW": 3.186,
+     "maxMW": 6.678
+    },
+    {
+     "hour": 22,
+     "minA": 142.2,
+     "maxA": 295.0,
+     "minMW": 2.956,
+     "maxMW": 6.131
+    },
+    {
+     "hour": 23,
+     "minA": 119.7,
+     "maxA": 250.0,
+     "minMW": 2.488,
+     "maxMW": 5.196
+    }
+   ],
+   "septMaxMW": 7.759,
+   "septMinMW": 0.929,
+   "yearMaxA": 414.3,
+   "yearMaxMW": 8.611,
+   "importLimitMW": 9.042,
+   "exportCapMW": -1.5
+  },
+  {
+   "id": "c4",
+   "name": "Dill",
+   "substation": "Moreno",
+   "voltage": "12KV",
+   "kv": 12.0,
+   "year": 2024,
+   "septHourly": [
+    {
+     "hour": 0,
+     "minA": 93.3,
+     "maxA": 234.0,
+     "minMW": 1.939,
+     "maxMW": 4.864
+    },
+    {
+     "hour": 1,
+     "minA": 87.1,
+     "maxA": 212.1,
+     "minMW": 1.81,
+     "maxMW": 4.408
+    },
+    {
+     "hour": 2,
+     "minA": 82.3,
+     "maxA": 199.1,
+     "minMW": 1.711,
+     "maxMW": 4.138
+    },
+    {
+     "hour": 3,
+     "minA": 77.6,
+     "maxA": 185.0,
+     "minMW": 1.613,
+     "maxMW": 3.845
+    },
+    {
+     "hour": 4,
+     "minA": 73.3,
+     "maxA": 166.9,
+     "minMW": 1.524,
+     "maxMW": 3.469
+    },
+    {
+     "hour": 5,
+     "minA": 73.5,
+     "maxA": 158.7,
+     "minMW": 1.528,
+     "maxMW": 3.299
+    },
+    {
+     "hour": 6,
+     "minA": 73.8,
+     "maxA": 157.0,
+     "minMW": 1.534,
+     "maxMW": 3.263
+    },
+    {
+     "hour": 7,
+     "minA": 70.0,
+     "maxA": 170.2,
+     "minMW": 1.455,
+     "maxMW": 3.538
+    },
+    {
+     "hour": 8,
+     "minA": 60.8,
+     "maxA": 189.5,
+     "minMW": 1.264,
+     "maxMW": 3.939
+    },
+    {
+     "hour": 9,
+     "minA": 53.3,
+     "maxA": 202.7,
+     "minMW": 1.108,
+     "maxMW": 4.213
+    },
+    {
+     "hour": 10,
+     "minA": 45.4,
+     "maxA": 229.7,
+     "minMW": 0.944,
+     "maxMW": 4.774
+    },
+    {
+     "hour": 11,
+     "minA": 36.1,
+     "maxA": 269.4,
+     "minMW": 0.75,
+     "maxMW": 5.599
+    },
+    {
+     "hour": 12,
+     "minA": 32.0,
+     "maxA": 294.0,
+     "minMW": 0.665,
+     "maxMW": 6.111
+    },
+    {
+     "hour": 13,
+     "minA": 38.5,
+     "maxA": 327.7,
+     "minMW": 0.8,
+     "maxMW": 6.811
+    },
+    {
+     "hour": 14,
+     "minA": 52.7,
+     "maxA": 339.2,
+     "minMW": 1.095,
+     "maxMW": 7.05
+    },
+    {
+     "hour": 15,
+     "minA": 75.5,
+     "maxA": 362.0,
+     "minMW": 1.569,
+     "maxMW": 7.524
+    },
+    {
+     "hour": 16,
+     "minA": 92.1,
+     "maxA": 365.5,
+     "minMW": 1.914,
+     "maxMW": 7.597
+    },
+    {
+     "hour": 17,
+     "minA": 101.1,
+     "maxA": 364.7,
+     "minMW": 2.101,
+     "maxMW": 7.58
+    },
+    {
+     "hour": 18,
+     "minA": 110.6,
+     "maxA": 362.4,
+     "minMW": 2.299,
+     "maxMW": 7.532
+    },
+    {
+     "hour": 19,
+     "minA": 112.5,
+     "maxA": 350.4,
+     "minMW": 2.338,
+     "maxMW": 7.283
+    },
+    {
+     "hour": 20,
+     "minA": 110.6,
+     "maxA": 342.9,
+     "minMW": 2.299,
+     "maxMW": 7.127
+    },
+    {
+     "hour": 21,
+     "minA": 111.3,
+     "maxA": 321.5,
+     "minMW": 2.313,
+     "maxMW": 6.682
+    },
+    {
+     "hour": 22,
+     "minA": 104.0,
+     "maxA": 294.5,
+     "minMW": 2.162,
+     "maxMW": 6.121
+    },
+    {
+     "hour": 23,
+     "minA": 99.0,
+     "maxA": 256.6,
+     "minMW": 2.058,
+     "maxMW": 5.333
+    }
+   ],
+   "septMaxMW": 7.597,
+   "septMinMW": 0.665,
+   "yearMaxA": 365.5,
+   "yearMaxMW": 7.597,
+   "importLimitMW": 7.977,
+   "exportCapMW": -1.5
+  }
+ ]
+}
