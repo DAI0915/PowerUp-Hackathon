@@ -105,3 +105,18 @@ The gap is a retrofit on existing homes behind the utility's existing switches, 
 - **What is estimated**: where each device sits. SCE publishes no switch or transformer locations. Its DRPEP layers carry the whole circuit shape even for partial shutoffs (checked Merlin: RAR0775 events have the same shape length as breaker events), and the ICA circuit segments have no device or overhead/underground field. Each device is placed where the downstream share of line matches the share of customers it cut. Latigo substation is placed where four of its circuits converge.
 - **What is hypothetical**: 798 service transformers, one per 8 homes (a typical residential unit), spaced along the lines. Each one is tagged with the device it sits behind (`behind_device`), which is the transformer-island candidate list for the planner's `transformerIsland`.
 - **To make it real**: SCE's device and transformer locations (ask SCE under the pilot), or OpenStreetMap `power=pole/transformer` tags where mapped (not reachable from this container). Replace the hypothetical points with real ones, and `island.js` runs unchanged.
+
+## 10. How many homes have solar and batteries (real, by ZIP)
+
+`malibu_solar_battery_by_zip.csv`, from SCE's interconnection records (California DG Stats "Interconnected Project Sites", both SCE files: historical to Jan 2020, and Jan 2020 to Aug 2026, uploaded by Omer). Residential systems only. The denominator is SCE residential accounts for Oct 2025 (SCE usage by ZIP).
+
+| Area | Solar per 100 homes | Batteries per 100 homes | Solar, no battery |
+|---|---|---|---|
+| Malibu 90265 | 15.4 | 7.1 | 8.4 |
+| Topanga 90290 | 17.1 | 6.8 | 10.3 |
+| Calabasas 91302 | 15.5 | 5.3 | 10.2 |
+| Agoura Hills 91301 | 19.7 | 5.8 | 13.9 |
+
+- Malibu: 1,053 home solar systems (420 before 2020, 633 since), 482 with a battery, averaging 24 kWh each.
+- Caveats: a replaced or expanded system can appear twice, so these may run slightly high. Homes lost in the Dec 2024 to Jan 2025 fires may still be counted. Batteries installed without an interconnection application are missed.
+- What it means for islands: the demo's 15 batteries per 100 homes is about twice reality. Re-running `scenario.cjs` for the coast island over 48 hours at real rates (7 batteries per 100, and 9% of the other homes with solar only), with a 400 kWh community battery, keeps opted-in homes at basic power for about 20 hours. A 1,000 kWh community battery gets about 29 hours. The community battery does most of the work, so the pilot sizes it first. Solar-only homes matter as much as battery homes: Malibu has more of them (8 per 100), and they only produce in an outage once an island is formed.

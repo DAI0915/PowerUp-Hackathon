@@ -9,6 +9,12 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible+Mono:wght@400;600&amp;family=Atkinson+Hyperlegible+Next:wght@400;700&amp;family=Big+Shoulders+Display:wght@700;800&amp;display=swap">
+<script>
+try {
+  const theme = JSON.parse(localStorage.getItem('interlock:theme'));
+  if (theme === 'light' || theme === 'dark') document.documentElement.dataset.theme = theme;
+} catch { /* use the system theme */ }
+</script>
 <style>
 /* Layout: a dispatch board. A sticky clock bar runs across the top; the left column holds the scoreboard and the four
    circuit trends, the right rail holds what needs the dispatcher (decision, chaos, quiet homes); the verdict log and the
@@ -65,6 +71,7 @@
   --hatch: rgba(220, 229, 235, 0.16); --open-bg: #131f28; --shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
   color-scheme: dark;
 }
+:root[data-theme="light"] { color-scheme: light; }
 
 * { box-sizing: border-box; }
 body { background: var(--bg); color: var(--ink); font-family: var(--f-body); font-size: 14px; line-height: 1.45; }
@@ -102,6 +109,8 @@ button:disabled { cursor: not-allowed; }
 .tbtn svg { width: 16px; height: 16px; fill: currentColor; }
 .speed { display: flex; align-items: center; gap: 4px; font: 11px var(--f-mono); color: var(--muted); text-transform: uppercase; letter-spacing: .06em; }
 .speed select { height: 38px; border: 1px solid var(--rule-2); border-radius: 3px; background: var(--panel); padding: 0 6px; font: 600 13px var(--f-mono); }
+.theme-picker { display: flex; align-items: center; gap: 5px; font: 11px var(--f-mono); color: var(--muted); text-transform: uppercase; letter-spacing: .06em; }
+.theme-picker select { height: 38px; border: 1px solid var(--rule-2); border-radius: 3px; background: var(--panel); padding: 0 7px; font: 600 13px var(--f-mono); color: var(--ink); text-transform: none; letter-spacing: 0; }
 .readouts { display: flex; flex-wrap: wrap; gap: 6px 18px; min-width: 0; flex: 1 1 320px; }
 .ro { display: flex; flex-direction: column; gap: 1px; min-width: 0; }
 .ro-k { font: 11px var(--f-mono); color: var(--muted); text-transform: uppercase; letter-spacing: .06em; white-space: nowrap; }
@@ -407,6 +416,13 @@ button:disabled { cursor: not-allowed; }
         </select>
       </label>
     </div>
+    <label class="theme-picker" for="themeSelect">Theme
+      <select id="themeSelect" aria-label="Color theme">
+        <option value="system">System</option>
+        <option value="light">Light</option>
+        <option value="dark">Dark</option>
+      </select>
+    </label>
     <div class="readouts">
       <div class="ro"><span class="ro-k">CAISO peak <span class="tag real">REAL</span></span><span class="ro-v">52,061 MW</span></div>
       <div class="ro"><span class="ro-k">EEA 3 <span class="tag real">REAL</span></span><span class="ro-v" id="roEea">17:17 to 20:00</span></div>
@@ -620,6 +636,17 @@ const money = (x) => (x < -0.5 ? '−$' : '$') + n0(Math.abs(x));
 const clockMin = (k) => START + k * STEP;
 const store = { get(k, d) { try { const v = localStorage.getItem('interlock:' + k); return v === null ? d : JSON.parse(v); } catch { return d; } },
   set(k, v) { try { localStorage.setItem('interlock:' + k, JSON.stringify(v)); } catch { /* storage unavailable */ } } };
+
+const savedTheme = store.get('theme', 'system');
+function setTheme(theme) {
+  const next = theme === 'light' || theme === 'dark' ? theme : 'system';
+  if (next === 'system') delete document.documentElement.dataset.theme;
+  else document.documentElement.dataset.theme = next;
+  $('themeSelect').value = next;
+  store.set('theme', next);
+}
+setTheme(savedTheme);
+$('themeSelect').addEventListener('change', (event) => setTheme(event.target.value));
 
 function rungChip(r) {
   if (!r) return '';

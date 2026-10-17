@@ -2,8 +2,8 @@
 
 Paste-ready text for the Devpost form. Every number comes from `node bridge/cli.mjs`, `node interlock/cli.mjs` and `node islands/scenario.cjs`, and matches the README.
 
-- **Live demo:** https://mrbese.github.io/PowerUP/ (the Malibu replay; the Heat-wave replay button opens the second page). Same demo on claude.ai: https://claude.ai/artifact/1f2gVaMjYXvTs8xiqCi5Lu
-- **Code:** https://github.com/mrbese/PowerUP
+- **Live demo:** https://mrbese.github.io/PowerUp/ (the Malibu replay; the Heat-wave replay button opens the second page). Same demo on claude.ai: https://claude.ai/artifact/1f2gVaMjYXvTs8xiqCi5Lu
+- **Code:** https://github.com/mrbese/PowerUp
 
 ## Name, lens and one-liner
 
@@ -44,6 +44,8 @@ PowerUP has three parts that share one ladder.
 | Battery-hours pushing power onto a de-energized line | 1,208 | 0 |
 | Worst circuit overload at restoration | 5.46 MW over Galahad's cap | none |
 
+The demo's 15 batteries per 100 homes is an assumption about a grown fleet. At Malibu's real share today, about 7.1 per 100 (482 batteries on 6,829 homes, SCE interconnection records), the same run has 484 battery homes: guard off, 483 go dark, including all 27 Medical Baseline homes; guard on, none do.
+
 With the guard on, the outcome equals PowerUP's plan with no failures. SCE's emergency event still delivers 86% of its energy; it stops at each home's planned reserve, so Medical Baseline homes give nothing.
 
 ### Proof 2: September 6, 2022, CAISO's record-peak evening
@@ -61,7 +63,7 @@ Four real SCE circuits, 2,000 simulated Base Core homes, the real EEA 3 emergenc
 
 ### Proof 3: an island behind Merlin's recloser
 
-For a 48-hour shutoff, the underground coast section (313 customers) can island; the overhead branch beside it is blocked. With a 400 kWh community battery: 32 battery donors, 41 solar-only homes, 147 receivers and 114 opt-outs, with every receiver carried at the critical budget for 44 of 48 hours. Without a grid-forming battery the island does not form, because home batteries are certified to island only their own house. On a 213-hour shutoff like January 2025, rooftop solar carries the island.
+For a 48-hour shutoff, the underground coast section (313 customers) can island; the overhead branch beside it is blocked. With a 400 kWh community battery: 32 battery donors, 41 solar-only homes, 147 receivers and 114 opt-outs, with every receiver carried at the critical budget for 44 of 48 hours. At Malibu's real battery and solar shares the same island runs about 20 of 48 hours on 400 kWh and about 29 on 1,000 kWh, so the community battery does most of the work and a pilot sizes it first. Without a grid-forming battery the island does not form, because home batteries are certified to island only their own house. On a 213-hour shutoff like January 2025, rooftop solar carries the island.
 
 ### Every day
 
@@ -69,12 +71,12 @@ The same battery earns its keep on ordinary days. PowerUP prices readiness with 
 
 ## How we built it
 
-- **PowerUP:** a deterministic hourly engine in plain JavaScript (282 hours from Oct 7), running SCE open data: circuit lines, customer counts, 55 past Malibu shutoffs and hourly circuit loads. CAISO day-ahead prices for the SCE zone price readiness.
+- **PowerUP** (`powerup/`): a deterministic hourly engine in plain JavaScript (282 hours from Oct 7), running SCE open data: circuit lines, customer counts, 55 past Malibu shutoffs and hourly circuit loads. CAISO day-ahead prices for the SCE zone price readiness.
 - **Interlock:** ES modules with no dependencies; orders shaped like OpenADR 3 events; a 5-minute replay simulator; three policy packs (SCE homes, a military installation, Australia).
 - **Bridge:** turns each PowerUP decision into a signed order, runs every sender's orders through Interlock, and re-runs PowerUP with what each order actually did to the batteries. Wiring it also hardened Interlock: a validly signed order admitted days earlier could be re-sent and pass the freshness check, and it is now treated as a replay once its window has closed.
 - **Islands:** pure functions that classify segments, find islands under three hard rules (never re-energize overhead line in a fire area, a switch to every dead neighbor, one grid-forming source), plan donors and receivers, and settle the money.
 - **App:** one page that runs all of it live in the browser: the Malibu map, the guard panel with guard on and off, the island planner and SCE's switches on the map. A second page replays the heat wave.
-- **Tests:** 70 node tests (PowerUP 22, Interlock 28, islands 11, bridge 9) and 160 Playwright browser checks at desktop and phone width.
+- **Tests:** 71 node tests (planner 22, Interlock 28, islands 11, bridge 10) and 160 Playwright browser checks at desktop and phone width.
 
 Every number in the apps is labelled real, assumed or simulated.
 
@@ -99,7 +101,7 @@ The disaster that comes with warning and the one that doesn't need the same ladd
 - SCE's per-event device list and segment map, so islands run on real switches.
 - Real signatures (per-sender certificates, as OpenADR 3 and IEEE 2030.5 use) in place of the demo stand-in.
 - A replay against Base's own dispatch logs.
-- A pilot: PowerUP plus Interlock in front of one dispatch policy at 1% of a fleet, then one transformer island in a frequent-shutoff Malibu block.
+- A pilot: the planner plus Interlock in front of one dispatch policy at 1% of a fleet, then one transformer island in a frequent-shutoff Malibu block.
 
 ## Twist 1: federal funding pathway
 

@@ -2,7 +2,7 @@
 
 **The disaster layer for a home-battery fleet.** PowerUP keeps the power on for the people who need it most when the grid is the disaster, and keeps the fleet's own software from becoming the disaster.
 
-**Live demo:** https://mrbese.github.io/PowerUP/ (GitHub Pages, from `index.html` and `heatwave.html` at the repo root) or https://claude.ai/artifact/1f2gVaMjYXvTs8xiqCi5Lu. The Malibu replay has the guard panel, the islands section and a link to the heat-wave replay.
+**Live demo:** https://mrbese.github.io/PowerUp/ (GitHub Pages, from `index.html` and `heatwave.html` at the repo root) or https://claude.ai/artifact/1f2gVaMjYXvTs8xiqCi5Lu. The Malibu replay has the guard panel, the islands section and a link to the heat-wave replay.
 
 Built for the InnovateLA Dual-Use Hackathon (USC, Oct 16 to 18, 2026), Energy & Grid Hardening lens with Base Power. The seat is the dispatcher of a fleet of Base Core home batteries (39.2 kWh, 20 kW).
 
@@ -49,6 +49,8 @@ Then PowerUP replays the shutoff with what each order actually did to the batter
 | Battery-hours pushing power onto a de-energized line | 1,208 | 0 |
 | Worst circuit overload at restoration | 5.46 MW over Galahad's cap | none |
 
+At Malibu's real battery share today, about 7.1 per 100 homes (482 batteries on 6,829 homes in ZIP 90265, SCE interconnection records, `islands/malibu_solar_battery_by_zip.csv`), the same run has 484 battery homes: guard off, 483 go dark, including all 27 Medical Baseline homes; guard on, none do. The demo's 15% is an assumption about a grown fleet.
+
 With the guard on, the outcome is exactly PowerUP's plan without any failures. The guard-off numbers count every order as run exactly as sent; in reality IEEE 1547 anti-islanding should trip a battery on a dead line, so Interlock is a second layer, not a replacement.
 
 ## Proof 2: Tuesday, September 6, 2022, CAISO's record-peak evening
@@ -81,11 +83,11 @@ For a 48-hour shutoff the underground coast section (313 customers) can island a
 Node 22 and Python 3, no packages to install.
 
 ```
-npm test                         # PowerUP engine (22), Interlock (28), islands (11) and bridge (9) tests
+npm test                         # PowerUP engine (22), Interlock (28), islands (11) and bridge (10) tests
 node bridge/cli.mjs              # Malibu: PowerUP through Interlock, guard on vs off -> bridge/out/malibu-guard.json
 node interlock/cli.mjs           # Sept 6, 2022 replay -> interlock/out/results.json
 node islands/scenario.cjs        # Merlin-shaped neighborhood island
-python3 -I powerup/app/build.py    # rebuilds the single-file Malibu app, powerup/app/index.html
+python3 -I powerup/app/build.py  # rebuilds the single-file Malibu app, powerup/app/index.html
 python3 -I site.py               # writes index.html and heatwave.html at the root (GitHub Pages) and site/ (the Artifact)
 ```
 
@@ -94,7 +96,7 @@ Browser checks (Playwright, Chromium): `cd powerup/app && NODE_PATH=$(npm root -
 ## Layout
 
 ```
-powerup/      the Malibu shutoff planner: engine, single-file app, SCE and CAISO data, spec, prior art, twists
+powerup/    the Malibu shutoff planner: engine, single-file app, SCE and CAISO data, spec, prior art, twists
 interlock/  the guard: engine, silence and behaviour checks, policy packs, Sept 6 2022 replay, demo page
 islands/    the neighborhood island planner and the SCE line-device shutoff records for Malibu
 bridge/     PowerUP's orders through Interlock on the Malibu replay, and its tests
@@ -107,7 +109,7 @@ site.py     builds the two-page demo in site/
 Every number in the apps carries one of these labels.
 
 - **Real:** SCE open data (circuit lines, customer counts, 55 past Malibu shutoffs, hourly circuit loads), the October 2026 Malibu shutoff timeline (NWS, City of Malibu, CAL FIRE), CAISO day-ahead prices for the SCE zone, CAISO's Sept 6, 2022 record and EEA 3 times, Base Core specs and Base's 20% floor.
-- **Assumed:** battery adoption (15%) and Medical Baseline share (5%) per circuit, outage budgets, circuit limits (SCE publishes loads, not ratings), time-of-use rates, event pay, the 50% raised floor, the reverse-flow cap.
+- **Assumed:** battery adoption (15%; the real Malibu share today is about 7.1 per 100 homes) and Medical Baseline share (5%) per circuit, outage budgets, circuit limits (SCE publishes loads, not ratings), time-of-use rates, event pay, the 50% raised floor, the reverse-flow cap.
 - **Simulated:** the fleet, the failures, the physics. Signatures are a deterministic stand-in, not cryptography.
 
 ## Credit what exists

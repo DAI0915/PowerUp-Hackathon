@@ -384,7 +384,7 @@ canvas.chart { display: block; width: 100%; }
   <header class="hdr">
     <div class="hdr-l">
       <div class="brand">PowerUP <span>Malibu Replay</span></div>
-      <p class="tag"><b>PowerUP plans, Interlock guards.</b> The October 2026 Malibu shutoff hour by hour on real SCE circuits. Every order to the demo fleet, PowerUP's too, passes Interlock first.</p>
+      <p class="tag"><b>PowerUP plans, Interlock guards.</b> The October 2026 Malibu shutoff on real SCE circuits. Every order, PowerUP's too, passes Interlock first.</p>
     </div>
     <div class="hdr-r">
       <div class="clock" id="clock" aria-live="off">Thu Oct 15, 4:00 PM</div>
@@ -546,7 +546,7 @@ canvas.chart { display: block; width: 100%; }
           <button class="btn sm" data-icomm="0" aria-pressed="false">Home batteries only</button>
         </div>
         <div id="islPlan"></div>
-        <p class="note">Real: Merlin's about 777 customers and the 223 behind RAR0775. Assumed: how the rest of Merlin splits into segments, which are underground, the homes (15% battery, 5% Medical Baseline), every opt-in choice, the community battery's size and every rate. The three hard rules: never re-energize overhead line in a fire area, a switch to every dead neighbor, one grid-forming source.</p>
+        <p class="note">Real: Merlin's about 777 customers and the 223 behind RAR0775, and Malibu's real battery share, about 7 per 100 homes (SCE interconnection records, ZIP 90265). At that share the community battery does most of the work: 400 kWh keeps opted-in homes on basic power for about 20 of 48 hours, 1,000 kWh about 29, so a pilot sizes the community battery first. Assumed: how the rest of Merlin splits into segments, which are underground, the homes (15% battery as drawn here, 5% Medical Baseline), every opt-in choice, the community battery's size and every rate. The three hard rules: never re-energize overhead line in a fire area, a switch to every dead neighbor, one grid-forming source.</p>
       </div>
       <div>
         <div class="lab">SCE line switches opened in Malibu shutoffs (tap one to find it on the map)</div>
@@ -1455,7 +1455,7 @@ function renderFleet() {
   const f = sim.fleet[hour], N = sim.N;
   const silentT = f.byChan[C.silent_tower], silentC = f.byChan[C.silent_check];
   const outage = hour >= RUNGS.hold;
-  $('fleetSub').textContent = `${fmtInt(N)} battery homes of ${fmtInt(world.homes.length)} (Tuna's ${DATA.circuits.Tuna.customers} assumed) on six circuits (${P.adoption_pct}% adoption, assumed)`;
+  $('fleetSub').textContent = `${fmtInt(N)} battery homes of ${fmtInt(world.homes.length)} (Tuna's ${DATA.circuits.Tuna.customers} assumed) on six circuits (${P.adoption_pct}% adoption, assumed; Malibu has about 7 per 100 today)`;
   const k = [];
   const gridBack = f.byStatus[S.standby] + f.byStatus[S.restoring] > 0;
   k.push(['Battery homes with power', `${fmtInt(f.power)}<small> of ${fmtInt(N)}</small>`]);

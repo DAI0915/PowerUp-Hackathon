@@ -88,3 +88,16 @@ test('without a restoration approval PowerUP sends no recharge order', () => {
   const r = PowerUP.run({ G, I, DATA, world, P, decisions: { restore: {}, ev: {} }, variants: [] });
   assert.equal(r.log.filter((e) => e.order.id.startsWith('powerup-recharge')).length, 0);
 });
+
+test("at Malibu's real battery share (about 7.1 per 100 homes) the guard still keeps every battery home lit", () => {
+  const P2 = { ...G.defaultParams(DATA), adoption_pct: 7.1 };
+  const w2 = G.buildHomes(DATA, P2);
+  const r2 = PowerUP.run({ G, I, DATA, world: w2, P: P2, decisions: approved });
+  assert.ok(w2.homes.filter((h) => h.battery).length < world.homes.filter((h) => h.battery).length);
+  assert.equal(r2.metrics.on.darkHomes, 0);
+  assert.equal(r2.metrics.on.mbDarkHomes, 0);
+  assert.ok(r2.metrics.off.darkHomes > 0 && r2.metrics.off.mbDarkHomes > 0);
+  assert.equal(r2.exposure.on.deadLineBatteryH, 0);
+  assert.equal(r2.exposure.on.worstOverMW, 0);
+  assert.equal(PowerUP.powerupSummary(r2.log).held, 0);
+});
