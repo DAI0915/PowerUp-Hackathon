@@ -16,7 +16,7 @@ function mulberry32(seed) {
   return () => { a = (a + 0x6D2B79F5) >>> 0; let t = a; t = Math.imul(t ^ (t >>> 15), t | 1); t ^= t + Math.imul(t ^ (t >>> 7), t | 61); return ((t ^ (t >>> 14)) >>> 0) / 4294967296; };
 }
 
-// homes: 15% battery (Grace default), 25% of the rest solar-only, 5% Medical Baseline; battery owners donate 60% of the time, homes without one
+// homes: 15% battery (PowerUP default), 25% of the rest solar-only, 5% Medical Baseline; battery owners donate 60% of the time, homes without one
 // sign up as receivers 50% of the time (all assumed)
 function buildHomes(seed, opts) {
   const o = Object.assign({ battery: 0.15, solar: 0.25, donate: 0.6, receive: 0.5, gridFormingHomes: false }, opts || {});
@@ -28,7 +28,7 @@ function buildHomes(seed, opts) {
       let choice = bat ? (rng() < o.donate ? 'donor' : 'self') : (medical || rng() < o.receive ? 'receiver' : 'out');
       if (!bat && solar && choice === 'receiver') choice = 'donor';       // solar-only homes that join offer their panels
       homes.push({
-        id: `${s.id}-${i}`, seg: s.id, battery_kwh: bat ? 39.2 : 0, soc: bat ? 1.0 : 0, // Grace fills batteries before the shutoff
+        id: `${s.id}-${i}`, seg: s.id, battery_kwh: bat ? 39.2 : 0, soc: bat ? 1.0 : 0, // PowerUP fills batteries before the shutoff
         solar_kwh_day: solar ? 15 : 0,     // assumed: ~5 kW roof on an October Malibu day
         grid_forming: bat && o.gridFormingHomes, choice, medical, size: 0.6 + rng()
       });

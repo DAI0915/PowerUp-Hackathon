@@ -153,7 +153,7 @@ On the chaos day itself, guard on earns $51,965 vs $17,758 with the guard off. T
 
 ## Data provenance
 
-- **Circuits:** `/mnt/project-files/data/grace/sce/Circuit_Load_Profile.csv` (SCE Circuit Load Profile open data; UTF-8 BOM; `MONTH` is 0-indexed, so September = 8). `data/prep_circuits.py` keeps circuits under Victor, Corona, Apple Valley and Moreno that meet all of these: YEAR 2024 (the latest in the file), all 12 months and all 24 September hours present, at least 12 kV, and a September max between 250 and 500. Within each substation it takes the one whose September max is closest to 400 A.
+- **Circuits:** `/mnt/project-files/data/powerup/sce/Circuit_Load_Profile.csv` (SCE Circuit Load Profile open data; UTF-8 BOM; `MONTH` is 0-indexed, so September = 8). `data/prep_circuits.py` keeps circuits under Victor, Corona, Apple Valley and Moreno that meet all of these: YEAR 2024 (the latest in the file), all 12 months and all 24 September hours present, at least 12 kV, and a September max between 250 and 500. Within each substation it takes the one whose September max is closest to 400 A.
 
 | id | Circuit | Substation | Voltage | Year | September load (MW, inferred) | Year max | Import limit (ASSUMED) | Export cap (ASSUMED) |
 |---|---|---|---|---|---|---|---|---|

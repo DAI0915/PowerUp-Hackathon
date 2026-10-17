@@ -1,5 +1,5 @@
 const fs=require('fs');const {chromium}=require('playwright');
-const L=JSON.parse(fs.readFileSync(__dirname+'/../grace/data/malibu/malibu_circuits.geojson'));
+const L=JSON.parse(fs.readFileSync(__dirname+'/../powerup/data/malibu/malibu_circuits.geojson'));
 const A=JSON.parse(fs.readFileSync(__dirname+'/malibu_hypothetical_assets.geojson'));
 const x0=-118.90,x1=-118.64,y0=33.995,y1=34.115,W=1400,H=Math.round(W*(y1-y0)*110570/((x1-x0)*111320*Math.cos(34.03*Math.PI/180)));
 const X=x=>(x-x0)/(x1-x0)*W,Y=y=>(y1-y)/(y1-y0)*H;

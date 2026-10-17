@@ -11,7 +11,7 @@
   },
   "ev": {}
  },
- "grace": {
+ "powerup": {
   "orders": 10,
   "held": 0,
   "clamped": 0,
@@ -133,11 +133,11 @@
   },
   {
    "h": 51,
-   "id": "grace-watch",
-   "who": "grace",
+   "id": "powerup-watch",
+   "who": "powerup",
    "truth": "legit",
    "tag": "Watch",
-   "title": "Grace Watch: fill Medical Baseline homes to 100% and hold them",
+   "title": "PowerUP Watch: fill Medical Baseline homes to 100% and hold them",
    "why": null,
    "verdict": "pass",
    "rung": "none",
@@ -173,7 +173,7 @@
     {
      "check": "precedence",
      "code": "SUPERSEDED",
-     "detail": "50 home(s) already follow higher-priority command \"grace-watch\" (priority 4 vs 5); this command does not run there.",
+     "detail": "50 home(s) already follow higher-priority command \"powerup-watch\" (priority 4 vs 5); this command does not run there.",
      "rung": "watch"
     }
    ],
@@ -207,7 +207,7 @@
     {
      "check": "precedence",
      "code": "SUPERSEDED",
-     "detail": "50 home(s) already follow higher-priority command \"grace-watch\" (priority 4 vs 5); this command does not run there.",
+     "detail": "50 home(s) already follow higher-priority command \"powerup-watch\" (priority 4 vs 5); this command does not run there.",
      "rung": "watch"
     }
    ],
@@ -241,7 +241,7 @@
     {
      "check": "precedence",
      "code": "SUPERSEDED",
-     "detail": "50 home(s) already follow higher-priority command \"grace-watch\" (priority 4 vs 5); this command does not run there.",
+     "detail": "50 home(s) already follow higher-priority command \"powerup-watch\" (priority 4 vs 5); this command does not run there.",
      "rung": "watch"
     }
    ],
@@ -256,11 +256,11 @@
   },
   {
    "h": 129,
-   "id": "grace-ask",
-   "who": "grace",
+   "id": "powerup-ask",
+   "who": "powerup",
    "truth": "legit",
    "tag": "Ask",
-   "title": "Grace Ask: fill registered critical-need homes on Galahad, Maguire, Cuthbert, Merlin; everyone else there keeps 50% and is asked to pre-fill",
+   "title": "PowerUP Ask: fill registered critical-need homes on Galahad, Maguire, Cuthbert, Merlin; everyone else there keeps 50% and is asked to pre-fill",
    "why": null,
    "verdict": "pass",
    "rung": "none",
@@ -296,13 +296,13 @@
     {
      "check": "precedence",
      "code": "SUPERSEDED",
-     "detail": "98 home(s) already follow higher-priority command \"grace-ask\" (priority 4 vs 5); this command does not run there.",
+     "detail": "98 home(s) already follow higher-priority command \"powerup-ask\" (priority 4 vs 5); this command does not run there.",
      "rung": "watch"
     },
     {
      "check": "precedence",
      "code": "SUPERSEDED",
-     "detail": "50 home(s) already follow higher-priority command \"grace-watch\" (priority 4 vs 5); this command does not run there.",
+     "detail": "50 home(s) already follow higher-priority command \"powerup-watch\" (priority 4 vs 5); this command does not run there.",
      "rung": "watch"
     }
    ],
@@ -336,13 +336,13 @@
     {
      "check": "precedence",
      "code": "SUPERSEDED",
-     "detail": "98 home(s) already follow higher-priority command \"grace-ask\" (priority 4 vs 5); this command does not run there.",
+     "detail": "98 home(s) already follow higher-priority command \"powerup-ask\" (priority 4 vs 5); this command does not run there.",
      "rung": "watch"
     },
     {
      "check": "precedence",
      "code": "SUPERSEDED",
-     "detail": "50 home(s) already follow higher-priority command \"grace-watch\" (priority 4 vs 5); this command does not run there.",
+     "detail": "50 home(s) already follow higher-priority command \"powerup-watch\" (priority 4 vs 5); this command does not run there.",
      "rung": "watch"
     }
    ],
@@ -403,11 +403,11 @@
   },
   {
    "h": 175,
-   "id": "grace-fill",
-   "who": "grace",
+   "id": "powerup-fill",
+   "who": "powerup",
    "truth": "legit",
    "tag": "Fill",
-   "title": "Grace Fill: every battery whose owner said yes goes to 100% under each circuit's headroom",
+   "title": "PowerUP Fill: every battery whose owner said yes goes to 100% under each circuit's headroom",
    "why": null,
    "verdict": "pass",
    "rung": "slow",
@@ -444,19 +444,19 @@
     {
      "check": "precedence",
      "code": "SUPERSEDED",
-     "detail": "775 home(s) already follow higher-priority command \"grace-fill\" (priority 4 vs 5); this command does not run there.",
+     "detail": "775 home(s) already follow higher-priority command \"powerup-fill\" (priority 4 vs 5); this command does not run there.",
      "rung": "watch"
     },
     {
      "check": "precedence",
      "code": "SUPERSEDED",
-     "detail": "98 home(s) already follow higher-priority command \"grace-ask\" (priority 4 vs 5); this command does not run there.",
+     "detail": "98 home(s) already follow higher-priority command \"powerup-ask\" (priority 4 vs 5); this command does not run there.",
      "rung": "watch"
     },
     {
      "check": "precedence",
      "code": "SUPERSEDED",
-     "detail": "50 home(s) already follow higher-priority command \"grace-watch\" (priority 4 vs 5); this command does not run there.",
+     "detail": "50 home(s) already follow higher-priority command \"powerup-watch\" (priority 4 vs 5); this command does not run there.",
      "rung": "watch"
     },
     {
@@ -536,19 +536,19 @@
     {
      "check": "precedence",
      "code": "SUPERSEDED",
-     "detail": "775 home(s) already follow higher-priority command \"grace-fill\" (priority 4 vs 7); this command does not run there.",
+     "detail": "775 home(s) already follow higher-priority command \"powerup-fill\" (priority 4 vs 7); this command does not run there.",
      "rung": "watch"
     },
     {
      "check": "precedence",
      "code": "SUPERSEDED",
-     "detail": "98 home(s) already follow higher-priority command \"grace-ask\" (priority 4 vs 7); this command does not run there.",
+     "detail": "98 home(s) already follow higher-priority command \"powerup-ask\" (priority 4 vs 7); this command does not run there.",
      "rung": "watch"
     },
     {
      "check": "precedence",
      "code": "SUPERSEDED",
-     "detail": "50 home(s) already follow higher-priority command \"grace-watch\" (priority 4 vs 7); this command does not run there.",
+     "detail": "50 home(s) already follow higher-priority command \"powerup-watch\" (priority 4 vs 7); this command does not run there.",
      "rung": "watch"
     },
     {
@@ -581,11 +581,11 @@
   },
   {
    "h": 208,
-   "id": "grace-hold",
-   "who": "grace",
+   "id": "powerup-hold",
+   "who": "powerup",
    "truth": "legit",
    "tag": "Hold",
-   "title": "Grace Hold: every battery islands, never exports, and runs its home on the outage budget",
+   "title": "PowerUP Hold: every battery islands, never exports, and runs its home on the outage budget",
    "why": null,
    "verdict": "pass",
    "rung": "none",
@@ -655,7 +655,7 @@
     {
      "check": "precedence",
      "code": "SUPERSEDED",
-     "detail": "86 home(s) already follow higher-priority command \"grace-hold\" (priority 4 vs 7); this command does not run there.",
+     "detail": "86 home(s) already follow higher-priority command \"powerup-hold\" (priority 4 vs 7); this command does not run there.",
      "rung": "watch"
     },
     {
@@ -776,11 +776,11 @@
   },
   {
    "h": 272,
-   "id": "grace-recharge-Galahad",
-   "who": "grace",
+   "id": "powerup-recharge-Galahad",
+   "who": "powerup",
    "truth": "legit",
    "tag": "Hand",
-   "title": "Grace recharge on Galahad, approved by SCE's shutoff officer, after the cold-load pickup",
+   "title": "PowerUP recharge on Galahad, approved by SCE's shutoff officer, after the cold-load pickup",
    "why": null,
    "verdict": "pass",
    "rung": "watch",
@@ -804,11 +804,11 @@
   },
   {
    "h": 273,
-   "id": "grace-recharge-Cuthbert",
-   "who": "grace",
+   "id": "powerup-recharge-Cuthbert",
+   "who": "powerup",
    "truth": "legit",
    "tag": "Hand",
-   "title": "Grace recharge on Cuthbert, approved by SCE's shutoff officer, after the cold-load pickup",
+   "title": "PowerUP recharge on Cuthbert, approved by SCE's shutoff officer, after the cold-load pickup",
    "why": null,
    "verdict": "pass",
    "rung": "none",
@@ -825,11 +825,11 @@
   },
   {
    "h": 274,
-   "id": "grace-recharge-Tuna",
-   "who": "grace",
+   "id": "powerup-recharge-Tuna",
+   "who": "powerup",
    "truth": "legit",
    "tag": "Hand",
-   "title": "Grace recharge on Tuna, approved by SCE's shutoff officer, after the cold-load pickup",
+   "title": "PowerUP recharge on Tuna, approved by SCE's shutoff officer, after the cold-load pickup",
    "why": null,
    "verdict": "pass",
    "rung": "watch",
@@ -853,11 +853,11 @@
   },
   {
    "h": 275,
-   "id": "grace-recharge-Maguire",
-   "who": "grace",
+   "id": "powerup-recharge-Maguire",
+   "who": "powerup",
    "truth": "legit",
    "tag": "Hand",
-   "title": "Grace recharge on Maguire, approved by SCE's shutoff officer, after the cold-load pickup",
+   "title": "PowerUP recharge on Maguire, approved by SCE's shutoff officer, after the cold-load pickup",
    "why": null,
    "verdict": "pass",
    "rung": "watch",
@@ -881,11 +881,11 @@
   },
   {
    "h": 276,
-   "id": "grace-recharge-Merlin",
-   "who": "grace",
+   "id": "powerup-recharge-Merlin",
+   "who": "powerup",
    "truth": "legit",
    "tag": "Hand",
-   "title": "Grace recharge on Merlin, approved by SCE's shutoff officer, after the cold-load pickup",
+   "title": "PowerUP recharge on Merlin, approved by SCE's shutoff officer, after the cold-load pickup",
    "why": null,
    "verdict": "pass",
    "rung": "none",
@@ -902,11 +902,11 @@
   },
   {
    "h": 277,
-   "id": "grace-recharge-Serra",
-   "who": "grace",
+   "id": "powerup-recharge-Serra",
+   "who": "powerup",
    "truth": "legit",
    "tag": "Hand",
-   "title": "Grace recharge on Serra, approved by SCE's shutoff officer, after the cold-load pickup",
+   "title": "PowerUP recharge on Serra, approved by SCE's shutoff officer, after the cold-load pickup",
    "why": null,
    "verdict": "pass",
    "rung": "watch",
