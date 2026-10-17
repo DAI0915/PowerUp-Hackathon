@@ -5,3 +5,4 @@ __pycache__/
 .DS_Store
 dist/
 site/
+islands/malibu_switches_map.svg

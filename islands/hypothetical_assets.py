@@ -11,7 +11,7 @@ transformers are. Run: python3 -I hypothetical_assets.py  -> malibu_hypothetical
 """
 import csv, heapq, json, math, os
 HERE = os.path.dirname(os.path.abspath(__file__))
-GRACE = os.path.join(HERE, '..', 'data', 'grace')
+GRACE = os.path.join(HERE, '..', 'grace', 'data', 'malibu')
 HOMES_PER_XFMR = 8
 
 def dist(a, b):

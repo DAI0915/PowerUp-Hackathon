@@ -1,6 +1,6 @@
 const fs=require('fs');const {chromium}=require('playwright');
-const L=JSON.parse(fs.readFileSync('/mnt/project-files/data/grace/malibu_circuits.geojson'));
-const A=JSON.parse(fs.readFileSync('/mnt/project-files/microgrid/malibu_hypothetical_assets.geojson'));
+const L=JSON.parse(fs.readFileSync(__dirname+'/../grace/data/malibu/malibu_circuits.geojson'));
+const A=JSON.parse(fs.readFileSync(__dirname+'/malibu_hypothetical_assets.geojson'));
 const x0=-118.90,x1=-118.64,y0=33.995,y1=34.115,W=1400,H=Math.round(W*(y1-y0)*110570/((x1-x0)*111320*Math.cos(34.03*Math.PI/180)));
 const X=x=>(x-x0)/(x1-x0)*W,Y=y=>(y1-y)/(y1-y0)*H;
 const col={CUTHBERT:'#2a78d6',GALAHAD:'#7a5bd6',MAGUIRE:'#d68a2a',MERLIN:'#1a9e77',SERRA:'#c2408a'};
@@ -15,5 +15,5 @@ let lx=16;s+=`<g transform="translate(0,${H+10})">`;
 for(const c in col){s+=`<rect x="${lx}" y="8" width="22" height="5" fill="${col[c]}"/><text x="${lx+28}" y="15" font-size="14">${c}</text>`;lx+=130;}
 s+=`<circle cx="${lx+8}" cy="11" r="7" fill="#e23"/><text x="${lx+20}" y="15" font-size="14">SCE line switch, real name and customers cut, location estimated</text>`;
 s+=`<rect x="16" y="32" width="5" height="5" fill="#333"/><text x="28" y="39" font-size="14">Hypothetical service transformer (1 per 8 homes), candidate island switch site. Lines: SCE DRPEP. Tuna circuit not published.</text></g></svg>`;
-fs.writeFileSync('/mnt/project-files/microgrid/malibu_switches_map.svg',s);
-(async()=>{const b=await chromium.launch();const pg=await b.newPage({viewport:{width:W,height:H+70}});await pg.setContent(s);await pg.screenshot({path:'/mnt/project-files/microgrid/malibu_switches_map.png'});await b.close();})();
+fs.writeFileSync(__dirname+'/malibu_switches_map.svg',s);
+(async()=>{const b=await chromium.launch();const pg=await b.newPage({viewport:{width:W,height:H+70}});await pg.setContent(s);await pg.screenshot({path:__dirname+'/malibu_switches_map.png'});await b.close();})();

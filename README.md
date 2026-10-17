@@ -2,6 +2,8 @@
 
 **The disaster layer for a home-battery fleet.** PowerUp keeps the power on for the people who need it most when the grid is the disaster, and keeps the fleet's own software from becoming the disaster.
 
+**Live demo:** https://claude.ai/artifact/1f2gVaMjYXvTs8xiqCi5Lu (the Malibu replay, with the guard panel, the islands section and a link to the heat-wave replay)
+
 Built for the InnovateLA Dual-Use Hackathon (USC, Oct 16 to 18, 2026), Energy & Grid Hardening lens with Base Power. The seat is the dispatcher of a fleet of Base Core home batteries (39.2 kWh, 20 kW).
 
 PowerUp has three parts that share one ladder, the one the hackathon prompt asks for: *watch, ask, slow, hold, hand to a person*.
@@ -66,6 +68,8 @@ Four real SCE 12 kV circuits, 2,000 simulated Base Core homes, the real EEA 3 em
 
 SCE already cuts partial circuits: 13 of the 55 Malibu shutoffs since 2019 were opened at a line switch, not the substation breaker, and Merlin's recloser RAR0775 cut the same 223 customers four times (`islands/malibu_device_shutoffs.csv`). `islands/island.js` finds the homes that went dark only because their feed runs through a risky stretch, checks the three hard rules (never re-energize risky overhead line, a switch to every dead neighbor, one grid-forming source), and plans who donates, who receives, who keeps their own battery and who opts out (`node islands/scenario.cjs`, design in `islands/README.md`).
 
+For a 48-hour shutoff the underground coast section (313 customers) can island and the overhead branch beside it cannot. With a 400 kWh community battery (assumed size) it carries every receiver at the critical budget for 44 of 48 hours; with home batteries alone it does not form, since none is grid-forming. The Malibu page plans this live and puts SCE's eight Malibu line switches on the map at **estimated** positions, with **hypothetical** service transformers behind each (`islands/malibu_hypothetical_assets.geojson`).
+
 ## Every day: how the same battery earns its keep
 
 - Grace prices readiness with real CAISO day-ahead prices for the SCE load zone (Q4 2025, `grace/data/prices/`): a free battery earns its daily arbitrage value, and readiness forfeits only what holding costs, only where the risk is.
@@ -82,7 +86,10 @@ node bridge/cli.mjs              # Malibu: Grace through Interlock, guard on vs 
 node interlock/cli.mjs           # Sept 6, 2022 replay -> interlock/out/results.json
 node islands/scenario.cjs        # Merlin-shaped neighborhood island
 python3 -I grace/app/build.py    # rebuilds the single-file Malibu app, grace/app/index.html
+python3 -I site.py               # assembles site/: the Malibu page plus the heat-wave page and its modules
 ```
+
+Browser checks (Playwright, Chromium): `cd grace/app && NODE_PATH=$(npm root -g) node tests/interact.cjs` (126) and `node tests/guard.cjs` (34). Serve `site/` with any static server to open both pages (the heat-wave page loads ES modules, which do not load from `file://`).
 
 ## Layout
 
@@ -91,6 +98,8 @@ grace/      the Malibu shutoff planner: engine, single-file app, SCE and CAISO d
 interlock/  the guard: engine, silence and behaviour checks, policy packs, Sept 6 2022 replay, demo page
 islands/    the neighborhood island planner and the SCE line-device shutoff records for Malibu
 bridge/     Grace's orders through Interlock on the Malibu replay, and its tests
+submission/ Devpost text and demo video script
+site.py     builds the two-page demo in site/
 ```
 
 ## Real, assumed, simulated
