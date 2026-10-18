@@ -34,5 +34,5 @@ JavaScript, Node.js, Python, HTML Canvas, Playwright, SCE open data (PSPS record
 3. **0:50 to 1:30, the failures.** In the guard panel, scroll the log: the sell-down three hours before power-off is held back, the stolen key is handed to a person, the export onto the dead Cuthbert line is held, SCE's own event stops at each home's reserve.
 4. **1:30 to 1:55, guard off.** Switch to "Six failures, guard off". The map goes dark: 85 of 86 battery homes and every Medical Baseline home. Switch back.
 5. **1:55 to 2:15, restoration.** Jump to Oct 18. The rebound is slowed so Cuthbert stays under its cap; the officer approves the recharge.
-6. **2:15 to 2:40, the pilot business.** Scroll to the pilot business: 56 free batteries carry all 16 real shutoffs. Tick smoky days to show the margin shrink, then pick a readiness rule to show holding from SCE's notice costs $28 a battery a year.
+6. **2:15 to 2:40, the pilot business.** Scroll to the pilot business: 160 free batteries carry all 16 real shutoffs. Tick smoky days to show it still carries 15, then pick a readiness rule to show holding from SCE's notice costs $28 a battery a year.
 7. **2:40 to 3:00, close.** Open the heat-wave replay for one second of the scoreboard. "PowerUP plans, Interlock guards. Base can run it on its fleet."

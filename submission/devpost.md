@@ -33,7 +33,7 @@ The same run on all six Malibu circuits (1,032 battery homes) gave the same answ
 
 **Proof 2, CAISO's record-peak evening (Sept 6, 2022).** Four real SCE circuits, 2,000 simulated Base Core homes, the real EEA 3 emergency and ten failures. With the guard on: zero homes drained below their backup (2,000 with it off), zero export onto a dead line (18,490 battery-minutes), and $51,965 of revenue against $17,758, because a fleet that keeps its charge can deliver 28.2 MWh to the emergency instead of 13.3.
 
-**Proof 3, the pilot business behind RAR8848.** SCE opened RAR8848 on its own once (Dec 2020, 18 hours), and the homes behind it went dark 15 more times when SCE opened the whole Cuthbert circuit at the breaker: 16 shutoffs since 2019, 435 hours. The upstream reason is real too: one of the two 66 kV lines feeding Latigo substation runs about 650 m inside the Bryson Fire perimeter. At Malibu's real rates (about 32 existing batteries and 38 solar-only roofs behind the switch), we would place 56 free Base Core batteries with volunteer homes, Medical Baseline homes first and then solar roofs, since those refill every day. Those 56 carry every neighbor at the critical budget through all 16 real shutoffs at clear-sky solar; 39 is the minimum. On ordinary days each one trades for about $334 a year at real CAISO prices for the SCE zone, about $18,700 for the island, and holding it full from SCE's shutoff notice costs about $28 a year, 8% of that.
+**Proof 3, the pilot business behind RAR8848.** SCE opened RAR8848 on its own once (Dec 2020, 18 hours), and the homes behind it went dark 15 more times when SCE opened the whole Cuthbert circuit at the breaker: 16 shutoffs since 2019, 435 hours. The upstream reason is real too: one of the two 66 kV lines feeding Latigo substation runs about 650 m inside the Bryson Fire perimeter. At Malibu's real rates there are about 35 home-owned batteries behind the switch. We deploy 160 free Base Core batteries at once with volunteer homes, Medical Baseline homes first and then solar roofs, since those refill every day. That carries every neighbor at the critical budget through all 16 real shutoffs at clear-sky solar (39 is the bare minimum), and through 15 of the 16 even if smoke halves the solar. On ordinary days each battery trades for about $334 a year at real CAISO prices for the SCE zone, about $53,400 for the fleet, and holding it full from SCE's shutoff notice costs about $28 a year, 8% of that.
 
 **Every day.** The same battery earns its keep on ordinary days, so readiness costs only the arbitrage it gives up, and only where the risk is. Interlock doubles as Base's test bench: replay a new dispatch policy through the guard, then roll it out to 1%, 10% and 100% of the fleet.
 
@@ -69,7 +69,7 @@ The disaster that comes with warning and the one that doesn't need the same ladd
 
 ## What's next for PowerUP
 
-- The RAR8848 pilot: SCE's segment and switch map for that branch, one grid-forming community battery at the switch, and free Base batteries for volunteer homes, solar homes first.
+- The RAR8848 pilot: SCE's segment and switch map for that branch, one grid-forming community battery at the switch, and 160 free Base batteries for volunteer homes, Medical Baseline and solar homes first.
 - Real signatures (per-sender certificates, as OpenADR 3 and IEEE 2030.5 use) in place of the demo stand-in.
 - A replay against Base's own dispatch logs, then PowerUP and Interlock in front of one dispatch policy at 1% of a fleet.
 
