@@ -432,7 +432,8 @@ button.z { font: 600 14px var(--mono); width: 30px; height: 30px; border: 1px so
       o._v = h.v; o._solarOnly = h.solar && !h.battery;
       return o;
     });
-    const order = hs.filter(h => !h.battery_kwh).sort((a, b) =>
+    // Medical Baseline homes are offered a free battery first, then (optionally) solar roofs, then anyone who volunteers
+    const order = hs.filter(h => !h.battery_kwh).sort((a, b) => (b.medical - a.medical) ||
       (P.solarFirst ? (b._solarOnly - a._solarOnly) : 0) || (a._v - b._v));
     order.slice(0, P.free).forEach((h, k) => {
       Object.assign(h, { battery_kwh: BASE.kwh, export_kw: BASE.kw, owner: 'startup', choice: 'donor', grid_forming: k === 0 });

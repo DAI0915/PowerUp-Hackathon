@@ -14,9 +14,11 @@ t('assign: the fleet size is what was asked, and only one battery forms the grid
   assert.strictEqual(hs.filter(h => h.grid_forming).length, 1);
   assert.ok(hs.filter(h => h.owner === 'startup').every(h => h.choice === 'donor'));
 });
-t('assign: solar first puts every free battery on a solar roof while roofs last', () => {
-  const hs = P.assign(D.homes, { free: 20, solarFirst: true });
-  assert.ok(hs.filter(h => h.owner === 'startup').every(h => h.solar_kwh_day > 0));
+t('assign: medical homes get a free battery first, then solar roofs', () => {
+  const hs = P.assign(D.homes, { free: 30, solarFirst: true });
+  const med = hs.filter(h => h.medical && h.owner !== 'home');
+  assert.ok(med.every(h => h.owner === 'startup'));
+  assert.ok(hs.filter(h => h.owner === 'startup' && !h.medical).every(h => h.solar_kwh_day > 0));
 });
 t('assign: medical homes always take part', () => {
   const hs = P.assign(D.homes, { free: 0 });
