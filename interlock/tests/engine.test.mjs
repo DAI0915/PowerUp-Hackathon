@@ -93,6 +93,21 @@ test('replay and stale epoch -> hold', () => {
   assert.ok(r3.reasons.some((r) => r.code === 'STALE'));
 });
 
+test('an admitted order re-sent after its own window has closed is a replay', () => {
+  const policy = getPack('sce');
+  const c = cmd({ id: 'admitted', issuedAt: 1040, durationMin: 60 });
+  const during = makeState({ nowMin: 1070 });
+  during.ledger.seen['admitted'] = c.sig;
+  during.ledger.admitted['admitted'] = c.sig;
+  assert.ok(!evaluate(c, during, policy).reasons.some((r) => r.code === 'REPLAY'), 'continues while its window is open');
+  const later = makeState({ nowMin: 1040 + 3 * 1440 });
+  later.ledger.seen['admitted'] = c.sig;
+  later.ledger.admitted['admitted'] = c.sig;
+  const r = evaluate(c, later, policy);
+  assert.equal(r.verdict, 'hold');
+  assert.ok(r.reasons.some((x) => x.code === 'REPLAY'));
+});
+
 test('SOC_TARGET 5% clamps at 20% (50% for medical homes) over the whole window', () => {
   const policy = noCanary(getPack('sce'));
   const st = makeState({ n: 4, circuits: 1, soc: 30, medicalEvery: 2, baseMW: 5 });

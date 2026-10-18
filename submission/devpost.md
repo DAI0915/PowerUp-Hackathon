@@ -18,40 +18,40 @@ PowerUP is the disaster layer for a home-battery fleet like Base Power's. It has
 
 **Islands (for the homes that are dark only because of where their wire runs).** SCE already opens partial circuits: 13 of the 55 shutoffs on these six circuits since 2019 were opened at a switch on the line. The island planner finds the homes that go dark only because their feed runs through a risky stretch, checks three hard rules (never re-energize overhead line in a fire area, a switch to every dead neighbor, one grid-forming source), and plans an opt-in neighborhood island behind the existing switch, with SCE opening and closing it.
 
-**Proof 1, the real October 2026 Malibu shutoff.** 1,032 demo battery homes on SCE's six real circuits, 50 of them Medical Baseline. PowerUP's ten orders run alongside Base's ordinary daily optimizer, and six failures are injected on the real timeline.
+**Proof 1, the real October 2026 Malibu shutoff on our pilot.** The pilot is the 456 homes behind RAR8848, the last SCE switch on one Cuthbert branch, on the coastal flats 9 km from the Bryson burn. 86 of them have a battery (assumed: our free batteries plus the homes' own), 13 of them Medical Baseline. PowerUP's five orders run alongside Base's ordinary daily optimizer, and six failures are injected on the real timeline.
 
 | Same shutoff, same orders | Guard off | Guard on |
 |---|---|---|
-| PowerUP's own orders held or clamped | n/a | 0 of 10 |
-| Battery homes that go dark | 1,028 of 1,032 | 0 |
-| Medical Baseline homes that go dark | 50 of 50 | 0 |
+| PowerUP's own orders held or clamped | n/a | 0 of 5 |
+| Battery homes that go dark | 85 of 86 | 0 |
+| Medical Baseline homes that go dark | 13 of 13 | 0 |
 | Fleet charge when the power goes off | 9% | 99% |
-| Battery-hours pushing power onto a de-energized line | 1,208 | 0 |
-| Worst circuit overload at restoration | 5.46 MW over Galahad's cap | none |
+| Battery-hours pushing power onto a de-energized line | 258 | 0 |
+| Worst circuit overload at restoration | 1.6 MW over Cuthbert's cap | none |
 
-The demo assumes 15 batteries per 100 homes, a grown fleet. At Malibu's real share today, 7.1 per 100 (482 batteries on 6,829 homes, SCE interconnection records), the result holds: guard off, 483 of 484 battery homes go dark, including all 27 Medical Baseline homes; guard on, none do.
+The same run on all six Malibu circuits (1,032 battery homes) gave the same answer: 1,028 dark with the guard off, none with it on. It also held at Malibu's real battery share today, 7.1 per 100 homes (SCE interconnection records): 483 of 484 dark with the guard off, none with it on.
 
 **Proof 2, CAISO's record-peak evening (Sept 6, 2022).** Four real SCE circuits, 2,000 simulated Base Core homes, the real EEA 3 emergency and ten failures. With the guard on: zero homes drained below their backup (2,000 with it off), zero export onto a dead line (18,490 battery-minutes), and $51,965 of revenue against $17,758, because a fleet that keeps its charge can deliver 28.2 MWh to the emergency instead of 13.3.
 
-**Proof 3, the pilot island behind RAR8848.** RAR8848 is the last switch on one Cuthbert branch: 456 homes on the coastal flats, 9 km from the Bryson burn. SCE opened it on its own once (Dec 2020, 18 hours), and the homes behind it went dark every time SCE opened the whole Cuthbert circuit at the breaker, 16 times since 2019. The upstream reason is real too: one of the two 66 kV lines feeding Latigo substation runs about 650 m inside the Bryson Fire perimeter. At Malibu's real rates (about 32 existing batteries and 38 solar-only roofs behind the switch), Base would place 88 free Base Core batteries with volunteer homes to carry every neighbor at the critical budget for 48 hours, or 56 if the free batteries go first to homes that already have solar, since those refill every day. Those 56 batteries carry all 16 real Cuthbert shutoffs since 2019 (435 hours, at clear-sky solar). On ordinary days each one trades for about $334 a year at real CAISO prices for the SCE zone, about $18,700 for the island, and holding it full from SCE's shutoff notice costs about $28 a year, 8% of that.
+**Proof 3, the pilot business behind RAR8848.** SCE opened RAR8848 on its own once (Dec 2020, 18 hours), and the homes behind it went dark 15 more times when SCE opened the whole Cuthbert circuit at the breaker: 16 shutoffs since 2019, 435 hours. The upstream reason is real too: one of the two 66 kV lines feeding Latigo substation runs about 650 m inside the Bryson Fire perimeter. At Malibu's real rates (about 32 existing batteries and 38 solar-only roofs behind the switch), we would place 56 free Base Core batteries with volunteer homes, Medical Baseline homes first and then solar roofs, since those refill every day. Those 56 carry every neighbor at the critical budget through all 16 real shutoffs at clear-sky solar; 39 is the minimum. On ordinary days each one trades for about $334 a year at real CAISO prices for the SCE zone, about $18,700 for the island, and holding it full from SCE's shutoff notice costs about $28 a year, 8% of that.
 
 **Every day.** The same battery earns its keep on ordinary days, so readiness costs only the arbitrage it gives up, and only where the risk is. Interlock doubles as Base's test bench: replay a new dispatch policy through the guard, then roll it out to 1%, 10% and 100% of the fleet.
 
 ## How we built it
 
-- **Planner** (`powerup/`): a deterministic hourly engine in plain JavaScript (282 hours from Oct 7), running SCE open data: circuit lines, customer counts, 55 past Malibu shutoffs and hourly circuit loads. Real CAISO day-ahead prices for the SCE zone price readiness.
+- **Planner** (`pilot/app/`): a deterministic hourly engine in plain JavaScript (282 hours from Oct 7), running SCE open data: circuit lines, customer counts, 55 past Malibu shutoffs and hourly circuit loads. Real CAISO day-ahead prices for the SCE zone price readiness.
 - **Interlock** (`interlock/`): ES modules with no dependencies, orders shaped like OpenADR 3 events, a 5-minute replay simulator and three policy packs (SCE homes, a military installation, Australia).
-- **Bridge** (`bridge/`): turns each planner decision into a signed order, runs every sender's orders through Interlock, and re-runs the plan with what each order actually did to the batteries.
-- **Islands** (`islands/`): pure functions that classify line segments, find islands under the three hard rules, plan donors and receivers, size the free batteries and settle the money. SCE's line switches sit on the map at estimated positions; transformers are hypothetical, one per 8 homes.
-- **App:** one page that runs all of it live in the browser: the Malibu map, the guard panel with guard on and off, the island planner and SCE's switches. A second page replays the heat wave. Both are static files served from the repo with GitHub Pages.
+- **Bridge** (`pilot/app/src/bridge.js`): turns each planner decision into a signed order, runs every sender's orders through Interlock, and re-runs the plan with what each order actually did to the batteries.
+- **Islands** (`islands/`, `pilot/`): pure functions that classify line segments, find islands under the three hard rules, plan donors and receivers, size the free batteries and settle the money. SCE's line switches sit on the map at estimated positions; transformers are hypothetical, one per 8 homes.
+- **App:** one page that runs all of it live in the browser on the RAR8848 pilot: the map with the Bryson perimeter and the 66 kV feed, the guard panel with guard on and off, and the pilot business with SCE's switches. We first built it for all six Malibu circuits, then narrowed it to one neighborhood on a mentor's advice. A second page replays the heat wave. Both are static files served from the repo with GitHub Pages.
 - **Data:** SCE PSPS records, circuit lines and load profiles, SCE interconnection records for real solar and battery counts by ZIP, the NIFC fire perimeter, the California Energy Commission's transmission map, and CAISO day-ahead prices.
-- **Tests:** 71 node tests and 160 Playwright browser checks at desktop and phone width.
+- **Tests:** 53 node tests, including the guard-on and guard-off results on the pilot.
 
 Every number in the apps is labelled real, assumed or simulated.
 
 ## Challenges we ran into
 
-- **Two engines, one truth.** The planner thinks in hours and Interlock in 5-minute steps. The bridge advances canaries in substeps and counts the plan's own recharge once, not twice, so all ten of its orders pass.
+- **Two engines, one truth.** The planner thinks in hours and Interlock in 5-minute steps. The bridge advances canaries in substeps and counts the plan's own recharge once, not twice, so every one of its orders passes.
 - **The sell-down.** Our first guarded run still let 90 homes go dark: a market bid drained owners who had declined pre-fill. The fix is a rule we now think is right: once a shutoff is definite, nothing is sold out of any battery in the zone.
 - **A hole in our own guard.** Wiring the planner in showed that a validly signed order admitted days earlier could be re-sent and pass the freshness check. Interlock now treats it as a replay once its window has closed.
 - **Data SCE doesn't publish.** Circuit ratings, switch positions, transformer locations and Medical Baseline counts aren't public. We estimated or assumed them and labelled them that way. Our demo also assumed twice Malibu's real battery share until the interconnection records showed it, so we re-ran everything at the real number.
@@ -59,7 +59,7 @@ Every number in the apps is labelled real, assumed or simulated.
 ## Accomplishments that we're proud of
 
 - On the real Malibu timeline with six failures injected, the guard keeps every battery home lit, every Medical Baseline home included, with zero export onto a dead line and no overload at restoration, and it never stops one of PowerUP's own orders.
-- The result holds at Malibu's real battery share today, not just at our assumed one.
+- The result holds on all six Malibu circuits and at Malibu's real battery share today, not just on the pilot.
 - The guard earns about three times what the unguarded fleet earns on the chaotic heat-wave evening.
 - A pilot island grounded in SCE's own records: a real switch, a real count of the times its homes went dark, and a real reason upstream.
 
