@@ -1,0 +1,326 @@
+<title>RAR8848 Pilot</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Source+Sans+3:wght@400;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: a field sheet for one switch. Summary strip, then map beside the fleet controls, then money, rules and the real shutoffs. */
+:root {
+  --bg: #f3f5f6; --panel: #ffffff; --ink: #17232b; --muted: #5a6872; --line: #d5dde2;
+  --wire: #33515f; --sea: #0f7c86; --sun: #c98a0c; --own: #4864c4; --med: #c23d62; --dark: #8a96a0;
+  --good: #1f8a4c; --warn: #b8740a; --bad: #b8324a;
+  --display: "Barlow Condensed", "Arial Narrow", sans-serif; --body: "Source Sans 3", "Segoe UI", system-ui, sans-serif;
+  --mono: "IBM Plex Mono", ui-monospace, Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #0f1619; --panel: #172126; --ink: #e4ecef; --muted: #96a6ae; --line: #2a3a41;
+  --wire: #8fb3c2; --sea: #3cc2cc; --sun: #f0b43c; --own: #8aa2ff; --med: #ff7a9c; --dark: #6b7a83;
+  --good: #4fca82; --warn: #f0b43c; --bad: #ff7088; color-scheme: dark } }
+:root[data-theme="dark"] {
+  --bg: #0f1619; --panel: #172126; --ink: #e4ecef; --muted: #96a6ae; --line: #2a3a41;
+  --wire: #8fb3c2; --sea: #3cc2cc; --sun: #f0b43c; --own: #8aa2ff; --med: #ff7a9c; --dark: #6b7a83;
+  --good: #4fca82; --warn: #f0b43c; --bad: #ff7088; color-scheme: dark }
+body { background: var(--bg); color: var(--ink); font: 15px/1.5 var(--body); }
+.wrap { max-width: 1180px; margin: 0 auto; padding-block: 20px 48px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); display: grid; gap: 22px; }
+h1, h2 { font-family: var(--display); font-weight: 600; letter-spacing: .01em; margin: 0; text-wrap: balance; }
+h1 { font-size: clamp(30px, 5vw, 44px); line-height: 1.05; }
+h2 { font-size: 24px; }
+.eyebrow { font: 500 12px/1 var(--mono); letter-spacing: .08em; text-transform: uppercase; color: var(--sea); }
+.lede { color: var(--muted); max-width: 72ch; margin: 6px 0 0; }
+.num { font-variant-numeric: tabular-nums; }
+.strip { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 1px; background: var(--line); border: 1px solid var(--line); border-radius: 8px; overflow: hidden; }
+.strip div { background: var(--panel); padding: 12px 14px; }
+.strip b { display: block; font: 600 26px/1.1 var(--display); font-variant-numeric: tabular-nums; }
+.strip span { color: var(--muted); font-size: 13px; }
+.grid2 { display: grid; grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr); gap: 18px; align-items: start; }
+@media (max-width: 860px) { .grid2 { grid-template-columns: minmax(0, 1fr); } }
+.panel { background: var(--panel); border: 1px solid var(--line); border-radius: 8px; padding: 16px; min-width: 0; }
+.panel > h2 { margin-bottom: 8px; }
+svg text { font-family: var(--mono); font-size: 11px; fill: var(--muted); paint-order: stroke; stroke: var(--panel); stroke-width: 4px; stroke-linejoin: round; }
+#map { width: 100%; height: auto; display: block; touch-action: none; cursor: grab; }
+.legend { display: flex; flex-wrap: wrap; gap: 6px 14px; font-size: 13px; color: var(--muted); margin-top: 8px; }
+.legend i { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 5px; vertical-align: -1px; }
+.ctl { display: grid; gap: 14px; }
+.ctl label { display: grid; gap: 4px; font-weight: 600; }
+.ctl .row { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; }
+.ctl output { font: 600 22px var(--display); font-variant-numeric: tabular-nums; }
+.ctl small { color: var(--muted); font-weight: 400; }
+input[type=range] { width: 100%; accent-color: var(--sea); }
+.ctl label.toggle { display: flex; gap: 8px; align-items: flex-start; font-weight: 400; }
+.toggle small { display: block; }
+.toggle input { margin-top: 4px; accent-color: var(--sea); }
+.facts { display: grid; grid-template-columns: auto 1fr; gap: 3px 12px; font-size: 14px; margin: 0; }
+.facts dt { color: var(--muted); } .facts dd { margin: 0; font-variant-numeric: tabular-nums; text-align: right; }
+.money { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 18px; }
+@media (max-width: 760px) { .money { grid-template-columns: minmax(0, 1fr); } }
+.bars { display: grid; gap: 8px; }
+.bar { display: grid; grid-template-columns: 170px minmax(0, 1fr) 70px; gap: 10px; align-items: center; font-size: 14px; }
+@media (max-width: 480px) { .bar { grid-template-columns: 110px minmax(0, 1fr) 62px; font-size: 13px; } }
+.bar .t { height: 14px; background: color-mix(in srgb, var(--line) 55%, transparent); border-radius: 3px; overflow: hidden; }
+.bar .f { height: 100%; border-radius: 3px; }
+.bar .v { text-align: right; font-variant-numeric: tabular-nums; }
+.tag { font: 500 11px var(--mono); padding: 1px 5px; border-radius: 3px; border: 1px solid var(--line); color: var(--muted); margin-left: 4px; white-space: nowrap; }
+.tag.real { color: var(--good); border-color: color-mix(in srgb, var(--good) 45%, transparent); }
+.big { font: 600 34px/1.1 var(--display); font-variant-numeric: tabular-nums; }
+.tablewrap { overflow-x: auto; }
+table { width: 100%; border-collapse: collapse; font-size: 14px; }
+th { font: 500 11px var(--mono); text-transform: uppercase; letter-spacing: .06em; color: var(--muted); text-align: left; padding: 6px 8px; border-bottom: 1px solid var(--line); white-space: nowrap; }
+td { padding: 8px; border-bottom: 1px solid var(--line); vertical-align: top; font-variant-numeric: tabular-nums; }
+td.n, th.n { text-align: right; }
+tr.rule { cursor: pointer; }
+tr.rule td:first-child { min-width: 220px; }
+tr.rule:hover td { background: color-mix(in srgb, var(--sea) 7%, transparent); }
+tr.rule.on td { background: color-mix(in srgb, var(--sea) 13%, transparent); }
+tr.rule:focus-visible { outline: 2px solid var(--sea); outline-offset: -2px; }
+.pill { display: inline-block; font: 600 12px var(--body); padding: 1px 8px; border-radius: 99px; }
+.pill.good { background: color-mix(in srgb, var(--good) 16%, transparent); color: var(--good); }
+.pill.warn { background: color-mix(in srgb, var(--warn) 18%, transparent); color: var(--warn); }
+.pill.bad { background: color-mix(in srgb, var(--bad) 15%, transparent); color: var(--bad); }
+.sub { color: var(--muted); font-size: 13px; }
+.ev { display: grid; grid-template-columns: 112px minmax(0, 1fr) 92px; gap: 10px; align-items: center; font-size: 13px; padding: 3px 0; }
+.ev .t { position: relative; height: 12px; }
+.ev .on, .ev .off { position: absolute; top: 0; height: 100%; }
+.ev .on { left: 0; background: var(--sea); border-radius: 3px 0 0 3px; }
+.ev .off { background: var(--bad); border-radius: 0 3px 3px 0; }
+.ev .r { text-align: right; font-variant-numeric: tabular-nums; }
+details { font-size: 14px; color: var(--muted); }
+details summary { cursor: pointer; color: var(--ink); font-weight: 600; }
+.assume { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px 16px; margin-top: 10px; }
+.assume label { display: grid; gap: 3px; font-size: 13px; color: var(--muted); }
+.assume input { font: 15px var(--mono); padding: 5px 8px; border: 1px solid var(--line); border-radius: 5px; background: var(--bg); color: var(--ink); width: 100%; box-sizing: border-box; }
+button.z { font: 600 14px var(--mono); width: 30px; height: 30px; border: 1px solid var(--line); border-radius: 5px; background: var(--panel); color: var(--ink); cursor: pointer; }
+.mapbar { display: flex; gap: 6px; justify-content: flex-end; margin-bottom: 6px; align-items: center; }
+.mapbar span { margin-right: auto; color: var(--muted); font-size: 13px; }
+@media (prefers-reduced-motion: no-preference) { .bar .f, .ev .on, .ev .off { transition: width .25s, left .25s; } }
+</style>
+
+<div class="wrap">
+  <header>
+    <div class="eyebrow">PowerUP pilot · SCE Cuthbert circuit · Malibu</div>
+    <h1>456 homes behind switch RAR8848</h1>
+    <p class="lede">Our company buys Base Core batteries and puts them free in homes that volunteer to share with neighbors. On ordinary days the batteries earn money. When SCE shuts the power off, the switch opens and the homes behind it run as one island on those batteries and rooftop solar. This page shows what the batteries earn, what holding them full costs, and how many homes they would have kept on through the 16 real shutoffs that cut these homes.</p>
+  </header>
+
+  <section class="strip" id="strip"></section>
+
+  <section class="grid2">
+    <div class="panel">
+      <div class="mapbar"><span>Drag to move, scroll or pinch to zoom</span><button class="z" id="zin" aria-label="Zoom in">+</button><button class="z" id="zout" aria-label="Zoom out">−</button><button class="z" id="zreset" aria-label="Reset view">⟲</button></div>
+      <svg id="map" viewBox="0 0 800 520" role="img" aria-label="Map of the line behind RAR8848 and the homes on it"></svg>
+      <div class="legend" id="legend"></div>
+    </div>
+    <div class="panel ctl">
+      <h2>Fleet</h2>
+      <label for="free"><span class="row">Free Base batteries we place <output id="freeOut" class="num">56</output></span>
+        <input type="range" id="free" min="0" max="160" step="1" value="56"></label>
+      <label class="toggle" for="solarFirst"><input type="checkbox" id="solarFirst" checked><span>Offer them to solar homes first <small>A battery on a solar roof refills every day.</small></span></label>
+      <label class="toggle" for="smoke"><input type="checkbox" id="smoke"><span>Smoky days: solar at half <small>Smoke from a fire can cut solar output by half or more.</small></span></label>
+      <dl class="facts" id="fleetFacts"></dl>
+      <p class="sub" id="fleetNeed"></p>
+    </div>
+  </section>
+
+  <section class="panel">
+    <h2>Ordinary days</h2>
+    <p class="sub">What one battery earns in a year, after the readiness rule you pick below. Green tags are real numbers; grey tags are assumptions you can change.</p>
+    <div class="money">
+      <div class="bars" id="moneyBars"></div>
+      <div>
+        <div class="sub">Fleet earnings per year</div>
+        <div class="big" id="fleetNet"></div>
+        <dl class="facts" id="moneyFacts" style="margin-top:10px"></dl>
+      </div>
+    </div>
+    <details style="margin-top:14px"><summary>Change the assumptions</summary>
+      <div class="assume">
+        <label for="capex">Installed cost per battery ($)<input type="number" id="capex" value="20000" step="500" min="0"></label>
+        <label for="itc">Tax credit (share)<input type="number" id="itc" value="0.30" step="0.05" min="0" max="1"></label>
+        <label for="cap">Capacity price ($ per kW-month)<input type="number" id="cap" value="8" step="0.5" min="0"></label>
+        <label for="capkw">kW counted per battery<input type="number" id="capkw" value="9.8" step="0.1" min="0"></label>
+        <label for="elrp">Emergency events a year<input type="number" id="elrp" value="10" step="1" min="0"></label>
+      </div>
+    </details>
+  </section>
+
+  <section class="panel">
+    <h2>Readiness rules</h2>
+    <p class="sub">Each rule says when the batteries stop trading and fill up before a shutoff. Holding costs the trading they give up on those days. SCE warns about 3.3 times as many customers as it actually cuts, so every rule pays for false alarms too. Pick a row to see it on the shutoffs below.</p>
+    <div class="tablewrap"><table>
+      <thead><tr><th>Rule</th><th class="n">Days held</th><th class="n">Cost / battery / yr</th><th class="n">Fleet cost / yr</th><th class="n">Shutoffs carried</th><th class="n">Home-hours dark</th></tr></thead>
+      <tbody id="rules"></tbody>
+    </table></div>
+  </section>
+
+  <section class="panel">
+    <h2>The 16 real shutoffs</h2>
+    <p class="sub" id="evHead"></p>
+    <div id="events"></div>
+  </section>
+
+  <section class="panel">
+    <h2>How this is worked out</h2>
+    <details open><summary>Sources and limits</summary>
+      <ul>
+        <li><b>Real:</b> SCE's Cuthbert line, RAR8848's 456 customers, and every Cuthbert shutoff from 2019 to January 2025 (SCE shutoff records). Whole-circuit breaker cuts and RAR8848 opened alone both cut these homes; 16 events, 435 hours.</li>
+        <li><b>Real:</b> what a Base Core (39.2 kWh, 20 kW, 20% floor) earns trading CAISO day-ahead prices for SCE, Oct to Dec 2025, with perfect foresight: $0.91 a day. Yearly figures repeat this quarter; summer spreads are usually wider.</li>
+        <li><b>Real:</b> Malibu has 7.1 home batteries (median 20 kWh) and 8.4 solar-only roofs per 100 homes (SCE interconnection records). Medical Baseline is 2.6% of homes (SCE's Dec 2024 report on Maguire to the CPUC). SCE notified 509,245 customers and cut 152,393 in its Jan 20 2025 event. The Emergency Load Reduction Program pays $2 per kWh.</li>
+        <li><b>Real:</b> lead times are from the Bryson Fire, Oct 2026. The first Santa Ana signal came 6.5 days before the shutoff, and SCE named Cuthbert 3 days before.</li>
+        <li><b>Estimated:</b> where RAR8848 sits, and where each home is (spread evenly along the line). Each home's battery, solar, medical need and choice is drawn at the real rates, so a dot is a stand-in, not an address. 60% of battery owners and 50% of other homes join; medical homes always join. Every home that receives keeps critical loads on (8 kWh a day). A roof makes 27 kWh a day.</li>
+        <li><b>Not modeled yet:</b> SCE approval to island its line, Base firmware for sharing, battery wear, and what volunteers pay. The island also needs one battery certified to form the grid.</li>
+      </ul>
+    </details>
+  </section>
+</div>
+
+<script>/*ISLAND*/</script>
+<script>/*PILOT*/</script>
+<script>
+const DATA = /*DATA*/null;
+const P = window.PowerUPPilot;
+const $ = id => document.getElementById(id);
+const fmt$ = (x, d = 0) => (x < 0 ? '−$' : '$') + Math.abs(x).toLocaleString('en-US', { maximumFractionDigits: d, minimumFractionDigits: d });
+const fmtK = x => Math.abs(x) >= 1e6 ? fmt$(x / 1e6, 2) + 'M' : Math.abs(x) >= 1e4 ? fmt$(x / 1e3, 0) + 'k' : fmt$(x);
+let ruleId = 'notice';
+
+function opts() {
+  return {
+    free: +$('free').value, solarFirst: $('solarFirst').checked, solarKwhDay: $('smoke').checked ? P.SOLAR_KWH_DAY / 2 : P.SOLAR_KWH_DAY,
+    capex: +$('capex').value || 0, itc: +$('itc').value || 0, capacityPerKwMonth: +$('cap').value || 0,
+    capacityKw: +$('capkw').value || 0, elrpEventsPerYear: +$('elrp').value || 0
+  };
+}
+
+// ---------- map ----------
+const svg = $('map'), NS = 'http://www.w3.org/2000/svg';
+const KX = Math.cos(34.03 * Math.PI / 180);
+const allPts = DATA.lines.flat().concat(DATA.homes.map(h => [h.x, h.y]));
+const minX = Math.min(...allPts.map(p => p[0])), maxX = Math.max(...allPts.map(p => p[0]));
+const minY = Math.min(...allPts.map(p => p[1])), maxY = Math.max(...allPts.map(p => p[1]));
+const W = 800, H = 520, PAD = 30;
+const S = Math.min((W - 2 * PAD) / ((maxX - minX) * KX), (H - 2 * PAD) / (maxY - minY));
+const ox = (W - (maxX - minX) * KX * S) / 2, oy = (H - (maxY - minY) * S) / 2;
+const px = p => [ox + (p[0] - minX) * KX * S, H - oy - (p[1] - minY) * S];
+const el = (tag, attrs, parent) => { const e = document.createElementNS(NS, tag); for (const k in attrs) e.setAttribute(k, attrs[k]); (parent || svg).appendChild(e); return e; };
+const gLines = el('g', {}), gHomes = el('g', {}), gMarks = el('g', {});
+const path = pts => 'M' + pts.map(p => px(p).map(v => v.toFixed(1)).join(',')).join('L');
+DATA.lines.forEach(l => el('path', { d: path(l), fill: 'none', stroke: 'var(--wire)', 'stroke-width': 2, 'stroke-linecap': 'round', 'stroke-linejoin': 'round', 'vector-effect': 'non-scaling-stroke' }, gLines));
+el('path', { d: path(DATA.feed.slice(0, 60)), fill: 'none', stroke: 'var(--dark)', 'stroke-width': 1.5, 'stroke-dasharray': '4 4', 'vector-effect': 'non-scaling-stroke' }, gLines);
+const homeDots = DATA.homes.map(h => { const [x, y] = px([h.x, h.y]); return el('circle', { cx: x.toFixed(1), cy: y.toFixed(1), r: 3.2 }, gHomes); });
+function mark(p, label, shape, dx, dy, anchor) {
+  const [x, y] = px(p);
+  const g = el('g', { transform: `translate(${x},${y})` }, gMarks);
+  if (shape === 'sq') el('rect', { x: -6, y: -6, width: 12, height: 12, fill: 'var(--ink)' }, g);
+  else el('circle', { r: 6, fill: shape === 'open' ? 'var(--panel)' : 'var(--ink)', stroke: 'var(--ink)', 'stroke-width': 2 }, g);
+  const t = el('text', { x: dx, y: dy, 'text-anchor': anchor || 'start', style: 'fill:var(--ink);font-weight:500' }, g); t.textContent = label;
+  return g;
+}
+mark(DATA.switch, 'RAR8848 opens to form the island', 'dot', -4, -26);
+mark(DATA.upstream_switch, 'RCS0036', 'open', -10, 18, 'end');
+const t9 = el('text', { x: 14, y: 22 }); t9.textContent = `Bryson burn: ${DATA.burn_km} km northwest · Latigo substation: west, along the dashed feed`;
+// pan and zoom
+let vb = [0, 0, W, H];
+const setVb = () => { svg.setAttribute('viewBox', vb.map(v => v.toFixed(1)).join(' ')); const k = W / vb[2]; homeDots.forEach(c => c.setAttribute('r', (3.2 / Math.sqrt(k)).toFixed(2))); gMarks.querySelectorAll('g').forEach(g => { const m = g.getAttribute('transform').match(/translate\(([^,]+),([^)]+)\)/); g.setAttribute('transform', `translate(${m[1]},${m[2]}) scale(${1 / k})`); }); t9.setAttribute('transform', `translate(${vb[0]},${vb[1]}) scale(${1 / k})`); };
+const zoomAt = (f, cx, cy) => { const nw = Math.min(W * 1.2, Math.max(W / 25, vb[2] / f)), nh = nw * H / W; vb = [cx - (cx - vb[0]) * nw / vb[2], cy - (cy - vb[1]) * nh / vb[3], nw, nh]; setVb(); };
+const toSvg = (e) => { const r = svg.getBoundingClientRect(); return [vb[0] + (e.clientX - r.left) / r.width * vb[2], vb[1] + (e.clientY - r.top) / r.height * vb[3]]; };
+svg.addEventListener('wheel', e => { e.preventDefault(); const [x, y] = toSvg(e); zoomAt(e.deltaY < 0 ? 1.25 : 0.8, x, y); }, { passive: false });
+const ptrs = new Map(); let pinch0 = null;
+svg.addEventListener('pointerdown', e => { svg.setPointerCapture(e.pointerId); ptrs.set(e.pointerId, [e.clientX, e.clientY]); svg.style.cursor = 'grabbing'; });
+svg.addEventListener('pointermove', e => {
+  if (!ptrs.has(e.pointerId)) return;
+  const r = svg.getBoundingClientRect(), prev = ptrs.get(e.pointerId);
+  ptrs.set(e.pointerId, [e.clientX, e.clientY]);
+  if (ptrs.size === 1) { vb[0] -= (e.clientX - prev[0]) / r.width * vb[2]; vb[1] -= (e.clientY - prev[1]) / r.height * vb[3]; setVb(); }
+  else if (ptrs.size === 2) { const [a, b] = [...ptrs.values()]; const d = Math.hypot(a[0] - b[0], a[1] - b[1]); if (pinch0) zoomAt(d / pinch0, ...toSvg({ clientX: (a[0] + b[0]) / 2, clientY: (a[1] + b[1]) / 2 })); pinch0 = d; }
+});
+const up = e => { ptrs.delete(e.pointerId); if (ptrs.size < 2) pinch0 = null; svg.style.cursor = 'grab'; };
+svg.addEventListener('pointerup', up); svg.addEventListener('pointercancel', up);
+$('zin').onclick = () => zoomAt(1.5, vb[0] + vb[2] / 2, vb[1] + vb[3] / 2);
+$('zout').onclick = () => zoomAt(1 / 1.5, vb[0] + vb[2] / 2, vb[1] + vb[3] / 2);
+$('zreset').onclick = () => { vb = [0, 0, W, H]; setVb(); };
+
+const KINDS = [
+  ['startup', 'var(--sea)', 'Our free Base battery'], ['own', 'var(--own)', 'Own battery'], ['solar', 'var(--sun)', 'Solar, no battery'],
+  ['medical', 'var(--med)', 'Medical Baseline (ring)'], ['recv', 'var(--ink)', 'Receives from neighbors'], ['out', 'var(--dark)', 'Not taking part']
+];
+$('legend').innerHTML = KINDS.map(([k, c, t]) => k === 'medical' ? `<span><i style="background:transparent;border:2px solid ${c};width:7px;height:7px"></i>${t}</span>` : `<span><i style="background:${c}${k === 'out' ? ';opacity:.45' : ''}"></i>${t}</span>`).join('');
+
+function paintHomes(homes) {
+  homes.forEach((h, i) => {
+    const c = homeDots[i];
+    const k = h.owner === 'startup' ? 'var(--sea)' : h.owner === 'home' ? 'var(--own)' : h._solarOnly ? 'var(--sun)' : h.choice === 'receiver' ? 'var(--ink)' : 'var(--dark)';
+    c.setAttribute('fill', k);
+    c.setAttribute('opacity', h.choice === 'out' ? .4 : 1);
+    if (h.medical) { c.setAttribute('stroke', 'var(--med)'); c.setAttribute('stroke-width', 2); c.setAttribute('vector-effect', 'non-scaling-stroke'); }
+    else c.removeAttribute('stroke');
+  });
+}
+
+// ---------- render ----------
+let lastNeedKey = '';
+function render() {
+  const o = opts();
+  $('freeOut').textContent = o.free;
+  const R = P.evaluate(DATA, o);
+  const rule = R.rules.find(r => r.id === ruleId);
+  const c = R.counts, fleet = c.startup;
+  paintHomes(R.homes);
+  const solarHomes = R.homes.filter(h => h.solar_kwh_day > 0).length;
+
+  $('strip').innerHTML = [
+    [DATA.homes.length, 'homes behind the switch'], [DATA.line_km + ' km', 'of line, all on the coast'],
+    [DATA.events.length, `real shutoffs, ${Math.round(DATA.events.reduce((a, e) => a + e.hours, 0))} h in all`],
+    [`${rule.eventsFull} of ${DATA.events.length}`, 'carried in full by this setup'],
+    [fmtK(rule.fleetMoney.net), 'fleet earnings a year (with assumptions)']
+  ].map(([b, s]) => `<div><b>${b}</b><span>${s}</span></div>`).join('');
+
+  $('fleetFacts').innerHTML = [
+    ['Our batteries', fleet], ['Homes with their own battery', c.own], ['Roofs with solar', solarHomes],
+    ['Medical Baseline homes', c.medical], ['Homes receiving', c.receivers], ['Homes not taking part', c.out],
+    ['Money we put in', fmtK(fleet * o.capex * (1 - o.itc)) + ' after tax credit']
+  ].map(([a, b]) => `<dt>${a}</dt><dd>${b}</dd>`).join('');
+  const needKey = [o.solarFirst, o.solarKwhDay, ruleId].join();
+  if (needKey !== lastNeedKey) {
+    lastNeedKey = needKey;
+    const n = P.fleetFor(DATA, ruleId, o);
+    $('fleetNeed').textContent = n ? `With the selected rule, ${n} batteries carry all ${DATA.events.length} real shutoffs in full, including the 80-hour one in January 2025.` : `No fleet up to 300 batteries carries every real shutoff under this rule.`;
+  }
+
+  const m = rule.money;
+  const rows = [
+    ['Trading day-ahead prices', m.arbitrage, 'var(--sea)', 'real'], ['Capacity payments', m.capacity, 'var(--own)', 'assumed'],
+    ['Emergency events', m.elrp, 'var(--sun)', '$2/kWh real, count assumed'], ['Readiness holds', -m.readiness, 'var(--bad)', 'real prices']
+  ];
+  const max = Math.max(...rows.map(r => Math.abs(r[1])));
+  $('moneyBars').innerHTML = rows.map(([t, v, col, tag]) => `<div class="bar"><span>${t}<br><span class="tag ${tag.startsWith('real') ? 'real' : ''}">${tag}</span></span><div class="t"><div class="f" style="width:${(Math.abs(v) / max * 100).toFixed(1)}%;background:${col}"></div></div><span class="v">${fmt$(v)}</span></div>`).join('')
+    + `<div class="bar" style="border-top:1px solid var(--line);padding-top:8px"><b>Net per battery</b><span></span><b class="v">${fmt$(m.net)}</b></div>`;
+  $('fleetNet').textContent = fmt$(rule.fleetMoney.net);
+  $('moneyFacts').innerHTML = [
+    ['Payback, all income', isFinite(m.payback) ? m.payback.toFixed(1) + ' years' : 'never'],
+    ['Payback, trading only', isFinite(m.arbitrageOnlyPayback) ? Math.round(m.arbitrageOnlyPayback) + ' years' : 'never'],
+    ['Readiness cost, share of trading', (m.readiness / m.arbitrage * 100).toFixed(0) + '%'],
+    ['Holds a year (incl. false alarms)', m.holds.toFixed(1)]
+  ].map(([a, b]) => `<dt>${a}</dt><dd>${b}</dd>`).join('');
+
+  $('rules').innerHTML = R.rules.map(r => {
+    const s = r.eventsFull === DATA.events.length ? 'good' : r.eventsFull >= DATA.events.length * .75 ? 'warn' : 'bad';
+    const med = r.medicalEventsDark ? ` · medical homes short in ${r.medicalEventsDark}` : '';
+    return `<tr class="rule${r.id === ruleId ? ' on' : ''}" data-id="${r.id}" tabindex="0"><td>${r.label}${r.note ? `<div class="sub">${r.note}</div>` : ''}${r.early ? `<div class="sub">${r.early} batteries held from notice for the medical homes</div>` : ''}</td>
+      <td class="n">${r.lead ? r.lead + (r.early ? ' / ' + 3 : '') : '0'}</td><td class="n">${fmt$(r.money.readiness, 2)}</td><td class="n">${fmt$(r.fleetMoney.readiness)}</td>
+      <td class="n"><span class="pill ${s}">${r.eventsFull} / ${DATA.events.length}</span>${med}</td><td class="n">${Math.round(r.receiverHoursDark).toLocaleString()}</td></tr>`;
+  }).join('');
+  document.querySelectorAll('tr.rule').forEach(tr => {
+    const pick = () => { ruleId = tr.dataset.id; render(); };
+    tr.onclick = pick; tr.onkeydown = e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); pick(); } };
+  });
+
+  const maxH = Math.max(...DATA.events.map(e => e.hours));
+  $('evHead').textContent = `Rule: ${rule.label}. Teal is hours the island keeps receiving homes on at critical loads; red is hours they would have been dark.`;
+  $('events').innerHTML = rule.events.map(e => {
+    const on = e.carried / maxH * 100, off = (e.hours - e.carried) / maxH * 100;
+    const d = new Date(e.start.replace(' ', 'T'));
+    const label = d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+    return `<div class="ev"><span>${label}<br><span class="sub">${e.cut_at === 'breaker' ? 'whole circuit' : 'RAR8848 alone'}</span></span><div class="t"><div class="on" style="width:${on.toFixed(1)}%${off < .1 ? ';border-radius:3px' : ''}"></div><div class="off" style="left:${on.toFixed(1)}%;width:${off.toFixed(1)}%"></div></div><span class="r">${Math.round(e.carried)} of ${e.hours.toFixed(1)} h</span></div>`;
+  }).join('');
+}
+['free', 'solarFirst', 'smoke', 'capex', 'itc', 'cap', 'capkw', 'elrp'].forEach(id => $(id).addEventListener('input', render));
+setVb(); render();
+</script>

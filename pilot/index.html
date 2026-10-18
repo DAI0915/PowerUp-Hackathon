@@ -1,0 +1,689 @@
+<title>RAR8848 Pilot</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Source+Sans+3:wght@400;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: a field sheet for one switch. Summary strip, then map beside the fleet controls, then money, rules and the real shutoffs. */
+:root {
+  --bg: #f3f5f6; --panel: #ffffff; --ink: #17232b; --muted: #5a6872; --line: #d5dde2;
+  --wire: #33515f; --sea: #0f7c86; --sun: #c98a0c; --own: #4864c4; --med: #c23d62; --dark: #8a96a0;
+  --good: #1f8a4c; --warn: #b8740a; --bad: #b8324a;
+  --display: "Barlow Condensed", "Arial Narrow", sans-serif; --body: "Source Sans 3", "Segoe UI", system-ui, sans-serif;
+  --mono: "IBM Plex Mono", ui-monospace, Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #0f1619; --panel: #172126; --ink: #e4ecef; --muted: #96a6ae; --line: #2a3a41;
+  --wire: #8fb3c2; --sea: #3cc2cc; --sun: #f0b43c; --own: #8aa2ff; --med: #ff7a9c; --dark: #6b7a83;
+  --good: #4fca82; --warn: #f0b43c; --bad: #ff7088; color-scheme: dark } }
+:root[data-theme="dark"] {
+  --bg: #0f1619; --panel: #172126; --ink: #e4ecef; --muted: #96a6ae; --line: #2a3a41;
+  --wire: #8fb3c2; --sea: #3cc2cc; --sun: #f0b43c; --own: #8aa2ff; --med: #ff7a9c; --dark: #6b7a83;
+  --good: #4fca82; --warn: #f0b43c; --bad: #ff7088; color-scheme: dark }
+body { background: var(--bg); color: var(--ink); font: 15px/1.5 var(--body); }
+.wrap { max-width: 1180px; margin: 0 auto; padding-block: 20px 48px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); display: grid; gap: 22px; }
+h1, h2 { font-family: var(--display); font-weight: 600; letter-spacing: .01em; margin: 0; text-wrap: balance; }
+h1 { font-size: clamp(30px, 5vw, 44px); line-height: 1.05; }
+h2 { font-size: 24px; }
+.eyebrow { font: 500 12px/1 var(--mono); letter-spacing: .08em; text-transform: uppercase; color: var(--sea); }
+.lede { color: var(--muted); max-width: 72ch; margin: 6px 0 0; }
+.num { font-variant-numeric: tabular-nums; }
+.strip { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 1px; background: var(--line); border: 1px solid var(--line); border-radius: 8px; overflow: hidden; }
+.strip div { background: var(--panel); padding: 12px 14px; }
+.strip b { display: block; font: 600 26px/1.1 var(--display); font-variant-numeric: tabular-nums; }
+.strip span { color: var(--muted); font-size: 13px; }
+.grid2 { display: grid; grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr); gap: 18px; align-items: start; }
+@media (max-width: 860px) { .grid2 { grid-template-columns: minmax(0, 1fr); } }
+.panel { background: var(--panel); border: 1px solid var(--line); border-radius: 8px; padding: 16px; min-width: 0; }
+.panel > h2 { margin-bottom: 8px; }
+svg text { font-family: var(--mono); font-size: 11px; fill: var(--muted); paint-order: stroke; stroke: var(--panel); stroke-width: 4px; stroke-linejoin: round; }
+#map { width: 100%; height: auto; display: block; touch-action: none; cursor: grab; }
+.legend { display: flex; flex-wrap: wrap; gap: 6px 14px; font-size: 13px; color: var(--muted); margin-top: 8px; }
+.legend i { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 5px; vertical-align: -1px; }
+.ctl { display: grid; gap: 14px; }
+.ctl label { display: grid; gap: 4px; font-weight: 600; }
+.ctl .row { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; }
+.ctl output { font: 600 22px var(--display); font-variant-numeric: tabular-nums; }
+.ctl small { color: var(--muted); font-weight: 400; }
+input[type=range] { width: 100%; accent-color: var(--sea); }
+.ctl label.toggle { display: flex; gap: 8px; align-items: flex-start; font-weight: 400; }
+.toggle small { display: block; }
+.toggle input { margin-top: 4px; accent-color: var(--sea); }
+.facts { display: grid; grid-template-columns: auto 1fr; gap: 3px 12px; font-size: 14px; margin: 0; }
+.facts dt { color: var(--muted); } .facts dd { margin: 0; font-variant-numeric: tabular-nums; text-align: right; }
+.money { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 18px; }
+@media (max-width: 760px) { .money { grid-template-columns: minmax(0, 1fr); } }
+.bars { display: grid; gap: 8px; }
+.bar { display: grid; grid-template-columns: 170px minmax(0, 1fr) 70px; gap: 10px; align-items: center; font-size: 14px; }
+@media (max-width: 480px) { .bar { grid-template-columns: 110px minmax(0, 1fr) 62px; font-size: 13px; } }
+.bar .t { height: 14px; background: color-mix(in srgb, var(--line) 55%, transparent); border-radius: 3px; overflow: hidden; }
+.bar .f { height: 100%; border-radius: 3px; }
+.bar .v { text-align: right; font-variant-numeric: tabular-nums; }
+.tag { font: 500 11px var(--mono); padding: 1px 5px; border-radius: 3px; border: 1px solid var(--line); color: var(--muted); margin-left: 4px; white-space: nowrap; }
+.tag.real { color: var(--good); border-color: color-mix(in srgb, var(--good) 45%, transparent); }
+.big { font: 600 34px/1.1 var(--display); font-variant-numeric: tabular-nums; }
+.tablewrap { overflow-x: auto; }
+table { width: 100%; border-collapse: collapse; font-size: 14px; }
+th { font: 500 11px var(--mono); text-transform: uppercase; letter-spacing: .06em; color: var(--muted); text-align: left; padding: 6px 8px; border-bottom: 1px solid var(--line); white-space: nowrap; }
+td { padding: 8px; border-bottom: 1px solid var(--line); vertical-align: top; font-variant-numeric: tabular-nums; }
+td.n, th.n { text-align: right; }
+tr.rule { cursor: pointer; }
+tr.rule td:first-child { min-width: 220px; }
+tr.rule:hover td { background: color-mix(in srgb, var(--sea) 7%, transparent); }
+tr.rule.on td { background: color-mix(in srgb, var(--sea) 13%, transparent); }
+tr.rule:focus-visible { outline: 2px solid var(--sea); outline-offset: -2px; }
+.pill { display: inline-block; font: 600 12px var(--body); padding: 1px 8px; border-radius: 99px; }
+.pill.good { background: color-mix(in srgb, var(--good) 16%, transparent); color: var(--good); }
+.pill.warn { background: color-mix(in srgb, var(--warn) 18%, transparent); color: var(--warn); }
+.pill.bad { background: color-mix(in srgb, var(--bad) 15%, transparent); color: var(--bad); }
+.sub { color: var(--muted); font-size: 13px; }
+.ev { display: grid; grid-template-columns: 112px minmax(0, 1fr) 92px; gap: 10px; align-items: center; font-size: 13px; padding: 3px 0; }
+.ev .t { position: relative; height: 12px; }
+.ev .on, .ev .off { position: absolute; top: 0; height: 100%; }
+.ev .on { left: 0; background: var(--sea); border-radius: 3px 0 0 3px; }
+.ev .off { background: var(--bad); border-radius: 0 3px 3px 0; }
+.ev .r { text-align: right; font-variant-numeric: tabular-nums; }
+details { font-size: 14px; color: var(--muted); }
+details summary { cursor: pointer; color: var(--ink); font-weight: 600; }
+.assume { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px 16px; margin-top: 10px; }
+.assume label { display: grid; gap: 3px; font-size: 13px; color: var(--muted); }
+.assume input { font: 15px var(--mono); padding: 5px 8px; border: 1px solid var(--line); border-radius: 5px; background: var(--bg); color: var(--ink); width: 100%; box-sizing: border-box; }
+button.z { font: 600 14px var(--mono); width: 30px; height: 30px; border: 1px solid var(--line); border-radius: 5px; background: var(--panel); color: var(--ink); cursor: pointer; }
+.mapbar { display: flex; gap: 6px; justify-content: flex-end; margin-bottom: 6px; align-items: center; }
+.mapbar span { margin-right: auto; color: var(--muted); font-size: 13px; }
+@media (prefers-reduced-motion: no-preference) { .bar .f, .ev .on, .ev .off { transition: width .25s, left .25s; } }
+</style>
+
+<div class="wrap">
+  <header>
+    <div class="eyebrow">PowerUP pilot · SCE Cuthbert circuit · Malibu</div>
+    <h1>456 homes behind switch RAR8848</h1>
+    <p class="lede">Our company buys Base Core batteries and puts them free in homes that volunteer to share with neighbors. On ordinary days the batteries earn money. When SCE shuts the power off, the switch opens and the homes behind it run as one island on those batteries and rooftop solar. This page shows what the batteries earn, what holding them full costs, and how many homes they would have kept on through the 16 real shutoffs that cut these homes.</p>
+  </header>
+
+  <section class="strip" id="strip"></section>
+
+  <section class="grid2">
+    <div class="panel">
+      <div class="mapbar"><span>Drag to move, scroll or pinch to zoom</span><button class="z" id="zin" aria-label="Zoom in">+</button><button class="z" id="zout" aria-label="Zoom out">−</button><button class="z" id="zreset" aria-label="Reset view">⟲</button></div>
+      <svg id="map" viewBox="0 0 800 520" role="img" aria-label="Map of the line behind RAR8848 and the homes on it"></svg>
+      <div class="legend" id="legend"></div>
+    </div>
+    <div class="panel ctl">
+      <h2>Fleet</h2>
+      <label for="free"><span class="row">Free Base batteries we place <output id="freeOut" class="num">56</output></span>
+        <input type="range" id="free" min="0" max="160" step="1" value="56"></label>
+      <label class="toggle" for="solarFirst"><input type="checkbox" id="solarFirst" checked><span>Offer them to solar homes first <small>A battery on a solar roof refills every day.</small></span></label>
+      <label class="toggle" for="smoke"><input type="checkbox" id="smoke"><span>Smoky days: solar at half <small>Smoke from a fire can cut solar output by half or more.</small></span></label>
+      <dl class="facts" id="fleetFacts"></dl>
+      <p class="sub" id="fleetNeed"></p>
+    </div>
+  </section>
+
+  <section class="panel">
+    <h2>Ordinary days</h2>
+    <p class="sub">What one battery earns in a year, after the readiness rule you pick below. Green tags are real numbers; grey tags are assumptions you can change.</p>
+    <div class="money">
+      <div class="bars" id="moneyBars"></div>
+      <div>
+        <div class="sub">Fleet earnings per year</div>
+        <div class="big" id="fleetNet"></div>
+        <dl class="facts" id="moneyFacts" style="margin-top:10px"></dl>
+      </div>
+    </div>
+    <details style="margin-top:14px"><summary>Change the assumptions</summary>
+      <div class="assume">
+        <label for="capex">Installed cost per battery ($)<input type="number" id="capex" value="20000" step="500" min="0"></label>
+        <label for="itc">Tax credit (share)<input type="number" id="itc" value="0.30" step="0.05" min="0" max="1"></label>
+        <label for="cap">Capacity price ($ per kW-month)<input type="number" id="cap" value="8" step="0.5" min="0"></label>
+        <label for="capkw">kW counted per battery<input type="number" id="capkw" value="9.8" step="0.1" min="0"></label>
+        <label for="elrp">Emergency events a year<input type="number" id="elrp" value="10" step="1" min="0"></label>
+      </div>
+    </details>
+  </section>
+
+  <section class="panel">
+    <h2>Readiness rules</h2>
+    <p class="sub">Each rule says when the batteries stop trading and fill up before a shutoff. Holding costs the trading they give up on those days. SCE warns about 3.3 times as many customers as it actually cuts, so every rule pays for false alarms too. Pick a row to see it on the shutoffs below.</p>
+    <div class="tablewrap"><table>
+      <thead><tr><th>Rule</th><th class="n">Days held</th><th class="n">Cost / battery / yr</th><th class="n">Fleet cost / yr</th><th class="n">Shutoffs carried</th><th class="n">Home-hours dark</th></tr></thead>
+      <tbody id="rules"></tbody>
+    </table></div>
+  </section>
+
+  <section class="panel">
+    <h2>The 16 real shutoffs</h2>
+    <p class="sub" id="evHead"></p>
+    <div id="events"></div>
+  </section>
+
+  <section class="panel">
+    <h2>How this is worked out</h2>
+    <details open><summary>Sources and limits</summary>
+      <ul>
+        <li><b>Real:</b> SCE's Cuthbert line, RAR8848's 456 customers, and every Cuthbert shutoff from 2019 to January 2025 (SCE shutoff records). Whole-circuit breaker cuts and RAR8848 opened alone both cut these homes; 16 events, 435 hours.</li>
+        <li><b>Real:</b> what a Base Core (39.2 kWh, 20 kW, 20% floor) earns trading CAISO day-ahead prices for SCE, Oct to Dec 2025, with perfect foresight: $0.91 a day. Yearly figures repeat this quarter; summer spreads are usually wider.</li>
+        <li><b>Real:</b> Malibu has 7.1 home batteries (median 20 kWh) and 8.4 solar-only roofs per 100 homes (SCE interconnection records). Medical Baseline is 2.6% of homes (SCE's Dec 2024 report on Maguire to the CPUC). SCE notified 509,245 customers and cut 152,393 in its Jan 20 2025 event. The Emergency Load Reduction Program pays $2 per kWh.</li>
+        <li><b>Real:</b> lead times are from the Bryson Fire, Oct 2026. The first Santa Ana signal came 6.5 days before the shutoff, and SCE named Cuthbert 3 days before.</li>
+        <li><b>Estimated:</b> where RAR8848 sits, and where each home is (spread evenly along the line). Each home's battery, solar, medical need and choice is drawn at the real rates, so a dot is a stand-in, not an address. 60% of battery owners and 50% of other homes join; medical homes always join. Every home that receives keeps critical loads on (8 kWh a day). A roof makes 27 kWh a day.</li>
+        <li><b>Not modeled yet:</b> SCE approval to island its line, Base firmware for sharing, battery wear, and what volunteers pay. The island also needs one battery certified to form the grid.</li>
+      </ul>
+    </details>
+  </section>
+</div>
+
+<script>/* PowerUP neighborhood islands: pure functions. Works in the browser (window.PowerUPIsland) and in node (module.exports).
+   Given a feeder drawn as segments between switching devices, the segments the utility calls high risk, and the homes
+   with their opt-in choices, it finds which de-energized pieces can safely run as a neighborhood island, plans how the
+   shared battery energy is split, and settles who pays whom. Numbers marked "assumed" are placeholders for a pilot. */
+(function (root, factory) {
+  if (typeof module === 'object' && module.exports) module.exports = factory();
+  else root.PowerUPIsland = factory();
+})(typeof self !== 'undefined' ? self : this, function () {
+  'use strict';
+
+  const MODES = ['critical', 'essential', 'normal'];
+  const BUDGET_KWH_DAY = { critical: 8, essential: 16, normal: 32 };   // same per-home budgets as the PowerUP replay
+  const DEFAULTS = {
+    capacity_kwh: 39.2,          // Base Core
+    reserve_floor_pct: 20,       // Base's backup floor; never shared
+    donor_keeps: 'essential',    // a donor keeps enough for its own home at this mode before sharing
+    peak_factor: 2.5,            // assumed: island peak kW = average kW x this
+    donor_kw: 11.5,              // assumed: export each donor inverter can give the island (Base Core is 20 kW)
+    // money, all assumed for a pilot
+    donor_rate_per_kwh: 0.75,    // paid to a battery owner for each kWh shared with neighbours
+    receiver_rate_per_kwh: 1.00, // charged to a home without a battery for island energy
+    subscription_per_month: 5,   // receivers pay this all year to be eligible
+    utility_per_customer_hour: 2.0, // paid by the utility (Microgrid Incentive Program style) per customer-hour kept on
+    platform_share: 0.15         // of island energy margin and utility payment
+  };
+
+  // ---------- 1. which segments are off, and why ----------
+  // segments: [{id, parent, device, customers, line: 'overhead'|'underground', hfra}] ; device is the switch at the
+  // segment's head (null if none: a fuse or solid tap that cannot be opened remotely). risky: ids the utility calls high risk.
+  function classify(segments, risky) {
+    const byId = new Map(segments.map(s => [s.id, s]));
+    const kids = new Map(segments.map(s => [s.id, []]));
+    segments.forEach(s => { if (s.parent != null) kids.get(s.parent).push(s.id); });
+    const riskySet = new Set(risky);
+    // the utility opens the nearest remotely operable device at or above each risky segment
+    const opened = new Set();
+    riskySet.forEach(id => {
+      let s = byId.get(id);
+      while (s && !s.device && s.parent != null) s = byId.get(s.parent);
+      opened.add(s.id);
+    });
+    const off = new Set();
+    const walk = id => { off.add(id); kids.get(id).forEach(walk); };
+    opened.forEach(walk);
+    const state = {};
+    segments.forEach(s => {
+      state[s.id] = riskySet.has(s.id) ? 'risk' : off.has(s.id) ? 'collateral' : 'on';
+    });
+    const count = st => segments.filter(s => state[s.id] === st).reduce((a, s) => a + s.customers, 0);
+    return {
+      state, opened: [...opened].map(id => byId.get(id).device || 'substation breaker'),
+      customers: { risk: count('risk'), collateral: count('collateral'), on: count('on') }
+    };
+  }
+
+  // ---------- 2. which collateral pieces can island ----------
+  // An island is a connected group of collateral segments. It is allowed only when (a) a device separates it from every
+  // de-energized neighbour that is risky or not in the island, and (b) none of its lines is overhead in a high fire risk
+  // area, since re-energizing those wires brings the fire risk back.
+  function findIslands(segments, cls) {
+    const byId = new Map(segments.map(s => [s.id, s]));
+    const kids = new Map(segments.map(s => [s.id, []]));
+    segments.forEach(s => { if (s.parent != null) kids.get(s.parent).push(s.id); });
+    const st = cls.state, seen = new Set(), islands = [];
+    segments.forEach(s => {
+      if (st[s.id] !== 'collateral' || seen.has(s.id)) return;
+      const par = s.parent != null ? byId.get(s.parent) : null;
+      if (par && st[par.id] === 'collateral') return;            // start from the top of each group
+      const members = [], blockers = [];
+      const grow = id => {
+        seen.add(id); members.push(id);
+        kids.get(id).forEach(k => {
+          if (st[k] === 'collateral') grow(k);
+          else if (!byId.get(k).device) blockers.push(`${k} is ${st[k]} with no switch between it and ${id}`);
+        });
+      };
+      grow(s.id);
+      if (par && !s.device) blockers.push(`no switch at the head of ${s.id}`);
+      members.forEach(id => {
+        const m = byId.get(id);
+        if (m.line === 'overhead' && m.hfra) blockers.push(`${id} is overhead line in a high fire risk area`);
+      });
+      islands.push({
+        id: 'island-' + s.id, head: s.device || null, segments: members,
+        customers: members.reduce((a, id) => a + byId.get(id).customers, 0),
+        allowed: blockers.length === 0, blockers
+      });
+    });
+    return islands;
+  }
+
+  // ---------- 3. plan the energy inside one island ----------
+  // homes: [{id, seg, battery_kwh (0 if none), soc (0..1), solar_kwh_day, grid_forming, choice: 'donor'|'receiver'|'out',
+  //          medical, size}]  A community battery is just a donor with no load (size 0) and grid_forming true.
+  // Opt-out homes are disconnected at the meter (smart meter service switch) so they draw nothing from the island.
+  function planIsland(island, homes, hours, opts) {
+    const P = Object.assign({}, DEFAULTS, opts || {});
+    const inIsland = new Set(island.segments);
+    const hs = homes.filter(h => inIsland.has(h.seg));
+    const days = hours / 24;
+    const donors = hs.filter(h => h.choice === 'donor' && h.battery_kwh > 0);
+    // a rooftop solar home without a battery goes dark in an ordinary outage (its inverter needs a grid to follow); inside a
+    // formed island it can run again, so it can offer its solar. It still needs power at night, so it is also a receiver.
+    // (Planning level: daytime solar is assumed to be stored by the island's batteries for the night.)
+    const solarOnly = hs.filter(h => h.choice === 'donor' && !(h.battery_kwh > 0) && h.solar_kwh_day > 0);
+    const receivers = hs.filter(h => h.choice === 'receiver').concat(solarOnly);
+    const out = hs.filter(h => h.choice === 'out');
+    // a battery home that did not opt in still backs up itself behind its own gateway; it is outside the island's sums
+    const selfBackup = hs.filter(h => h.choice !== 'out' && h.battery_kwh > 0 && h.choice !== 'donor');
+    const need = (h, mode) => BUDGET_KWH_DAY[mode] * (h.size == null ? 1 : h.size) * days;
+    const share = donors.map(h => {
+      const usable = Math.max(0, h.battery_kwh * h.soc - h.battery_kwh * P.reserve_floor_pct / 100);
+      const own = need(h, P.donor_keeps);
+      const solar = (h.solar_kwh_day || 0) * days;
+      return { id: h.id, kwh: Math.max(0, usable + solar - own) };
+    }).concat(solarOnly.map(h => ({ id: h.id, kwh: h.solar_kwh_day * days })));
+    const pool = share.reduce((a, d) => a + d.kwh, 0);
+    // Medical Baseline receivers get critical first; then everyone rises together to the richest mode the pool carries
+    const med = receivers.filter(h => h.medical);
+    const medNeed = med.reduce((a, h) => a + need(h, 'critical'), 0);
+    let mode = null, used = 0;
+    if (pool >= medNeed) {
+      for (const m of MODES) {
+        const tot = receivers.reduce((a, h) => a + need(h, m), 0);
+        if (tot <= pool) { mode = m; used = tot; }
+      }
+    }
+    const fullHours = mode === null && receivers.length
+      ? Math.floor(24 * pool / receivers.reduce((a, h) => a + BUDGET_KWH_DAY.critical * (h.size == null ? 1 : h.size), 0))
+      : hours;
+    const allCritical = receivers.reduce((a, h) => a + need(h, 'critical'), 0);
+    if (mode === null) used = Math.min(pool, allCritical);
+    // power: the island needs one grid-forming source and enough inverter export for the peak
+    const avgKw = receivers.reduce((a, h) => a + BUDGET_KWH_DAY[mode || 'critical'] * (h.size == null ? 1 : h.size), 0) / 24;
+    const peakKw = avgKw * P.peak_factor;
+    const exportKw = donors.reduce((a, h) => a + (h.export_kw || P.donor_kw), 0);
+    const formers = donors.filter(h => h.grid_forming);
+    const problems = [];
+    if (!island.allowed) problems.push(...island.blockers);
+    if (!formers.length) problems.push('no grid-forming source in the island');
+    if (exportKw < peakKw) problems.push(`inverters give ${exportKw.toFixed(0)} kW, the peak needs ${peakKw.toFixed(0)} kW`);
+    if (pool < medNeed) problems.push('shared energy does not cover Medical Baseline receivers at critical');
+    // each donor gives in proportion to what it offered
+    const given = share.map(d => ({ id: d.id, kwh: pool ? used * d.kwh / pool : 0 }));
+    return {
+      island: island.id, hours, feasible: problems.length === 0, problems,
+      shortfall_kwh: round(Math.max(0, allCritical - pool)),   // extra storage to carry every receiver at critical
+      counts: { donors: donors.length, solar_only: solarOnly.length, receivers: receivers.length, opted_out: out.length, self_backup: selfBackup.length },
+      pool_kwh: round(pool), used_kwh: round(used), receiver_mode: mode, receiver_hours: mode ? hours : fullHours,
+      peak_kw: round(peakKw), export_kw: round(exportKw), grid_forming: formers.map(h => h.id), given
+    };
+  }
+
+  // ---------- 4. settle ----------
+  // customer-hours kept on = receivers x hours they were carried (donors and self-backup homes would have had power anyway)
+  function settle(plan, opts) {
+    const P = Object.assign({}, DEFAULTS, opts || {});
+    if (!plan.feasible) return { paid_to_donors: 0, charged_to_receivers: 0, utility_payment: 0, platform: 0, customer_hours: 0 };
+    const donorPay = plan.given.reduce((a, d) => a + d.kwh * P.donor_rate_per_kwh, 0);
+    const receiverCharge = plan.used_kwh * P.receiver_rate_per_kwh;
+    const custHours = plan.counts.receivers * plan.receiver_hours;
+    const utility = custHours * P.utility_per_customer_hour;
+    const margin = receiverCharge - donorPay;
+    const platform = P.platform_share * (Math.max(0, margin) + utility);
+    return {
+      customer_hours: custHours, paid_to_donors: round(donorPay), charged_to_receivers: round(receiverCharge),
+      utility_payment: round(utility), platform: round(platform),
+      donors: plan.given.map(d => ({ id: d.id, kwh: round(d.kwh), paid: round(d.kwh * P.donor_rate_per_kwh) })),
+      // the rest of the utility payment funds the switch and the grid-forming battery (assumed split)
+      to_infrastructure: round(utility + Math.max(0, margin) - platform)
+    };
+  }
+
+  // ---------- 5. transformer islands (the pilot) ----------
+  // A switch on the low-voltage side of one service transformer islands only that transformer's 240 V secondary. Nothing
+  // at distribution voltage is re-energized, so it can run even inside a risky segment when the secondary is underground.
+  function transformerIsland(xfmr, homes, hours, opts) {
+    const island = {
+      id: 'xfmr-' + xfmr.id, segments: [xfmr.seg], customers: xfmr.homes.length,
+      allowed: xfmr.secondary === 'underground' && !!xfmr.switch,
+      blockers: [!xfmr.switch && 'no secondary isolation switch fitted', xfmr.secondary !== 'underground' && 'overhead secondary'].filter(Boolean)
+    };
+    const ids = new Set(xfmr.homes);
+    return planIsland(island, homes.filter(h => ids.has(h.id)), hours, opts);
+  }
+
+  // ---------- 6. where a new switch pays off ----------
+  // For each segment with no switch at its head, how many fewer customers would lose power in this shutoff if one were
+  // fitted there. This is how the pilot picks its first isolation switches.
+  function switchValue(segments, risky) {
+    const base = classify(segments, risky).customers;
+    const offBase = base.risk + base.collateral;
+    return segments.filter(s => !s.device && s.parent != null).map(s => {
+      const trial = segments.map(x => x.id === s.id ? Object.assign({}, x, { device: 'NEW-' + s.id }) : x);
+      const c = classify(trial, risky).customers;
+      return { segment: s.id, customers_kept_on: offBase - (c.risk + c.collateral) };
+    }).sort((a, b) => b.customers_kept_on - a.customers_kept_on);
+  }
+
+  function round(x) { return Math.round(x * 10) / 10; }
+
+  return { MODES, BUDGET_KWH_DAY, DEFAULTS, classify, findIslands, planIsland, settle, transformerIsland, switchValue };
+});
+</script>
+<script>/* PowerUP pilot behind SCE switch RAR8848 (Cuthbert circuit, Malibu): pure functions. Works in the browser
+   (window.PowerUPPilot, needs window.PowerUPIsland) and in node (module.exports).
+   The startup buys Base Core batteries, places them free in homes that volunteer to share with neighbours, earns on
+   ordinary days, and holds them full when a shutoff is coming. This file answers three questions:
+   1. what one battery earns on an ordinary day, 2. what each readiness rule costs in earnings given up,
+   3. how many homes each rule keeps on through Cuthbert's 16 real shutoffs. Numbers marked "assumed" are placeholders. */
+(function (root, factory) {
+  if (typeof module === 'object' && module.exports) module.exports = factory(require('../../islands/island.js'));
+  else root.PowerUPPilot = factory(root.PowerUPIsland);
+})(typeof self !== 'undefined' ? self : this, function (Island) {
+  'use strict';
+
+  const BASE = { kwh: 39.2, kw: 20, floor: 0.2 };             // Base Core; the 20% floor is never shared or sold
+  const OWN = { kwh: 20, kw: 10 };                            // real Malibu median home battery (SCE records)
+  const SOLAR_KWH_DAY = 27;                                   // assumed: 8.2 kW median roof x 3.3 kWh/kW/day
+  const LEAD_DAYS = { forecast: 6.5, notice: 3, dayBefore: 1 };  // real, Bryson Fire 2026: first Santa Ana signal Oct 9,
+                                                              // SCE named Cuthbert Oct 12, shutoff Oct 15 5 PM
+  const FALSE_ALARM = 509245 / 152393;                        // real: SCE notified 3.3 customers per one cut (Jan 20 2025)
+
+  const DEFAULTS = {
+    free: 56,                 // startup batteries placed free in volunteer homes
+    solarFirst: true,         // offer them to homes with solar and no battery first (they refill every day)
+    solarKwhDay: SOLAR_KWH_DAY, // per roof; smoke can halve it
+    ownerShares: 0.6,         // assumed: homes with their own battery that opt in to share
+    receiverJoins: 0.5,       // assumed: homes without a battery that join as receivers (medical homes always join)
+    capex: 20000,             // assumed: installed cost of one Base Core; Base publishes none
+    itc: 0.30,                // federal investment tax credit for business-owned storage (assumed to still apply)
+    capacityPerKwMonth: 8,    // assumed: resource adequacy price (SB 913 lets aggregated home batteries count)
+    capacityKw: 9.8,          // a 2-hour battery counts for a quarter of 39.2 kWh under 4-hour rules (assumed)
+    elrpPerKwh: 2,            // real: CPUC Emergency Load Reduction Program pays $2/kWh exported in an event
+    elrpEventsPerYear: 10,    // assumed
+    eventsPerYear: 16 / 5.24  // real: 16 shutoffs cut these homes from Oct 30 2019 to Jan 24 2025
+  };
+
+  // readiness rules: how long before a shutoff the batteries stop trading, and how full they wait
+  const RULES = [
+    { id: 'never', label: 'Never hold, keep trading', lead: 0, level: BASE.floor, note: 'Worst case: a battery has just sold down to its 20% floor when the power goes.' },
+    { id: 'forecast', label: 'Fill all at the first forecast', lead: LEAD_DAYS.forecast, level: 1 },
+    { id: 'notice', label: 'Fill all when SCE sends notice', lead: LEAD_DAYS.notice, level: 1 },
+    { id: 'dayBefore', label: 'Fill all 24 h before', lead: LEAD_DAYS.dayBefore, level: 1 },
+    { id: 'medical', label: 'Medical first: enough for medical homes at notice, the rest 24 h before', lead: LEAD_DAYS.dayBefore, level: 1, medicalLead: LEAD_DAYS.notice },
+    { id: 'eighty', label: 'Hold at 80% from notice', lead: LEAD_DAYS.notice, level: 0.8 }
+  ];
+
+  // ---------- homes ----------
+  // data homes carry real-rate draws (battery, solar, medical) and two fixed random numbers u, v for choices
+  function assign(dataHomes, opts) {
+    const P = Object.assign({}, DEFAULTS, opts || {});
+    const hs = dataHomes.map(h => {
+      const o = { id: h.id, seg: 'A', x: h.x, y: h.y, medical: h.medical, size: h.size, battery_kwh: 0, soc: 0,
+                  solar_kwh_day: h.solar ? P.solarKwhDay : 0, owner: null, grid_forming: false };
+      if (h.battery) { Object.assign(o, { battery_kwh: OWN.kwh, export_kw: OWN.kw, owner: 'home', choice: h.u < P.ownerShares ? 'donor' : 'self' }); }
+      else if (h.medical || h.u < P.receiverJoins) o.choice = h.solar ? 'donor' : 'receiver';  // solar without a battery
+      else o.choice = 'out';                                      // also offers its daytime power once it joins
+      o._v = h.v; o._solarOnly = h.solar && !h.battery;
+      return o;
+    });
+    const order = hs.filter(h => !h.battery_kwh).sort((a, b) =>
+      (P.solarFirst ? (b._solarOnly - a._solarOnly) : 0) || (a._v - b._v));
+    order.slice(0, P.free).forEach((h, k) => {
+      Object.assign(h, { battery_kwh: BASE.kwh, export_kw: BASE.kw, owner: 'startup', choice: 'donor', grid_forming: k === 0 });
+    });
+    return hs;
+  }
+
+  // how many startup batteries the medical homes need held from notice: their critical energy for the longest real
+  // shutoff, plus the grid-former
+  function medicalHold(homes, hours) {
+    const need = homes.filter(h => h.medical && h.choice === 'receiver')
+      .reduce((a, h) => a + Island.BUDGET_KWH_DAY.critical * h.size * hours / 24, 0);
+    return Math.min(homes.filter(h => h.owner === 'startup').length, 1 + Math.ceil(need / (BASE.kwh * (1 - BASE.floor))));
+  }
+
+  // state of charge when the power goes, per rule. Home-owned batteries get the same ask as the fleet.
+  function socAtShutoff(homes, rule) {
+    // under the medical rule every battery is full by the shutoff; the early holders only cost more (see yearMoney)
+    return homes.map(h => h.battery_kwh ? Object.assign({}, h, { soc: rule.level }) : h);
+  }
+
+  // ---------- one shutoff ----------
+  const ISLAND = { id: 'RAR8848', segments: ['A'], allowed: true, blockers: [] };
+  function runEvent(homes, hours) {
+    const p = Island.planIsland(ISLAND, homes, hours, { donor_keeps: 'critical', reserve_floor_pct: BASE.floor * 100 });
+    const carried = p.receiver_mode ? hours : Math.min(hours, p.receiver_hours);
+    const receivers = p.counts.receivers;
+    const medRecv = homes.filter(h => h.medical && h.choice === 'receiver').length;
+    const medicalOk = !p.problems.some(s => s.includes('Medical'));
+    return {
+      hours, carried, full: carried >= hours && p.feasible, mode: p.receiver_mode, receivers,
+      receiverHoursDark: receivers * (hours - carried), medicalDark: medicalOk ? 0 : medRecv,
+      pool: p.pool_kwh, problems: p.problems, plan: p
+    };
+  }
+
+  // ---------- money ----------
+  const mean = a => a.reduce((s, x) => s + x, 0) / a.length;
+  function priceStats(prices) {
+    return { day20: mean(prices.map(p => p.v20)), day80: mean(prices.map(p => p.v80)), days: prices.length };
+  }
+  // earnings given up per battery-day while waiting at a level: arbitrage at the 20% floor minus what is left above it
+  function holdCostPerDay(stats, level) {
+    if (level <= BASE.floor) return 0;
+    if (level >= 1) return stats.day20;
+    return stats.day20 - stats.day80;                         // 80% is the only partial level the price file has
+  }
+  // per battery per year
+  function yearMoney(stats, rule, opts, earlyShare) {
+    const P = Object.assign({}, DEFAULTS, opts || {});
+    const arbitrage = 365 * stats.day20;
+    const capacity = 12 * P.capacityPerKwMonth * P.capacityKw;
+    const elrp = P.elrpEventsPerYear * P.elrpPerKwh * BASE.kwh * (1 - BASE.floor);
+    const holds = P.eventsPerYear * FALSE_ALARM;               // every notice is a hold, cut or not
+    let readiness = holds * rule.lead * holdCostPerDay(stats, rule.level);
+    if (rule.medicalLead) readiness += holds * (rule.medicalLead - rule.lead) * holdCostPerDay(stats, 1) * (earlyShare || 0);
+    const net = arbitrage + capacity + elrp - readiness;
+    const cost = P.capex * (1 - P.itc);
+    return { arbitrage, capacity, elrp, readiness, net, cost, payback: net > 0 ? cost / net : Infinity,
+             arbitrageOnlyPayback: arbitrage - readiness > 0 ? cost / (arbitrage - readiness) : Infinity, holds };
+  }
+
+  // ---------- everything for one setting ----------
+  function evaluate(data, opts) {
+    const P = Object.assign({}, DEFAULTS, opts || {});
+    const homes = assign(data.homes, P);
+    const stats = priceStats(data.prices);
+    const fleet = homes.filter(h => h.owner === 'startup').length;
+    const rules = RULES.map(rule => {
+      const hs = socAtShutoff(homes, rule);
+      const early = rule.medicalLead ? medicalHold(homes, 72) : 0;
+      const events = data.events.map(e => Object.assign({ start: e.start, cut_at: e.cut_at }, runEvent(hs, e.hours)));
+      const money = yearMoney(stats, rule, P, fleet ? early / fleet : 0);
+      return {
+        id: rule.id, label: rule.label, note: rule.note || '', lead: rule.lead, level: rule.level, early,
+        eventsFull: events.filter(e => e.full).length, events,
+        receiverHoursDark: events.reduce((a, e) => a + e.receiverHoursDark, 0),
+        medicalEventsDark: events.filter(e => e.medicalDark).length,
+        money, fleetMoney: { net: money.net * fleet, readiness: money.readiness * fleet, arbitrage: money.arbitrage * fleet }
+      };
+    });
+    const c = homes.reduce((a, h) => {
+      if (h.owner === 'startup') a.startup++; else if (h.owner === 'home') a.own++; else if (h._solarOnly) a.solarOnly++;
+      if (h.medical) a.medical++;
+      if (h.choice === 'receiver') a.receivers++; if (h.choice === 'out') a.out++;
+      return a;
+    }, { startup: 0, own: 0, solarOnly: 0, medical: 0, receivers: 0, out: 0 });
+    return { homes, counts: c, stats, rules, opts: P };
+  }
+
+  // smallest fleet that carries every real shutoff in full under a rule
+  function fleetFor(data, ruleId, opts) {
+    for (let n = 1; n <= 300; n++) {
+      const r = evaluate(data, Object.assign({}, opts, { free: n })).rules.find(x => x.id === ruleId);
+      if (r.eventsFull === data.events.length) return n;
+    }
+    return null;
+  }
+
+  return { BASE, OWN, SOLAR_KWH_DAY, LEAD_DAYS, FALSE_ALARM, DEFAULTS, RULES, assign, medicalHold, socAtShutoff,
+           runEvent, priceStats, holdCostPerDay, yearMoney, evaluate, fleetFor };
+});
+</script>
+<script>
+const DATA = {"note":"Data for the RAR8848 pilot: the line behind switch RAR8848 on SCE's Cuthbert circuit, 456 homes on it, Cuthbert's real\nshutoffs that cut those homes, and the real SCE price values.\n\nReal: SCE's Cuthbert line shape, RAR8848's 456 customers and every Cuthbert shutoff 2019 to Jan 2025 (SCE PSPS records),\nCAISO day-ahead arbitrage value per battery-day for SCE, Q4 2025 (powerup/data/prices), Malibu 90265 solar and battery\nrates (SCE interconnection records) and Maguire's Medical Baseline share (SCE's Dec 2024 report to the CPUC).\nEstimated: where RAR8848 sits on the line (islands/hypothetical_assets.py) and where each home is (spread evenly along\nthe line behind it). Each home's battery, solar, medical need and choice is drawn at the real rates, so a home on the map\nis a stand-in, not a real address.\nRun: python3 -I pilot/build_data.py  -> pilot/data.json","switch":[-118.78055,34.02584],"upstream_switch":[-118.78359,34.02509],"substation":[-118.77704,34.04407],"feed":[[-118.78359,34.02509],[-118.78381,34.02503],[-118.78391,34.02528],[-118.78415,34.02576],[-118.78409,34.02579],[-118.78404,34.02586],[-118.78391,34.02602],[-118.78378,34.02612],[-118.7837,34.02619],[-118.78363,34.02624],[-118.78359,34.02628],[-118.78353,34.02633],[-118.78339,34.02644],[-118.78297,34.02699],[-118.78185,34.02792],[-118.78162,34.02819],[-118.7815,34.02829],[-118.78129,34.02851],[-118.78107,34.0286],[-118.78081,34.02864],[-118.78065,34.02866],[-118.77945,34.02871],[-118.77904,34.02874],[-118.77883,34.02882],[-118.77883,34.02883],[-118.77884,34.02884],[-118.77885,34.02885],[-118.77885,34.02886],[-118.77885,34.02887],[-118.77885,34.02888],[-118.77885,34.02889],[-118.77885,34.0289],[-118.77885,34.02891],[-118.77884,34.02892],[-118.77884,34.02893],[-118.77883,34.02893],[-118.77883,34.02894],[-118.77882,34.02894],[-118.77881,34.02895],[-118.7788,34.02895],[-118.77879,34.02896],[-118.77878,34.02896],[-118.77877,34.02896],[-118.77876,34.02896],[-118.77875,34.02896],[-118.77874,34.02896],[-118.77873,34.02896],[-118.77872,34.02896],[-118.77872,34.02895],[-118.77871,34.02895],[-118.7787,34.02895],[-118.77869,34.02894],[-118.77868,34.02893],[-118.77867,34.02892],[-118.77867,34.02891],[-118.77866,34.02891],[-118.77866,34.0289],[-118.77866,34.02889],[-118.77854,34.02894],[-118.77827,34.02904],[-118.77812,34.02909],[-118.77807,34.02911],[-118.77729,34.02939],[-118.77712,34.0294],[-118.77701,34.02947],[-118.77688,34.02958],[-118.77686,34.0296],[-118.7767,34.02968],[-118.77655,34.02969],[-118.77634,34.02965],[-118.77624,34.02966],[-118.77612,34.02968],[-118.77536,34.03124],[-118.77535,34.03127],[-118.77514,34.03146],[-118.7747,34.0318],[-118.77461,34.03188],[-118.77454,34.03193],[-118.77446,34.03196],[-118.77433,34.03203],[-118.77408,34.03209],[-118.77399,34.03209],[-118.77387,34.03209],[-118.77378,34.03207],[-118.77365,34.03203],[-118.7735,34.03199],[-118.77332,34.03193],[-118.77289,34.03179],[-118.77276,34.03178],[-118.77251,34.03172],[-118.77244,34.0317],[-118.7724,34.03194],[-118.77236,34.03227],[-118.77233,34.03238],[-118.77221,34.03265],[-118.77221,34.03268],[-118.77213,34.0328],[-118.77193,34.03298],[-118.77184,34.03304],[-118.77177,34.03308],[-118.77169,34.03314],[-118.77167,34.03318],[-118.77162,34.03327],[-118.77156,34.03335],[-118.77153,34.03347],[-118.77151,34.03359],[-118.77147,34.03365],[-118.77143,34.0337],[-118.77134,34.03376],[-118.77114,34.03409],[-118.77073,34.03492],[-118.77048,34.0354],[-118.7703,34.03577],[-118.77028,34.03584],[-118.77018,34.03702],[-118.77017,34.03765],[-118.77023,34.03767],[-118.77035,34.0377],[-118.77047,34.03772],[-118.7706,34.03775],[-118.77069,34.03778],[-118.77077,34.03782],[-118.77087,34.03789],[-118.77094,34.03798],[-118.77097,34.03802],[-118.77101,34.03813],[-118.77102,34.03818],[-118.77102,34.03823],[-118.77102,34.03832],[-118.77099,34.0384],[-118.77097,34.03843],[-118.77094,34.03847],[-118.7709,34.03852],[-118.77084,34.03857],[-118.77076,34.03861],[-118.77072,34.03862],[-118.77064,34.03863],[-118.77059,34.03864],[-118.77058,34.03933],[-118.77064,34.03934],[-118.77074,34.03935],[-118.77084,34.03936],[-118.77094,34.03937],[-118.77102,34.03939],[-118.77115,34.03943],[-118.77124,34.03951],[-118.77131,34.03961],[-118.77133,34.03972],[-118.77134,34.03974],[-118.77134,34.03989],[-118.77133,34.03995],[-118.77131,34.04002],[-118.77127,34.04013],[-118.77123,34.04022],[-118.77116,34.04032],[-118.77111,34.0404],[-118.77102,34.0405],[-118.7709,34.04062],[-118.77087,34.04065],[-118.77083,34.0407],[-118.77081,34.04075],[-118.7708,34.04079],[-118.77081,34.04083],[-118.77083,34.04089],[-118.77086,34.04091],[-118.77094,34.04096],[-118.77114,34.04106],[-118.77126,34.04112],[-118.77135,34.04115],[-118.77144,34.04117],[-118.77152,34.04117],[-118.77159,34.04116],[-118.77169,34.04112],[-118.7718,34.04108],[-118.77184,34.04107],[-118.77196,34.04106],[-118.77201,34.04106],[-118.77213,34.04109],[-118.77224,34.04113],[-118.77246,34.04127],[-118.77265,34.04142],[-118.77275,34.04153],[-118.77292,34.04172],[-118.77301,34.04175],[-118.77319,34.04182],[-118.77338,34.0419],[-118.77346,34.04196],[-118.77355,34.04206],[-118.77365,34.04217],[-118.77379,34.04235],[-118.7739,34.0425],[-118.77403,34.04266],[-118.7741,34.04273],[-118.77424,34.04286],[-118.77442,34.04302],[-118.77446,34.0431],[-118.77448,34.04319],[-118.77446,34.04333],[-118.77442,34.04346],[-118.77431,34.0438],[-118.7743,34.04389],[-118.7743,34.04395],[-118.77439,34.04427],[-118.77457,34.04471],[-118.77479,34.04471],[-118.77488,34.04456],[-118.77564,34.04408],[-118.77576,34.044],[-118.77584,34.04395],[-118.77612,34.04381],[-118.77665,34.04382],[-118.77702,34.04382],[-118.77704,34.04407]],"lines":[[[-118.78055,34.02584],[-118.78034,34.02588]],[[-118.78055,34.02584],[-118.78055,34.02588],[-118.78052,34.02592],[-118.7805,34.02595],[-118.7805,34.02649]],[[-118.78034,34.02588],[-118.78019,34.02591],[-118.77995,34.02595],[-118.77982,34.02596],[-118.77935,34.02603]],[[-118.77982,34.02596],[-118.77983,34.02599],[-118.77987,34.02613],[-118.77992,34.02647],[-118.78023,34.02654],[-118.78022,34.02662]],[[-118.77935,34.02603],[-118.77922,34.02604],[-118.7791,34.02605],[-118.77904,34.02606],[-118.77869,34.02608],[-118.77827,34.02607],[-118.77784,34.02605]],[[-118.77827,34.02607],[-118.77827,34.02603],[-118.77828,34.0258],[-118.77829,34.02572],[-118.77827,34.02566]],[[-118.77829,34.02572],[-118.77884,34.02562],[-118.77897,34.0256]],[[-118.77884,34.02562],[-118.77881,34.02551],[-118.77877,34.02542],[-118.77872,34.02538],[-118.7787,34.02535],[-118.77858,34.02529],[-118.77853,34.02522],[-118.77851,34.02511]],[[-118.77853,34.02522],[-118.7784,34.02522],[-118.77833,34.02533]],[[-118.77851,34.02511],[-118.77848,34.02495]],[[-118.77851,34.02511],[-118.77851,34.02512]],[[-118.77848,34.02495],[-118.7785,34.02486],[-118.77856,34.02473],[-118.77855,34.0246]],[[-118.77897,34.0256],[-118.77921,34.02556],[-118.77991,34.02546]],[[-118.77921,34.02556],[-118.7792,34.02551],[-118.77921,34.02537],[-118.77921,34.02527],[-118.77924,34.02521],[-118.77928,34.02513],[-118.7793,34.02504],[-118.77931,34.02501],[-118.77929,34.02455]],[[-118.77991,34.02546],[-118.78024,34.02542],[-118.78024,34.02538],[-118.78021,34.02525],[-118.78003,34.02457],[-118.78018,34.02458],[-118.78024,34.02458],[-118.78038,34.02458],[-118.78038,34.02449],[-118.78053,34.02449]],[[-118.78038,34.02449],[-118.78039,34.02389],[-118.78006,34.02351]],[[-118.78053,34.02449],[-118.7807,34.02449],[-118.7809,34.02449]],[[-118.77827,34.02566],[-118.77825,34.02553],[-118.77825,34.02547],[-118.77808,34.02547],[-118.77815,34.02475],[-118.77817,34.02441],[-118.77817,34.02435],[-118.77817,34.02434]],[[-118.77784,34.02605],[-118.77784,34.02606],[-118.77784,34.02607],[-118.77784,34.02608],[-118.77783,34.02609],[-118.77783,34.0261],[-118.77782,34.02611],[-118.77781,34.02612],[-118.7778,34.02612]],[[-118.77781,34.02612],[-118.77792,34.0262],[-118.77774,34.02621],[-118.77775,34.02566],[-118.77762,34.02563],[-118.7773,34.02534]],[[-118.77762,34.02563],[-118.77781,34.02497]],[[-118.7773,34.02534],[-118.7773,34.02525]],[[-118.7778,34.02612],[-118.7778,34.02613],[-118.77779,34.02613],[-118.77778,34.02613],[-118.77777,34.02613],[-118.77777,34.02614],[-118.77776,34.02614],[-118.77775,34.02614],[-118.77774,34.02614],[-118.77773,34.02614],[-118.77772,34.02614],[-118.77771,34.02613],[-118.7777,34.02613],[-118.77769,34.02613],[-118.77768,34.02612]],[[-118.77769,34.02613],[-118.77761,34.0262],[-118.77761,34.02634],[-118.77779,34.02634],[-118.77789,34.02645],[-118.77803,34.02645],[-118.77804,34.02631],[-118.77816,34.02621],[-118.77827,34.02621],[-118.77842,34.02638]],[[-118.77827,34.02621],[-118.77827,34.02647],[-118.778,34.02662],[-118.77781,34.02703]],[[-118.77842,34.02638],[-118.77842,34.02656],[-118.77819,34.02666],[-118.77818,34.02727]],[[-118.77768,34.02612],[-118.77767,34.02611],[-118.77766,34.0261],[-118.77765,34.02609],[-118.77765,34.02608],[-118.77765,34.02607],[-118.77765,34.02606],[-118.77765,34.02605],[-118.77765,34.02604],[-118.77761,34.02604],[-118.77586,34.02596]],[[-118.77761,34.02604],[-118.77761,34.02606]],[[-118.77586,34.02596],[-118.77586,34.02593]],[[-118.77586,34.02596],[-118.77543,34.02593],[-118.77507,34.02591],[-118.77507,34.0259]],[[-118.77507,34.02591],[-118.77412,34.02582],[-118.77417,34.02578]],[[-118.77412,34.02582],[-118.7736,34.02579]],[[-118.77412,34.02582],[-118.77413,34.02583],[-118.77414,34.02593],[-118.77416,34.02607],[-118.77426,34.0268],[-118.77446,34.02679],[-118.77446,34.02678],[-118.77442,34.02649]],[[-118.77446,34.02678],[-118.77445,34.02673],[-118.77445,34.0267]],[[-118.77442,34.02649],[-118.77442,34.02648],[-118.77441,34.02643],[-118.77441,34.02642],[-118.77461,34.02641],[-118.77466,34.02685],[-118.77431,34.02685],[-118.77431,34.02686],[-118.77431,34.02689],[-118.77433,34.02705],[-118.77433,34.02706],[-118.77485,34.02706],[-118.77485,34.02699],[-118.77511,34.02699],[-118.77538,34.027]],[[-118.77511,34.02699],[-118.77523,34.0271],[-118.77523,34.0272],[-118.77523,34.02733],[-118.77436,34.02732],[-118.77439,34.02751],[-118.7744,34.02756],[-118.7744,34.02759],[-118.77442,34.02772],[-118.77445,34.02785]],[[-118.77442,34.02772],[-118.77441,34.02767],[-118.77441,34.02765]],[[-118.77445,34.02785],[-118.77446,34.0279],[-118.77452,34.02813],[-118.77456,34.02825]],[[-118.77452,34.02813],[-118.77451,34.02808],[-118.77447,34.02795]],[[-118.77456,34.02825],[-118.77539,34.02826],[-118.77545,34.02826],[-118.7755,34.02826]],[[-118.77538,34.027],[-118.77572,34.027]],[[-118.77538,34.027],[-118.77532,34.027],[-118.77523,34.027],[-118.77523,34.02704]],[[-118.77523,34.027],[-118.77517,34.027]],[[-118.77572,34.027],[-118.77577,34.027],[-118.77605,34.02701],[-118.77605,34.02714],[-118.77604,34.02726],[-118.77604,34.02732],[-118.77604,34.02735]],[[-118.7736,34.02579],[-118.77266,34.02573],[-118.77261,34.02569]],[[-118.77266,34.02573],[-118.77224,34.02571],[-118.7717,34.02569],[-118.771,34.0257],[-118.77079,34.02571],[-118.77038,34.02572],[-118.77038,34.02575]],[[-118.77038,34.02572],[-118.76975,34.02573],[-118.76975,34.02577]],[[-118.76975,34.02573],[-118.76869,34.02578],[-118.76803,34.0258]],[[-118.76869,34.02578],[-118.76869,34.0258],[-118.7687,34.02598],[-118.7687,34.02607],[-118.76858,34.02612],[-118.76855,34.02626],[-118.76839,34.02665],[-118.76809,34.02737],[-118.76804,34.02751],[-118.76802,34.02767],[-118.76803,34.02785],[-118.7681,34.02802]],[[-118.76803,34.02785],[-118.76813,34.02784],[-118.76823,34.02799],[-118.76829,34.02797],[-118.76821,34.02751],[-118.76827,34.02733]],[[-118.7681,34.02802],[-118.7682,34.02818],[-118.76827,34.0283],[-118.76835,34.02855],[-118.76839,34.02933]],[[-118.76803,34.0258],[-118.7672,34.02583],[-118.76662,34.02585],[-118.76657,34.02585],[-118.76648,34.02586],[-118.76638,34.02586],[-118.76601,34.02587],[-118.76568,34.02589],[-118.76543,34.02591],[-118.76543,34.02583]],[[-118.76543,34.02591],[-118.76527,34.0258]],[[-118.76543,34.02591],[-118.76493,34.02593]],[[-118.76543,34.02591],[-118.76544,34.02599],[-118.76545,34.02604],[-118.76546,34.02612],[-118.76547,34.02623],[-118.76547,34.02632],[-118.76544,34.02641],[-118.76542,34.02647],[-118.76532,34.0266],[-118.7652,34.02676],[-118.76517,34.02686],[-118.76557,34.02709]],[[-118.76517,34.02686],[-118.76514,34.02688]],[[-118.76517,34.02686],[-118.765,34.0267],[-118.76474,34.0266],[-118.76444,34.02666],[-118.76429,34.0267],[-118.76402,34.02677],[-118.76351,34.02692],[-118.76342,34.02695],[-118.76336,34.02699],[-118.76318,34.02713],[-118.76313,34.02716],[-118.76307,34.02722],[-118.76301,34.02732],[-118.76299,34.0274],[-118.763,34.02747],[-118.76301,34.02754],[-118.76304,34.02759],[-118.7631,34.02767],[-118.76316,34.02774],[-118.76321,34.0278],[-118.76325,34.02786],[-118.76329,34.02796],[-118.76329,34.02799],[-118.76329,34.02807],[-118.76327,34.02819],[-118.76322,34.02833],[-118.7632,34.02836],[-118.76317,34.02842],[-118.76307,34.0285],[-118.76299,34.02854],[-118.76296,34.02855]],[[-118.76514,34.02688],[-118.76498,34.02708],[-118.7643,34.02781],[-118.76427,34.02785],[-118.76413,34.02802],[-118.76406,34.02811],[-118.764,34.02828],[-118.76389,34.02865],[-118.76385,34.02887],[-118.76381,34.02912],[-118.76379,34.02929],[-118.76377,34.02946],[-118.76372,34.02971],[-118.76371,34.0298],[-118.76369,34.02991],[-118.76368,34.02995],[-118.76365,34.03003],[-118.76363,34.03007],[-118.76357,34.03018],[-118.76349,34.03031],[-118.76347,34.03037],[-118.76345,34.03041],[-118.76345,34.03044],[-118.76346,34.03051],[-118.76349,34.03064],[-118.76354,34.03081],[-118.76359,34.031],[-118.76363,34.03113],[-118.76365,34.0312],[-118.76367,34.0313],[-118.76368,34.03135],[-118.76367,34.03153],[-118.76364,34.03171],[-118.76361,34.03189],[-118.76359,34.03202],[-118.76355,34.03217],[-118.76355,34.03225],[-118.76357,34.03231],[-118.7636,34.03235],[-118.76367,34.03244],[-118.76385,34.03267],[-118.76395,34.03278],[-118.76403,34.03289],[-118.76413,34.03307],[-118.76423,34.03325]],[[-118.76557,34.02709],[-118.76558,34.02708]],[[-118.76557,34.02709],[-118.76579,34.02722],[-118.76607,34.02742]],[[-118.76579,34.02722],[-118.76608,34.02704],[-118.76619,34.02693],[-118.76619,34.02687],[-118.76619,34.02685]],[[-118.76607,34.02742],[-118.76614,34.02763],[-118.76615,34.02782]],[[-118.76614,34.02763],[-118.76633,34.02762],[-118.76647,34.02726],[-118.76697,34.02672],[-118.76698,34.02671],[-118.7673,34.02688],[-118.7675,34.02698]],[[-118.76615,34.02782],[-118.76615,34.02786],[-118.76616,34.028],[-118.76616,34.02823],[-118.76618,34.02841],[-118.76617,34.02848],[-118.76614,34.0286],[-118.76609,34.0287],[-118.76598,34.02881],[-118.76582,34.02889],[-118.76571,34.02895],[-118.76559,34.02901],[-118.76545,34.02911],[-118.76539,34.02914]],[[-118.76545,34.02911],[-118.76562,34.02919],[-118.76566,34.02925],[-118.7657,34.02932],[-118.76572,34.02935],[-118.76572,34.02941],[-118.76571,34.02944],[-118.76538,34.02975],[-118.76525,34.02988],[-118.76525,34.02998],[-118.76529,34.03009],[-118.76536,34.03016],[-118.76547,34.03022],[-118.76561,34.03028],[-118.76576,34.03034],[-118.76585,34.03048],[-118.76594,34.03061],[-118.76595,34.03063],[-118.76595,34.03073]],[[-118.76595,34.03063],[-118.76592,34.03063],[-118.76575,34.03063],[-118.7656,34.03063],[-118.7656,34.03089]],[[-118.76595,34.03073],[-118.76596,34.03078],[-118.76598,34.03082],[-118.76601,34.03087],[-118.76602,34.03088],[-118.76608,34.03091],[-118.76615,34.03092],[-118.76622,34.03092],[-118.76627,34.03089],[-118.76633,34.03082],[-118.76639,34.03073],[-118.76644,34.03065]],[[-118.76639,34.03073],[-118.76649,34.03078],[-118.76649,34.03114]],[[-118.76644,34.03065],[-118.76648,34.0306],[-118.7665,34.03064]],[[-118.76648,34.0306],[-118.76659,34.03059],[-118.76669,34.03058],[-118.76676,34.03059]],[[-118.76539,34.02914],[-118.76527,34.02919],[-118.76504,34.02928],[-118.76476,34.02942],[-118.76465,34.02956],[-118.76461,34.02966],[-118.76459,34.02982],[-118.7646,34.03],[-118.76459,34.03008],[-118.76458,34.03018],[-118.7645,34.03036],[-118.76443,34.0305],[-118.76431,34.03077],[-118.76441,34.03092]],[[-118.76558,34.02708],[-118.76569,34.02698],[-118.76571,34.02695],[-118.76588,34.02706],[-118.76593,34.02709],[-118.76599,34.02713],[-118.76604,34.02708]],[[-118.76493,34.02593],[-118.76411,34.02608],[-118.7631,34.02626],[-118.7627,34.02639],[-118.76261,34.02642],[-118.76247,34.02646],[-118.76166,34.02669],[-118.76094,34.02695],[-118.76093,34.02694]],[[-118.76094,34.02695],[-118.76083,34.02699],[-118.76056,34.02711],[-118.76017,34.02729]],[[-118.76056,34.02711],[-118.76054,34.02711],[-118.76029,34.02701],[-118.76016,34.02683]],[[-118.76017,34.02729],[-118.75988,34.02741],[-118.75905,34.02787]],[[-118.75988,34.02741],[-118.75973,34.02721],[-118.75969,34.02715]],[[-118.75973,34.02721],[-118.75941,34.02733],[-118.7594,34.02734]],[[-118.75941,34.02733],[-118.75946,34.0273],[-118.75954,34.02725],[-118.75955,34.0265],[-118.75995,34.02651],[-118.76001,34.02651],[-118.76006,34.02651]],[[-118.7594,34.02734],[-118.75934,34.02737],[-118.75931,34.02738],[-118.75926,34.02741],[-118.75848,34.02783],[-118.758,34.02689],[-118.75777,34.02699],[-118.75772,34.02702],[-118.75764,34.02705],[-118.75756,34.02708]],[[-118.75764,34.02705],[-118.75767,34.0271],[-118.75769,34.02715],[-118.7578,34.02732]],[[-118.75756,34.02708],[-118.75751,34.0271],[-118.75702,34.02728],[-118.75688,34.02702],[-118.75686,34.02697],[-118.75683,34.02693]],[[-118.75905,34.02787],[-118.75902,34.02788],[-118.75894,34.02793],[-118.75841,34.02822],[-118.75841,34.02828]],[[-118.75841,34.02822],[-118.75806,34.02841],[-118.75806,34.0284]],[[-118.75806,34.02841],[-118.75807,34.02841]],[[-118.75806,34.02841],[-118.75756,34.0287],[-118.75677,34.02913],[-118.75642,34.02934],[-118.75612,34.02951],[-118.75596,34.02959],[-118.75555,34.02976]],[[-118.75807,34.02841],[-118.75807,34.02842],[-118.75808,34.02842],[-118.75808,34.02843],[-118.75809,34.02843],[-118.7581,34.02844],[-118.75811,34.02844],[-118.75812,34.02845],[-118.75813,34.02845],[-118.75814,34.02845],[-118.75815,34.02845],[-118.75816,34.02845],[-118.75817,34.02845],[-118.75818,34.02844],[-118.75819,34.02844],[-118.7582,34.02844],[-118.75821,34.02843],[-118.75822,34.02843],[-118.75822,34.02842],[-118.75823,34.02842],[-118.75823,34.02841],[-118.75845,34.02866],[-118.75861,34.02858],[-118.75897,34.02907]],[[-118.75861,34.02858],[-118.75857,34.02853]],[[-118.75897,34.02907],[-118.75895,34.0292],[-118.75891,34.02939],[-118.75893,34.02942],[-118.75915,34.02973],[-118.75888,34.02985]],[[-118.75915,34.02973],[-118.75934,34.02965],[-118.75958,34.02961]],[[-118.75934,34.02965],[-118.75944,34.02989],[-118.75964,34.0302]],[[-118.75958,34.02961],[-118.75973,34.0296],[-118.75989,34.02959],[-118.76006,34.02959],[-118.76005,34.0298],[-118.76068,34.02981],[-118.76127,34.02982]],[[-118.76068,34.02981],[-118.76067,34.03072],[-118.76113,34.03073]],[[-118.76127,34.02982],[-118.76133,34.02982],[-118.76135,34.02982]],[[-118.75888,34.02985],[-118.75866,34.0299]],[[-118.75888,34.02985],[-118.75906,34.03054]],[[-118.75866,34.0299],[-118.75857,34.02993],[-118.75852,34.02994],[-118.75845,34.02994],[-118.75838,34.02993],[-118.75827,34.02991],[-118.75803,34.02982],[-118.75811,34.03054]],[[-118.75803,34.02982],[-118.7577,34.02995],[-118.75734,34.03007],[-118.7568,34.03022],[-118.75665,34.03026],[-118.75628,34.0304]],[[-118.75806,34.0284],[-118.75805,34.02839],[-118.75805,34.02838],[-118.75805,34.02837],[-118.75805,34.02836],[-118.75805,34.02835],[-118.75805,34.02834],[-118.75806,34.02834],[-118.75806,34.02833],[-118.75806,34.02832],[-118.75807,34.02832],[-118.75808,34.02831],[-118.75809,34.0283],[-118.7581,34.02829],[-118.75807,34.02826],[-118.75833,34.0281],[-118.75817,34.02786],[-118.75788,34.02745]],[[-118.75841,34.02828],[-118.75843,34.02832]],[[-118.76093,34.02694],[-118.76078,34.02675],[-118.76072,34.02669]],[[-118.76527,34.0258],[-118.76505,34.02565],[-118.76467,34.02561],[-118.76346,34.02571],[-118.76278,34.0258],[-118.76239,34.02585],[-118.76205,34.02584],[-118.76182,34.0258],[-118.76121,34.02575],[-118.76089,34.02575],[-118.7607,34.02575],[-118.7605,34.02576],[-118.76034,34.02578],[-118.75987,34.02582],[-118.7597,34.02584],[-118.75959,34.02585],[-118.75941,34.02587]],[[-118.76543,34.02583],[-118.7656,34.02564],[-118.76561,34.02564],[-118.76598,34.02554],[-118.766,34.02554],[-118.76621,34.02552],[-118.7664,34.02551],[-118.76683,34.02548],[-118.76736,34.02546],[-118.76781,34.02542],[-118.76796,34.02541],[-118.76847,34.02537],[-118.76841,34.02512]],[[-118.76847,34.02537],[-118.76911,34.02529],[-118.7692,34.02523],[-118.7696,34.02497],[-118.76964,34.02496],[-118.76955,34.02481]],[[-118.76964,34.02496],[-118.76999,34.02485]],[[-118.76975,34.02577],[-118.76976,34.02582],[-118.76981,34.026],[-118.76988,34.02623],[-118.77001,34.0267],[-118.77066,34.02725],[-118.77079,34.02772],[-118.77109,34.02904],[-118.77123,34.02952],[-118.77133,34.02952],[-118.77149,34.02951],[-118.77181,34.02941],[-118.77196,34.02934],[-118.77198,34.02934],[-118.77222,34.02923]],[[-118.77198,34.02934],[-118.77187,34.0292],[-118.77174,34.0289]],[[-118.77038,34.02575],[-118.77038,34.02598],[-118.77075,34.0268]],[[-118.77261,34.02569],[-118.77242,34.02552],[-118.77236,34.02547]],[[-118.77417,34.02578],[-118.77417,34.02577],[-118.77419,34.02553],[-118.77418,34.02546],[-118.7742,34.02518],[-118.77421,34.02515]],[[-118.7742,34.02518],[-118.7742,34.02523],[-118.77419,34.02532]],[[-118.77421,34.02515],[-118.77421,34.0251],[-118.77424,34.02508],[-118.77429,34.02506],[-118.77492,34.02472],[-118.77497,34.02469],[-118.77499,34.02468]],[[-118.77507,34.0259],[-118.77518,34.02568],[-118.77521,34.02561],[-118.77523,34.02547],[-118.77527,34.02526]],[[-118.77586,34.02593],[-118.77585,34.0257],[-118.77585,34.02568],[-118.77586,34.02554],[-118.77586,34.02517],[-118.77599,34.02506],[-118.77598,34.02477],[-118.77593,34.02464]]],"line_km":12.3,"homes":[{"id":0,"x":-118.780353,"y":34.025585,"battery":false,"solar":false,"medical":false,"size":1.16,"u":0.429,"v":0.3951},{"id":1,"x":-118.780686,"y":34.026016,"battery":false,"solar":false,"medical":false,"size":0.87,"u":0.7745,"v":0.1756},{"id":2,"x":-118.780215,"y":34.026261,"battery":true,"solar":true,"medical":false,"size":0.62,"u":0.742,"v":0.0072},{"id":3,"x":-118.780371,"y":34.02613,"battery":false,"solar":false,"medical":false,"size":0.76,"u":0.073,"v":0.2627},{"id":4,"x":-118.77999,"y":34.02567,"battery":false,"solar":true,"medical":true,"size":1.19,"u":0.9884,"v":0.8903},{"id":5,"x":-118.779783,"y":34.026232,"battery":false,"solar":false,"medical":false,"size":1.04,"u":0.9587,"v":0.9823},{"id":6,"x":-118.779419,"y":34.025771,"battery":false,"solar":false,"medical":false,"size":0.98,"u":0.1295,"v":0.2118},{"id":7,"x":-118.780097,"y":34.026044,"battery":false,"solar":false,"medical":false,"size":1.24,"u":0.1187,"v":0.8266},{"id":8,"x":-118.779718,"y":34.026381,"battery":false,"solar":false,"medical":false,"size":1.05,"u":0.2656,"v":0.6558},{"id":9,"x":-118.780127,"y":34.026239,"battery":false,"solar":false,"medical":false,"size":1.05,"u":0.3689,"v":0.8425},{"id":10,"x":-118.779301,"y":34.025766,"battery":false,"solar":false,"medical":false,"size":0.84,"u":0.5172,"v":0.3659},{"id":11,"x":-118.779046,"y":34.026343,"battery":false,"solar":false,"medical":false,"size":1.54,"u":0.5949,"v":0.4439},{"id":12,"x":-118.778721,"y":34.025795,"battery":false,"solar":false,"medical":false,"size":1.14,"u":0.2406,"v":0.1892},{"id":13,"x":-118.778437,"y":34.026356,"battery":false,"solar":false,"medical":false,"size":0.64,"u":0.3228,"v":0.1179},{"id":14,"x":-118.778161,"y":34.025834,"battery":false,"solar":false,"medical":false,"size":1.27,"u":0.8551,"v":0.5779},{"id":15,"x":-118.777846,"y":34.026289,"battery":false,"solar":false,"medical":false,"size":1.15,"u":0.5578,"v":0.2013},{"id":16,"x":-118.778477,"y":34.025848,"battery":false,"solar":false,"medical":false,"size":0.68,"u":0.3863,"v":0.7512},{"id":17,"x":-118.778317,"y":34.025456,"battery":true,"solar":true,"medical":false,"size":0.78,"u":0.3895,"v":0.7552},{"id":18,"x":-118.778684,"y":34.025842,"battery":false,"solar":false,"medical":false,"size":1.05,"u":0.7666,"v":0.2358},{"id":19,"x":-118.778897,"y":34.025345,"battery":false,"solar":true,"medical":false,"size":1.35,"u":0.9303,"v":0.9666},{"id":20,"x":-118.778905,"y":34.025236,"battery":false,"solar":false,"medical":false,"size":0.9,"u":0.1907,"v":0.8895},{"id":21,"x":-118.778319,"y":34.025419,"battery":true,"solar":true,"medical":false,"size":1.25,"u":0.8406,"v":0.207},{"id":22,"x":-118.778414,"y":34.024976,"battery":false,"solar":true,"medical":false,"size":1.0,"u":0.2951,"v":0.8078},{"id":23,"x":-118.778261,"y":34.025046,"battery":false,"solar":false,"medical":false,"size":0.96,"u":0.1542,"v":0.1316},{"id":24,"x":-118.778728,"y":34.024863,"battery":false,"solar":false,"medical":false,"size":1.46,"u":0.4928,"v":0.871},{"id":25,"x":-118.779017,"y":34.025407,"battery":false,"solar":true,"medical":false,"size":0.87,"u":0.4666,"v":0.448},{"id":26,"x":-118.779365,"y":34.025752,"battery":false,"solar":false,"medical":false,"size":1.19,"u":0.3555,"v":0.9717},{"id":27,"x":-118.779594,"y":34.025285,"battery":true,"solar":true,"medical":false,"size":1.21,"u":0.3956,"v":0.2306},{"id":28,"x":-118.77941,"y":34.025517,"battery":false,"solar":false,"medical":false,"size":1.43,"u":0.589,"v":0.7845},{"id":29,"x":-118.778977,"y":34.025313,"battery":false,"solar":false,"medical":false,"size":1.35,"u":0.3767,"v":0.8097},{"id":30,"x":-118.77952,"y":34.025131,"battery":false,"solar":false,"medical":false,"size":1.13,"u":0.2182,"v":0.4733},{"id":31,"x":-118.779122,"y":34.024845,"battery":false,"solar":false,"medical":false,"size":0.67,"u":0.5401,"v":0.018},{"id":32,"x":-118.779557,"y":34.024581,"battery":false,"solar":false,"medical":false,"size":1.5,"u":0.9579,"v":0.5834},{"id":33,"x":-118.780118,"y":34.025167,"battery":false,"solar":false,"medical":false,"size":1.34,"u":0.5949,"v":0.0321},{"id":34,"x":-118.780429,"y":34.025203,"battery":false,"solar":false,"medical":false,"size":1.09,"u":0.5807,"v":0.4735},{"id":35,"x":-118.779923,"y":34.025074,"battery":false,"solar":false,"medical":false,"size":0.98,"u":0.6774,"v":0.6362},{"id":36,"x":-118.78034,"y":34.024708,"battery":false,"solar":false,"medical":false,"size":1.21,"u":0.5851,"v":0.2894},{"id":37,"x":-118.780087,"y":34.024343,"battery":false,"solar":false,"medical":false,"size":0.78,"u":0.8994,"v":0.3196},{"id":38,"x":-118.780365,"y":34.024805,"battery":false,"solar":true,"medical":false,"size":0.76,"u":0.7744,"v":0.1589},{"id":39,"x":-118.780161,"y":34.024469,"battery":false,"solar":false,"medical":false,"size":1.28,"u":0.817,"v":0.9077},{"id":40,"x":-118.780656,"y":34.024233,"battery":false,"solar":false,"medical":false,"size":1.32,"u":0.7781,"v":0.2382},{"id":41,"x":-118.78011,"y":34.023979,"battery":false,"solar":false,"medical":false,"size":1.0,"u":0.7238,"v":0.5845},{"id":42,"x":-118.780447,"y":34.023626,"battery":false,"solar":false,"medical":false,"size":1.09,"u":0.5389,"v":0.3767},{"id":43,"x":-118.779934,"y":34.023723,"battery":false,"solar":false,"medical":false,"size":0.79,"u":0.2636,"v":0.0316},{"id":44,"x":-118.780736,"y":34.024679,"battery":false,"solar":false,"medical":false,"size":1.31,"u":0.6951,"v":0.5801},{"id":45,"x":-118.778051,"y":34.025584,"battery":false,"solar":false,"medical":false,"size":1.4,"u":0.7767,"v":0.0704},{"id":46,"x":-118.77827,"y":34.025468,"battery":false,"solar":false,"medical":false,"size":1.29,"u":0.4192,"v":0.0919},{"id":47,"x":-118.777816,"y":34.025177,"battery":false,"solar":false,"medical":false,"size":0.61,"u":0.303,"v":0.4191},{"id":48,"x":-118.778369,"y":34.024985,"battery":false,"solar":false,"medical":false,"size":0.71,"u":0.8009,"v":0.1182},{"id":49,"x":-118.777922,"y":34.024704,"battery":false,"solar":true,"medical":false,"size":0.75,"u":0.9957,"v":0.9461},{"id":50,"x":-118.778361,"y":34.024484,"battery":false,"solar":false,"medical":false,"size":0.86,"u":0.7322,"v":0.3951},{"id":51,"x":-118.777986,"y":34.025926,"battery":true,"solar":true,"medical":false,"size":0.87,"u":0.6825,"v":0.1683},{"id":52,"x":-118.777732,"y":34.026006,"battery":false,"solar":false,"medical":false,"size":0.87,"u":0.4878,"v":0.3115},{"id":53,"x":-118.777513,"y":34.025964,"battery":false,"solar":false,"medical":false,"size":1.3,"u":0.9299,"v":0.8092},{"id":54,"x":-118.777993,"y":34.025727,"battery":true,"solar":true,"medical":false,"size":0.89,"u":0.8631,"v":0.0304},{"id":55,"x":-118.77742,"y":34.025737,"battery":false,"solar":false,"medical":false,"size":1.28,"u":0.9702,"v":0.9354},{"id":56,"x":-118.777554,"y":34.02519,"battery":false,"solar":false,"medical":false,"size":0.69,"u":0.1662,"v":0.0894},{"id":57,"x":-118.777485,"y":34.025417,"battery":false,"solar":false,"medical":false,"size":0.99,"u":0.4151,"v":0.2799},{"id":58,"x":-118.777916,"y":34.025283,"battery":false,"solar":false,"medical":false,"size":0.97,"u":0.9421,"v":0.6697},{"id":59,"x":-118.7776,"y":34.024935,"battery":false,"solar":false,"medical":false,"size":1.18,"u":0.837,"v":0.2076},{"id":60,"x":-118.777552,"y":34.025975,"battery":false,"solar":false,"medical":false,"size":0.86,"u":0.4433,"v":0.3192},{"id":61,"x":-118.777622,"y":34.026115,"battery":false,"solar":false,"medical":false,"size":1.01,"u":0.7902,"v":0.9373},{"id":62,"x":-118.777652,"y":34.026618,"battery":false,"solar":false,"medical":false,"size":1.47,"u":0.8549,"v":0.2668},{"id":63,"x":-118.777846,"y":34.026342,"battery":false,"solar":false,"medical":false,"size":1.18,"u":0.955,"v":0.0295},{"id":64,"x":-118.778229,"y":34.026478,"battery":false,"solar":false,"medical":false,"size":1.27,"u":0.2852,"v":0.7271},{"id":65,"x":-118.778613,"y":34.026209,"battery":false,"solar":false,"medical":false,"size":1.5,"u":0.1726,"v":0.9866},{"id":66,"x":-118.777976,"y":34.026455,"battery":false,"solar":false,"medical":false,"size":0.72,"u":0.6223,"v":0.7877},{"id":67,"x":-118.778181,"y":34.02685,"battery":false,"solar":true,"medical":false,"size":0.61,"u":0.0392,"v":0.8785},{"id":68,"x":-118.777672,"y":34.026699,"battery":false,"solar":false,"medical":false,"size":0.96,"u":0.8501,"v":0.3599},{"id":69,"x":-118.778644,"y":34.026389,"battery":false,"solar":false,"medical":false,"size":1.0,"u":0.5488,"v":0.7446},{"id":70,"x":-118.778254,"y":34.026394,"battery":false,"solar":false,"medical":false,"size":1.59,"u":0.7393,"v":0.3496},{"id":71,"x":-118.77844,"y":34.026767,"battery":false,"solar":false,"medical":false,"size":1.26,"u":0.6891,"v":0.0059},{"id":72,"x":-118.777968,"y":34.027004,"battery":false,"solar":false,"medical":false,"size":1.18,"u":0.4117,"v":0.9612},{"id":73,"x":-118.778378,"y":34.027256,"battery":false,"solar":false,"medical":false,"size":0.71,"u":0.6664,"v":0.7645},{"id":74,"x":-118.777494,"y":34.02583,"battery":true,"solar":true,"medical":false,"size":0.92,"u":0.554,"v":0.8954},{"id":75,"x":-118.777178,"y":34.026312,"battery":false,"solar":false,"medical":false,"size":0.7,"u":0.6003,"v":0.716},{"id":76,"x":-118.77691,"y":34.025759,"battery":false,"solar":false,"medical":false,"size":1.05,"u":0.5606,"v":0.7777},{"id":77,"x":-118.776595,"y":34.026225,"battery":false,"solar":false,"medical":false,"size":0.96,"u":0.946,"v":0.1007},{"id":78,"x":-118.776321,"y":34.025796,"battery":false,"solar":true,"medical":false,"size":0.69,"u":0.272,"v":0.8168},{"id":79,"x":-118.776007,"y":34.026234,"battery":false,"solar":false,"medical":false,"size":1.57,"u":0.3905,"v":0.4692},{"id":80,"x":-118.775803,"y":34.025715,"battery":false,"solar":false,"medical":false,"size":1.5,"u":0.163,"v":0.1233},{"id":81,"x":-118.775478,"y":34.026161,"battery":false,"solar":false,"medical":false,"size":1.5,"u":0.7864,"v":0.1036},{"id":82,"x":-118.775213,"y":34.025694,"battery":false,"solar":false,"medical":false,"size":1.0,"u":0.5218,"v":0.7041},{"id":83,"x":-118.774898,"y":34.026134,"battery":false,"solar":false,"medical":false,"size":0.89,"u":0.5908,"v":0.5619},{"id":84,"x":-118.774657,"y":34.025573,"battery":false,"solar":false,"medical":false,"size":0.89,"u":0.331,"v":0.5074},{"id":85,"x":-118.77431,"y":34.026124,"battery":false,"solar":false,"medical":false,"size":1.38,"u":0.9726,"v":0.2039},{"id":86,"x":-118.774127,"y":34.025598,"battery":false,"solar":false,"medical":false,"size":0.88,"u":0.0761,"v":0.1478},{"id":87,"x":-118.773809,"y":34.02602,"battery":true,"solar":true,"medical":false,"size":0.67,"u":0.4101,"v":0.5644},{"id":88,"x":-118.773884,"y":34.025902,"battery":false,"solar":false,"medical":false,"size":0.66,"u":0.4884,"v":0.2847},{"id":89,"x":-118.774457,"y":34.02608,"battery":false,"solar":false,"medical":false,"size":0.96,"u":0.9002,"v":0.3186},{"id":90,"x":-118.774022,"y":34.026388,"battery":false,"solar":false,"medical":false,"size":0.92,"u":0.1975,"v":0.5369},{"id":91,"x":-118.774476,"y":34.026573,"battery":false,"solar":false,"medical":false,"size":1.51,"u":0.4801,"v":0.5513},{"id":92,"x":-118.774334,"y":34.027077,"battery":false,"solar":false,"medical":true,"size":0.72,"u":0.8973,"v":0.8831},{"id":93,"x":-118.774149,"y":34.026703,"battery":false,"solar":true,"medical":false,"size":1.24,"u":0.7217,"v":0.2824},{"id":94,"x":-118.774715,"y":34.02671,"battery":false,"solar":false,"medical":false,"size":1.24,"u":0.8459,"v":0.9552},{"id":95,"x":-118.774592,"y":34.02612,"battery":true,"solar":true,"medical":false,"size":0.94,"u":0.39,"v":0.7728},{"id":96,"x":-118.774453,"y":34.026672,"battery":false,"solar":false,"medical":false,"size":1.58,"u":0.6532,"v":0.5209},{"id":97,"x":-118.774606,"y":34.027133,"battery":false,"solar":true,"medical":false,"size":0.94,"u":0.3563,"v":0.9846},{"id":98,"x":-118.774312,"y":34.026558,"battery":false,"solar":false,"medical":false,"size":1.5,"u":0.8115,"v":0.9102},{"id":99,"x":-118.774368,"y":34.026872,"battery":false,"solar":false,"medical":false,"size":1.43,"u":0.4794,"v":0.1528},{"id":100,"x":-118.774662,"y":34.027326,"battery":false,"solar":false,"medical":false,"size":0.9,"u":0.3824,"v":0.6695},{"id":101,"x":-118.774872,"y":34.026705,"battery":false,"solar":false,"medical":false,"size":1.1,"u":0.6122,"v":0.9811},{"id":102,"x":-118.775158,"y":34.027177,"battery":false,"solar":false,"medical":false,"size":1.19,"u":0.7224,"v":0.4253},{"id":103,"x":-118.77529,"y":34.0269,"battery":false,"solar":false,"medical":false,"size":1.43,"u":0.0728,"v":0.1981},{"id":104,"x":-118.774967,"y":34.027262,"battery":false,"solar":false,"medical":false,"size":0.82,"u":0.7339,"v":0.6194},{"id":105,"x":-118.775016,"y":34.027567,"battery":false,"solar":false,"medical":false,"size":1.49,"u":0.8104,"v":0.03},{"id":106,"x":-118.774727,"y":34.02714,"battery":false,"solar":false,"medical":false,"size":1.27,"u":0.7419,"v":0.3897},{"id":107,"x":-118.774428,"y":34.027594,"battery":false,"solar":false,"medical":false,"size":1.13,"u":0.0095,"v":0.2409},{"id":108,"x":-118.774203,"y":34.027533,"battery":false,"solar":true,"medical":false,"size":1.16,"u":0.4709,"v":0.1526},{"id":109,"x":-118.77468,"y":34.027688,"battery":false,"solar":false,"medical":false,"size":0.93,"u":0.7849,"v":0.4923},{"id":110,"x":-118.774249,"y":34.027974,"battery":false,"solar":false,"medical":false,"size":1.19,"u":0.2971,"v":0.1097},{"id":111,"x":-118.774703,"y":34.028098,"battery":false,"solar":false,"medical":false,"size":1.42,"u":0.7458,"v":0.6308},{"id":112,"x":-118.774733,"y":34.027909,"battery":false,"solar":false,"medical":false,"size":1.42,"u":0.1724,"v":0.069},{"id":113,"x":-118.774812,"y":34.028007,"battery":false,"solar":false,"medical":false,"size":0.89,"u":0.872,"v":0.1506},{"id":114,"x":-118.775099,"y":34.028548,"battery":false,"solar":false,"medical":false,"size":0.72,"u":0.9409,"v":0.6147},{"id":115,"x":-118.775396,"y":34.028009,"battery":false,"solar":false,"medical":false,"size":1.35,"u":0.8192,"v":0.8596},{"id":116,"x":-118.775569,"y":34.027217,"battery":false,"solar":false,"medical":false,"size":1.24,"u":0.6451,"v":0.7762},{"id":117,"x":-118.775237,"y":34.027211,"battery":false,"solar":false,"medical":false,"size":1.51,"u":0.7167,"v":0.9873},{"id":118,"x":-118.775889,"y":34.027273,"battery":true,"solar":true,"medical":false,"size":1.5,"u":0.6935,"v":0.4521},{"id":119,"x":-118.776284,"y":34.027128,"battery":false,"solar":false,"medical":false,"size":1.06,"u":0.2736,"v":0.1568},{"id":120,"x":-118.773587,"y":34.025565,"battery":false,"solar":false,"medical":false,"size":1.27,"u":0.2894,"v":0.6546},{"id":121,"x":-118.773267,"y":34.025971,"battery":false,"solar":false,"medical":false,"size":1.27,"u":0.6835,"v":0.9534},{"id":122,"x":-118.773001,"y":34.025538,"battery":false,"solar":false,"medical":false,"size":1.09,"u":0.9119,"v":0.4311},{"id":123,"x":-118.772676,"y":34.026031,"battery":false,"solar":false,"medical":false,"size":1.21,"u":0.5058,"v":0.6057},{"id":124,"x":-118.77248,"y":34.025519,"battery":false,"solar":false,"medical":true,"size":1.2,"u":0.3572,"v":0.571},{"id":125,"x":-118.772169,"y":34.025931,"battery":false,"solar":false,"medical":false,"size":1.38,"u":0.3971,"v":0.9437},{"id":126,"x":-118.771892,"y":34.025504,"battery":false,"solar":true,"medical":false,"size":1.47,"u":0.6035,"v":0.354},{"id":127,"x":-118.771594,"y":34.025886,"battery":false,"solar":true,"medical":false,"size":1.55,"u":0.5796,"v":0.423},{"id":128,"x":-118.771293,"y":34.02541,"battery":false,"solar":false,"medical":false,"size":0.93,"u":0.72,"v":0.493},{"id":129,"x":-118.771007,"y":34.02589,"battery":true,"solar":true,"medical":false,"size":0.87,"u":0.53,"v":0.4515},{"id":130,"x":-118.770704,"y":34.025422,"battery":false,"solar":false,"medical":false,"size":1.28,"u":0.6666,"v":0.2149},{"id":131,"x":-118.770423,"y":34.025936,"battery":false,"solar":false,"medical":false,"size":1.29,"u":0.7769,"v":0.525},{"id":132,"x":-118.770156,"y":34.025451,"battery":false,"solar":false,"medical":false,"size":0.71,"u":0.9434,"v":0.792},{"id":133,"x":-118.76987,"y":34.025936,"battery":false,"solar":true,"medical":false,"size":0.86,"u":0.1223,"v":0.4548},{"id":134,"x":-118.769611,"y":34.02553,"battery":false,"solar":false,"medical":false,"size":1.09,"u":0.4828,"v":0.6153},{"id":135,"x":-118.76934,"y":34.026008,"battery":true,"solar":true,"medical":false,"size":1.15,"u":0.169,"v":0.8898},{"id":136,"x":-118.769024,"y":34.025527,"battery":false,"solar":false,"medical":false,"size":0.82,"u":0.5639,"v":0.8378},{"id":137,"x":-118.768751,"y":34.025959,"battery":false,"solar":false,"medical":true,"size":1.36,"u":0.1639,"v":0.0205},{"id":138,"x":-118.768442,"y":34.025563,"battery":false,"solar":false,"medical":false,"size":0.63,"u":0.2731,"v":0.1492},{"id":139,"x":-118.768162,"y":34.026015,"battery":false,"solar":false,"medical":false,"size":1.51,"u":0.7887,"v":0.1537},{"id":140,"x":-118.768445,"y":34.025934,"battery":false,"solar":false,"medical":false,"size":0.62,"u":0.6543,"v":0.9984},{"id":141,"x":-118.768713,"y":34.026388,"battery":false,"solar":true,"medical":false,"size":0.88,"u":0.2191,"v":0.6726},{"id":142,"x":-118.768313,"y":34.026257,"battery":false,"solar":false,"medical":false,"size":1.09,"u":0.8643,"v":0.0224},{"id":143,"x":-118.768643,"y":34.026664,"battery":false,"solar":false,"medical":false,"size":0.74,"u":0.9992,"v":0.4527},{"id":144,"x":-118.768056,"y":34.026692,"battery":false,"solar":false,"medical":false,"size":1.0,"u":0.9086,"v":0.5209},{"id":145,"x":-118.768462,"y":34.027132,"battery":false,"solar":false,"medical":false,"size":1.19,"u":0.9893,"v":0.7514},{"id":146,"x":-118.767891,"y":34.027166,"battery":false,"solar":false,"medical":false,"size":1.57,"u":0.3915,"v":0.201},{"id":147,"x":-118.768287,"y":34.027587,"battery":false,"solar":false,"medical":false,"size":1.26,"u":0.8779,"v":0.13},{"id":148,"x":-118.767766,"y":34.027758,"battery":false,"solar":false,"medical":false,"size":1.46,"u":0.9926,"v":0.0545},{"id":149,"x":-118.768277,"y":34.027901,"battery":false,"solar":false,"medical":false,"size":0.92,"u":0.3822,"v":0.5823},{"id":150,"x":-118.768048,"y":34.028045,"battery":false,"solar":false,"medical":false,"size":1.1,"u":0.7739,"v":0.5603},{"id":151,"x":-118.768044,"y":34.027871,"battery":false,"solar":false,"medical":false,"size":1.42,"u":0.7474,"v":0.9057},{"id":152,"x":-118.768472,"y":34.027547,"battery":false,"solar":false,"medical":false,"size":0.97,"u":0.4663,"v":0.3681},{"id":153,"x":-118.768001,"y":34.027265,"battery":false,"solar":false,"medical":false,"size":0.62,"u":0.6752,"v":0.8363},{"id":154,"x":-118.768,"y":34.028347,"battery":false,"solar":false,"medical":false,"size":1.44,"u":0.4436,"v":0.533},{"id":155,"x":-118.768513,"y":34.028385,"battery":false,"solar":false,"medical":false,"size":1.04,"u":0.5825,"v":0.7234},{"id":156,"x":-118.768123,"y":34.028701,"battery":false,"solar":false,"medical":false,"size":1.27,"u":0.8947,"v":0.1206},{"id":157,"x":-118.768663,"y":34.028919,"battery":false,"solar":false,"medical":false,"size":0.79,"u":0.1609,"v":0.2276},{"id":158,"x":-118.768182,"y":34.029189,"battery":false,"solar":false,"medical":false,"size":1.01,"u":0.5243,"v":0.8577},{"id":159,"x":-118.767926,"y":34.02601,"battery":false,"solar":false,"medical":false,"size":1.41,"u":0.3111,"v":0.6053},{"id":160,"x":-118.767617,"y":34.02558,"battery":true,"solar":true,"medical":false,"size":1.09,"u":0.2324,"v":0.3855},{"id":161,"x":-118.767339,"y":34.026022,"battery":false,"solar":false,"medical":false,"size":0.94,"u":0.6187,"v":0.0148},{"id":162,"x":-118.76703,"y":34.025597,"battery":false,"solar":false,"medical":false,"size":0.73,"u":0.7247,"v":0.6412},{"id":163,"x":-118.766754,"y":34.026099,"battery":false,"solar":false,"medical":false,"size":1.6,"u":0.3538,"v":0.6782},{"id":164,"x":-118.766453,"y":34.025627,"battery":false,"solar":true,"medical":false,"size":0.95,"u":0.104,"v":0.2564},{"id":165,"x":-118.766167,"y":34.026145,"battery":false,"solar":false,"medical":false,"size":1.04,"u":0.5963,"v":0.3227},{"id":166,"x":-118.765849,"y":34.025593,"battery":false,"solar":false,"medical":false,"size":0.6,"u":0.242,"v":0.0373},{"id":167,"x":-118.765595,"y":34.026168,"battery":false,"solar":false,"medical":false,"size":0.73,"u":0.7058,"v":0.6422},{"id":168,"x":-118.765517,"y":34.025696,"battery":false,"solar":true,"medical":false,"size":1.49,"u":0.957,"v":0.5251},{"id":169,"x":-118.765303,"y":34.02621,"battery":false,"solar":false,"medical":false,"size":0.83,"u":0.1365,"v":0.041},{"id":170,"x":-118.76499,"y":34.025737,"battery":false,"solar":true,"medical":false,"size":1.08,"u":0.4171,"v":0.779},{"id":171,"x":-118.765688,"y":34.026068,"battery":false,"solar":false,"medical":false,"size":1.14,"u":0.3036,"v":0.8959},{"id":172,"x":-118.765258,"y":34.026272,"battery":false,"solar":false,"medical":false,"size":1.41,"u":0.4472,"v":0.0526},{"id":173,"x":-118.765576,"y":34.026739,"battery":false,"solar":false,"medical":false,"size":0.68,"u":0.3792,"v":0.7913},{"id":174,"x":-118.764924,"y":34.02669,"battery":false,"solar":false,"medical":false,"size":1.48,"u":0.8227,"v":0.0136},{"id":175,"x":-118.765446,"y":34.026732,"battery":true,"solar":true,"medical":false,"size":0.78,"u":0.8035,"v":0.7746},{"id":176,"x":-118.765427,"y":34.027325,"battery":false,"solar":false,"medical":false,"size":0.61,"u":0.6833,"v":0.5066},{"id":177,"x":-118.764818,"y":34.026904,"battery":false,"solar":false,"medical":false,"size":0.61,"u":0.9273,"v":0.1902},{"id":178,"x":-118.76481,"y":34.02642,"battery":false,"solar":false,"medical":false,"size":1.42,"u":0.5319,"v":0.0695},{"id":179,"x":-118.76451,"y":34.026928,"battery":false,"solar":false,"medical":false,"size":0.74,"u":0.524,"v":0.0189},{"id":180,"x":-118.764108,"y":34.026467,"battery":false,"solar":false,"medical":false,"size":1.04,"u":0.9317,"v":0.8759},{"id":181,"x":-118.763953,"y":34.026999,"battery":false,"solar":false,"medical":false,"size":1.13,"u":0.1296,"v":0.4334},{"id":182,"x":-118.763556,"y":34.02667,"battery":false,"solar":false,"medical":false,"size":0.73,"u":0.6367,"v":0.1569},{"id":183,"x":-118.763478,"y":34.027146,"battery":false,"solar":false,"medical":false,"size":0.74,"u":0.9548,"v":0.8205},{"id":184,"x":-118.763008,"y":34.026936,"battery":false,"solar":false,"medical":false,"size":1.34,"u":0.876,"v":0.6462},{"id":185,"x":-118.76318,"y":34.02741,"battery":false,"solar":false,"medical":false,"size":0.64,"u":0.2008,"v":0.8396},{"id":186,"x":-118.762874,"y":34.02773,"battery":false,"solar":false,"medical":false,"size":0.99,"u":0.0744,"v":0.9281},{"id":187,"x":-118.763375,"y":34.027694,"battery":false,"solar":false,"medical":false,"size":0.7,"u":0.6109,"v":0.5432},{"id":188,"x":-118.763087,"y":34.028034,"battery":false,"solar":false,"medical":false,"size":0.71,"u":0.3131,"v":0.9508},{"id":189,"x":-118.763459,"y":34.028353,"battery":false,"solar":true,"medical":false,"size":0.85,"u":0.4117,"v":0.0182},{"id":190,"x":-118.762952,"y":34.028302,"battery":false,"solar":false,"medical":false,"size":1.0,"u":0.5544,"v":0.2104},{"id":191,"x":-118.765221,"y":34.027097,"battery":false,"solar":false,"medical":false,"size":0.91,"u":0.5532,"v":0.7686},{"id":192,"x":-118.764714,"y":34.027004,"battery":false,"solar":false,"medical":false,"size":1.12,"u":0.3765,"v":0.5507},{"id":193,"x":-118.764881,"y":34.027521,"battery":false,"solar":false,"medical":false,"size":1.34,"u":0.6184,"v":0.8139},{"id":194,"x":-118.764397,"y":34.027431,"battery":false,"solar":false,"medical":false,"size":1.34,"u":0.9598,"v":0.9511},{"id":195,"x":-118.764566,"y":34.027949,"battery":false,"solar":false,"medical":false,"size":0.77,"u":0.7374,"v":0.9206},{"id":196,"x":-118.763983,"y":34.027786,"battery":false,"solar":false,"medical":false,"size":1.02,"u":0.4721,"v":0.3828},{"id":197,"x":-118.764213,"y":34.028224,"battery":false,"solar":false,"medical":false,"size":1.17,"u":0.2384,"v":0.5276},{"id":198,"x":-118.763755,"y":34.028338,"battery":true,"solar":true,"medical":false,"size":1.25,"u":0.512,"v":0.3075},{"id":199,"x":-118.764142,"y":34.028711,"battery":false,"solar":false,"medical":false,"size":1.51,"u":0.5161,"v":0.2603},{"id":200,"x":-118.763663,"y":34.02885,"battery":false,"solar":false,"medical":false,"size":0.76,"u":0.5647,"v":0.7949},{"id":201,"x":-118.764068,"y":34.029153,"battery":false,"solar":false,"medical":false,"size":1.11,"u":0.7399,"v":0.171},{"id":202,"x":-118.763555,"y":34.029339,"battery":false,"solar":false,"medical":false,"size":1.15,"u":0.2763,"v":0.8683},{"id":203,"x":-118.764026,"y":34.029665,"battery":false,"solar":true,"medical":false,"size":1.03,"u":0.4837,"v":0.1323},{"id":204,"x":-118.763443,"y":34.029804,"battery":false,"solar":false,"medical":false,"size":1.19,"u":0.8476,"v":0.8442},{"id":205,"x":-118.763801,"y":34.030183,"battery":false,"solar":false,"medical":false,"size":1.09,"u":0.3545,"v":0.1846},{"id":206,"x":-118.763271,"y":34.030169,"battery":false,"solar":false,"medical":false,"size":1.34,"u":0.9397,"v":0.2631},{"id":207,"x":-118.763753,"y":34.030477,"battery":false,"solar":false,"medical":false,"size":1.36,"u":0.956,"v":0.5331},{"id":208,"x":-118.763274,"y":34.030858,"battery":true,"solar":true,"medical":false,"size":0.73,"u":0.3442,"v":0.9536},{"id":209,"x":-118.763866,"y":34.030938,"battery":false,"solar":false,"medical":false,"size":1.07,"u":0.6693,"v":0.2786},{"id":210,"x":-118.763417,"y":34.031309,"battery":false,"solar":false,"medical":false,"size":0.84,"u":0.273,"v":0.0301},{"id":211,"x":-118.763855,"y":34.031513,"battery":false,"solar":false,"medical":false,"size":0.73,"u":0.5763,"v":0.7679},{"id":212,"x":-118.763376,"y":34.031703,"battery":false,"solar":false,"medical":false,"size":1.55,"u":0.1783,"v":0.9759},{"id":213,"x":-118.763879,"y":34.032032,"battery":false,"solar":false,"medical":false,"size":0.67,"u":0.4021,"v":0.6864},{"id":214,"x":-118.763304,"y":34.03223,"battery":false,"solar":false,"medical":false,"size":1.49,"u":0.7532,"v":0.5299},{"id":215,"x":-118.763871,"y":34.032293,"battery":false,"solar":false,"medical":false,"size":1.26,"u":0.0238,"v":0.4776},{"id":216,"x":-118.763639,"y":34.032805,"battery":false,"solar":false,"medical":false,"size":0.69,"u":0.2627,"v":0.3647},{"id":217,"x":-118.764223,"y":34.032692,"battery":false,"solar":false,"medical":false,"size":1.18,"u":0.1369,"v":0.2836},{"id":218,"x":-118.763941,"y":34.033178,"battery":false,"solar":false,"medical":false,"size":1.48,"u":0.515,"v":0.9902},{"id":219,"x":-118.765709,"y":34.026936,"battery":false,"solar":false,"medical":false,"size":1.13,"u":0.2563,"v":0.9758},{"id":220,"x":-118.765719,"y":34.027427,"battery":false,"solar":false,"medical":true,"size":1.0,"u":0.282,"v":0.601},{"id":221,"x":-118.766227,"y":34.027188,"battery":false,"solar":false,"medical":false,"size":1.55,"u":0.9264,"v":0.3347},{"id":222,"x":-118.766151,"y":34.027291,"battery":false,"solar":false,"medical":false,"size":1.58,"u":0.0488,"v":0.3032},{"id":223,"x":-118.76595,"y":34.026892,"battery":false,"solar":true,"medical":false,"size":0.91,"u":0.8871,"v":0.8741},{"id":224,"x":-118.765931,"y":34.027684,"battery":false,"solar":false,"medical":false,"size":0.85,"u":0.9271,"v":0.1338},{"id":225,"x":-118.766174,"y":34.027367,"battery":false,"solar":false,"medical":false,"size":0.61,"u":0.4437,"v":0.9705},{"id":226,"x":-118.76657,"y":34.027575,"battery":false,"solar":true,"medical":false,"size":1.1,"u":0.9645,"v":0.1002},{"id":227,"x":-118.766222,"y":34.027172,"battery":false,"solar":false,"medical":false,"size":0.83,"u":0.6056,"v":0.0063},{"id":228,"x":-118.766832,"y":34.027246,"battery":false,"solar":false,"medical":false,"size":0.68,"u":0.8958,"v":0.0953},{"id":229,"x":-118.766606,"y":34.026676,"battery":false,"solar":false,"medical":false,"size":0.78,"u":0.9993,"v":0.6806},{"id":230,"x":-118.766904,"y":34.02693,"battery":false,"solar":false,"medical":false,"size":1.29,"u":0.5786,"v":0.2615},{"id":231,"x":-118.767396,"y":34.026602,"battery":false,"solar":false,"medical":false,"size":0.9,"u":0.0915,"v":0.0817},{"id":232,"x":-118.765926,"y":34.027831,"battery":false,"solar":false,"medical":false,"size":1.12,"u":0.982,"v":0.8698},{"id":233,"x":-118.766424,"y":34.028075,"battery":false,"solar":false,"medical":false,"size":1.56,"u":0.1658,"v":0.6376},{"id":234,"x":-118.765981,"y":34.028341,"battery":false,"solar":false,"medical":false,"size":0.97,"u":0.9871,"v":0.4388},{"id":235,"x":-118.766354,"y":34.028613,"battery":false,"solar":false,"medical":false,"size":1.27,"u":0.3584,"v":0.403},{"id":236,"x":-118.765873,"y":34.028634,"battery":false,"solar":false,"medical":false,"size":1.37,"u":0.1552,"v":0.4745},{"id":237,"x":-118.76589,"y":34.029123,"battery":false,"solar":false,"medical":false,"size":1.31,"u":0.815,"v":0.2554},{"id":238,"x":-118.765393,"y":34.028854,"battery":false,"solar":false,"medical":false,"size":1.26,"u":0.8481,"v":0.5863},{"id":239,"x":-118.765646,"y":34.028952,"battery":true,"solar":true,"medical":false,"size":0.98,"u":0.1479,"v":0.1937},{"id":240,"x":-118.765503,"y":34.029491,"battery":false,"solar":true,"medical":false,"size":0.9,"u":0.9996,"v":0.6579},{"id":241,"x":-118.76574,"y":34.029712,"battery":false,"solar":false,"medical":false,"size":1.08,"u":0.6159,"v":0.2656},{"id":242,"x":-118.765256,"y":34.029587,"battery":false,"solar":false,"medical":false,"size":0.79,"u":0.2293,"v":0.0691},{"id":243,"x":-118.765546,"y":34.029936,"battery":false,"solar":false,"medical":false,"size":0.77,"u":0.7509,"v":0.4752},{"id":244,"x":-118.765219,"y":34.030294,"battery":false,"solar":false,"medical":false,"size":0.65,"u":0.0485,"v":0.8377},{"id":245,"x":-118.765692,"y":34.030085,"battery":true,"solar":true,"medical":false,"size":1.39,"u":0.7498,"v":0.9885},{"id":246,"x":-118.765597,"y":34.030576,"battery":false,"solar":false,"medical":false,"size":0.72,"u":0.5977,"v":0.5605},{"id":247,"x":-118.766216,"y":34.030649,"battery":false,"solar":false,"medical":false,"size":1.42,"u":0.6406,"v":0.1493},{"id":248,"x":-118.765753,"y":34.030393,"battery":false,"solar":false,"medical":false,"size":0.85,"u":0.185,"v":0.5481},{"id":249,"x":-118.76582,"y":34.030747,"battery":false,"solar":false,"medical":false,"size":1.35,"u":0.298,"v":0.5014},{"id":250,"x":-118.765759,"y":34.030963,"battery":false,"solar":false,"medical":false,"size":1.46,"u":0.5539,"v":0.1585},{"id":251,"x":-118.766079,"y":34.030667,"battery":false,"solar":false,"medical":false,"size":0.83,"u":0.3519,"v":0.341},{"id":252,"x":-118.766615,"y":34.030855,"battery":false,"solar":false,"medical":false,"size":1.0,"u":0.9404,"v":0.0387},{"id":253,"x":-118.766776,"y":34.03085,"battery":false,"solar":false,"medical":false,"size":1.44,"u":0.9712,"v":0.7524},{"id":254,"x":-118.766279,"y":34.031095,"battery":false,"solar":false,"medical":false,"size":0.77,"u":0.9839,"v":0.4059},{"id":255,"x":-118.766573,"y":34.030373,"battery":false,"solar":false,"medical":false,"size":1.48,"u":0.4536,"v":0.6716},{"id":256,"x":-118.765185,"y":34.028967,"battery":false,"solar":false,"medical":false,"size":1.25,"u":0.7994,"v":0.5889},{"id":257,"x":-118.765112,"y":34.029492,"battery":false,"solar":false,"medical":true,"size":1.6,"u":0.8015,"v":0.8543},{"id":258,"x":-118.764634,"y":34.029166,"battery":false,"solar":false,"medical":false,"size":1.52,"u":0.3577,"v":0.4008},{"id":259,"x":-118.764851,"y":34.029725,"battery":true,"solar":true,"medical":true,"size":1.41,"u":0.3507,"v":0.2122},{"id":260,"x":-118.764355,"y":34.029888,"battery":false,"solar":false,"medical":false,"size":1.18,"u":0.5633,"v":0.7196},{"id":261,"x":-118.764774,"y":34.030138,"battery":false,"solar":false,"medical":false,"size":0.87,"u":0.2192,"v":0.8295},{"id":262,"x":-118.764337,"y":34.030279,"battery":false,"solar":false,"medical":false,"size":0.73,"u":0.3388,"v":0.1848},{"id":263,"x":-118.76464,"y":34.030689,"battery":false,"solar":false,"medical":false,"size":0.75,"u":0.6364,"v":0.6525},{"id":264,"x":-118.764108,"y":34.030958,"battery":false,"solar":true,"medical":false,"size":1.51,"u":0.5844,"v":0.963},{"id":265,"x":-118.765512,"y":34.026817,"battery":false,"solar":true,"medical":false,"size":1.54,"u":0.1301,"v":0.8522},{"id":266,"x":-118.765753,"y":34.027295,"battery":true,"solar":true,"medical":false,"size":1.21,"u":0.4453,"v":0.4212},{"id":267,"x":-118.764876,"y":34.02613,"battery":false,"solar":false,"medical":false,"size":0.64,"u":0.8713,"v":0.1223},{"id":268,"x":-118.764504,"y":34.02572,"battery":false,"solar":false,"medical":false,"size":0.72,"u":0.3027,"v":0.4659},{"id":269,"x":-118.764318,"y":34.02632,"battery":false,"solar":false,"medical":false,"size":0.94,"u":0.4663,"v":0.2653},{"id":270,"x":-118.76395,"y":34.025925,"battery":false,"solar":false,"medical":false,"size":0.82,"u":0.0908,"v":0.6105},{"id":271,"x":-118.763727,"y":34.026336,"battery":true,"solar":true,"medical":false,"size":1.13,"u":0.5196,"v":0.0772},{"id":272,"x":-118.763364,"y":34.025962,"battery":false,"solar":true,"medical":false,"size":1.08,"u":0.6354,"v":0.9111},{"id":273,"x":-118.763155,"y":34.02645,"battery":false,"solar":false,"medical":false,"size":1.35,"u":0.5901,"v":0.8779},{"id":274,"x":-118.762755,"y":34.026062,"battery":false,"solar":false,"medical":false,"size":0.93,"u":0.245,"v":0.1763},{"id":275,"x":-118.762635,"y":34.026652,"battery":false,"solar":false,"medical":false,"size":1.45,"u":0.5946,"v":0.1215},{"id":276,"x":-118.762241,"y":34.026323,"battery":false,"solar":false,"medical":false,"size":1.03,"u":0.2045,"v":0.7885},{"id":277,"x":-118.762084,"y":34.026827,"battery":false,"solar":false,"medical":false,"size":0.68,"u":0.7485,"v":0.6005},{"id":278,"x":-118.76166,"y":34.026391,"battery":false,"solar":false,"medical":false,"size":1.39,"u":0.5674,"v":0.0715},{"id":279,"x":-118.761531,"y":34.026937,"battery":false,"solar":false,"medical":false,"size":1.4,"u":0.5327,"v":0.6402},{"id":280,"x":-118.761108,"y":34.02661,"battery":false,"solar":false,"medical":false,"size":1.22,"u":0.9093,"v":0.5302},{"id":281,"x":-118.760749,"y":34.027124,"battery":false,"solar":false,"medical":false,"size":1.58,"u":0.9139,"v":0.6233},{"id":282,"x":-118.760566,"y":34.026803,"battery":false,"solar":false,"medical":false,"size":0.77,"u":0.0633,"v":0.182},{"id":283,"x":-118.760531,"y":34.027411,"battery":false,"solar":false,"medical":false,"size":0.75,"u":0.4065,"v":0.4105},{"id":284,"x":-118.760554,"y":34.026906,"battery":false,"solar":false,"medical":false,"size":1.34,"u":0.3685,"v":0.1541},{"id":285,"x":-118.760056,"y":34.027176,"battery":false,"solar":true,"medical":false,"size":1.14,"u":0.2774,"v":0.3597},{"id":286,"x":-118.760028,"y":34.027058,"battery":false,"solar":false,"medical":false,"size":1.15,"u":0.8149,"v":0.3047},{"id":287,"x":-118.760009,"y":34.02767,"battery":false,"solar":false,"medical":false,"size":0.79,"u":0.0936,"v":0.9473},{"id":288,"x":-118.75952,"y":34.027364,"battery":false,"solar":false,"medical":false,"size":0.97,"u":0.6782,"v":0.2966},{"id":289,"x":-118.759505,"y":34.027914,"battery":false,"solar":false,"medical":false,"size":0.79,"u":0.2823,"v":0.4214},{"id":290,"x":-118.759022,"y":34.02762,"battery":false,"solar":false,"medical":false,"size":0.7,"u":0.6973,"v":0.4471},{"id":291,"x":-118.759579,"y":34.027424,"battery":false,"solar":false,"medical":false,"size":0.63,"u":0.8793,"v":0.5503},{"id":292,"x":-118.759547,"y":34.027056,"battery":false,"solar":false,"medical":false,"size":0.81,"u":0.3048,"v":0.2271},{"id":293,"x":-118.759328,"y":34.027107,"battery":false,"solar":false,"medical":false,"size":1.01,"u":0.4919,"v":0.9315},{"id":294,"x":-118.759788,"y":34.027104,"battery":false,"solar":false,"medical":true,"size":0.84,"u":0.6495,"v":0.1299},{"id":295,"x":-118.759312,"y":34.026852,"battery":true,"solar":true,"medical":false,"size":1.07,"u":0.8552,"v":0.8516},{"id":296,"x":-118.759755,"y":34.026613,"battery":false,"solar":false,"medical":false,"size":0.71,"u":0.2312,"v":0.4996},{"id":297,"x":-118.759716,"y":34.026294,"battery":false,"solar":false,"medical":false,"size":0.97,"u":0.1142,"v":0.8128},{"id":298,"x":-118.760004,"y":34.026773,"battery":false,"solar":false,"medical":false,"size":0.85,"u":0.9262,"v":0.1331},{"id":299,"x":-118.759329,"y":34.027687,"battery":false,"solar":false,"medical":false,"size":1.13,"u":0.115,"v":0.9626},{"id":300,"x":-118.758835,"y":34.02736,"battery":false,"solar":false,"medical":false,"size":1.43,"u":0.3993,"v":0.5629},{"id":301,"x":-118.758812,"y":34.027909,"battery":false,"solar":false,"medical":false,"size":0.98,"u":0.7163,"v":0.6507},{"id":302,"x":-118.758665,"y":34.02771,"battery":false,"solar":false,"medical":false,"size":1.56,"u":0.1028,"v":0.0646},{"id":303,"x":-118.758143,"y":34.027693,"battery":false,"solar":false,"medical":false,"size":1.19,"u":0.081,"v":0.1693},{"id":304,"x":-118.758491,"y":34.027231,"battery":false,"solar":false,"medical":false,"size":1.53,"u":0.4088,"v":0.9915},{"id":305,"x":-118.757943,"y":34.027227,"battery":false,"solar":false,"medical":false,"size":0.87,"u":0.4628,"v":0.3259},{"id":306,"x":-118.758221,"y":34.026801,"battery":false,"solar":false,"medical":false,"size":1.53,"u":0.6253,"v":0.853},{"id":307,"x":-118.757868,"y":34.027171,"battery":false,"solar":false,"medical":false,"size":1.29,"u":0.409,"v":0.3524},{"id":308,"x":-118.757444,"y":34.027235,"battery":false,"solar":false,"medical":false,"size":1.19,"u":0.7691,"v":0.6692},{"id":309,"x":-118.758043,"y":34.027161,"battery":false,"solar":true,"medical":false,"size":1.31,"u":0.9924,"v":0.1251},{"id":310,"x":-118.757224,"y":34.026991,"battery":false,"solar":false,"medical":false,"size":1.18,"u":0.5447,"v":0.6814},{"id":311,"x":-118.757122,"y":34.027542,"battery":false,"solar":false,"medical":false,"size":0.68,"u":0.644,"v":0.1849},{"id":312,"x":-118.757158,"y":34.026923,"battery":false,"solar":false,"medical":false,"size":1.31,"u":0.4248,"v":0.0977},{"id":313,"x":-118.759079,"y":34.028132,"battery":false,"solar":false,"medical":false,"size":0.89,"u":0.9579,"v":0.7274},{"id":314,"x":-118.758599,"y":34.027866,"battery":false,"solar":false,"medical":false,"size":1.09,"u":0.4731,"v":0.5856},{"id":315,"x":-118.758559,"y":34.028376,"battery":false,"solar":false,"medical":false,"size":0.84,"u":0.4442,"v":0.6084},{"id":316,"x":-118.758186,"y":34.028132,"battery":false,"solar":false,"medical":false,"size":0.79,"u":0.412,"v":0.9719},{"id":317,"x":-118.758194,"y":34.028672,"battery":false,"solar":false,"medical":false,"size":0.91,"u":0.8395,"v":0.1397},{"id":318,"x":-118.757712,"y":34.028396,"battery":false,"solar":false,"medical":false,"size":1.56,"u":0.8535,"v":0.3686},{"id":319,"x":-118.757684,"y":34.028905,"battery":false,"solar":false,"medical":false,"size":1.1,"u":0.0086,"v":0.9501},{"id":320,"x":-118.757222,"y":34.028654,"battery":false,"solar":false,"medical":false,"size":0.86,"u":0.5385,"v":0.7044},{"id":321,"x":-118.757177,"y":34.029157,"battery":false,"solar":false,"medical":false,"size":1.51,"u":0.0488,"v":0.7985},{"id":322,"x":-118.756721,"y":34.028905,"battery":false,"solar":false,"medical":true,"size":1.49,"u":0.862,"v":0.2873},{"id":323,"x":-118.756716,"y":34.029455,"battery":false,"solar":false,"medical":false,"size":1.0,"u":0.5823,"v":0.3872},{"id":324,"x":-118.756253,"y":34.029216,"battery":false,"solar":false,"medical":false,"size":1.29,"u":0.5717,"v":0.6445},{"id":325,"x":-118.756208,"y":34.029726,"battery":false,"solar":false,"medical":false,"size":0.64,"u":0.5869,"v":0.186},{"id":326,"x":-118.755771,"y":34.029453,"battery":false,"solar":false,"medical":false,"size":1.03,"u":0.0771,"v":0.6221},{"id":327,"x":-118.755662,"y":34.029934,"battery":false,"solar":true,"medical":false,"size":0.69,"u":0.3351,"v":0.0573},{"id":328,"x":-118.758022,"y":34.028623,"battery":false,"solar":true,"medical":false,"size":1.02,"u":0.7655,"v":0.6795},{"id":329,"x":-118.758623,"y":34.028444,"battery":false,"solar":false,"medical":false,"size":1.15,"u":0.216,"v":0.9695},{"id":330,"x":-118.758487,"y":34.028729,"battery":false,"solar":false,"medical":false,"size":1.46,"u":0.5023,"v":0.0217},{"id":331,"x":-118.758953,"y":34.028709,"battery":false,"solar":false,"medical":false,"size":1.35,"u":0.1735,"v":0.6155},{"id":332,"x":-118.758734,"y":34.029191,"battery":false,"solar":false,"medical":false,"size":0.86,"u":0.7254,"v":0.1587},{"id":333,"x":-118.75919,"y":34.029265,"battery":false,"solar":false,"medical":false,"size":1.41,"u":0.9105,"v":0.2479},{"id":334,"x":-118.758735,"y":34.029599,"battery":false,"solar":false,"medical":false,"size":1.42,"u":0.5422,"v":0.8107},{"id":335,"x":-118.759325,"y":34.029497,"battery":false,"solar":true,"medical":false,"size":1.25,"u":0.4429,"v":0.6292},{"id":336,"x":-118.758897,"y":34.029618,"battery":false,"solar":false,"medical":false,"size":1.13,"u":0.8196,"v":0.2323},{"id":337,"x":-118.759228,"y":34.029465,"battery":true,"solar":true,"medical":false,"size":0.86,"u":0.6688,"v":0.1134},{"id":338,"x":-118.759094,"y":34.029768,"battery":false,"solar":true,"medical":true,"size":1.08,"u":0.8023,"v":0.2019},{"id":339,"x":-118.759641,"y":34.029766,"battery":false,"solar":false,"medical":false,"size":1.13,"u":0.0226,"v":0.1073},{"id":340,"x":-118.759342,"y":34.030264,"battery":false,"solar":false,"medical":false,"size":1.48,"u":0.2,"v":0.4488},{"id":341,"x":-118.759733,"y":34.029324,"battery":false,"solar":false,"medical":false,"size":0.72,"u":0.9991,"v":0.3197},{"id":342,"x":-118.760043,"y":34.029842,"battery":false,"solar":false,"medical":false,"size":1.13,"u":0.9591,"v":0.0788},{"id":343,"x":-118.760079,"y":34.02953,"battery":false,"solar":false,"medical":false,"size":1.54,"u":0.3722,"v":0.1914},{"id":344,"x":-118.760364,"y":34.030082,"battery":false,"solar":true,"medical":false,"size":1.26,"u":0.2385,"v":0.6635},{"id":345,"x":-118.760666,"y":34.029563,"battery":false,"solar":false,"medical":false,"size":0.93,"u":0.504,"v":0.9579},{"id":346,"x":-118.76095,"y":34.030108,"battery":false,"solar":false,"medical":false,"size":1.13,"u":0.0737,"v":0.1159},{"id":347,"x":-118.761252,"y":34.029632,"battery":false,"solar":false,"medical":false,"size":1.54,"u":0.5966,"v":0.4932},{"id":348,"x":-118.760405,"y":34.030034,"battery":false,"solar":false,"medical":false,"size":0.83,"u":0.8296,"v":0.2005},{"id":349,"x":-118.760965,"y":34.030285,"battery":false,"solar":false,"medical":false,"size":0.91,"u":0.4666,"v":0.1145},{"id":350,"x":-118.760381,"y":34.030524,"battery":false,"solar":false,"medical":false,"size":0.92,"u":0.564,"v":0.1394},{"id":351,"x":-118.760736,"y":34.030524,"battery":false,"solar":false,"medical":false,"size":1.44,"u":0.2135,"v":0.2066},{"id":352,"x":-118.761019,"y":34.03101,"battery":false,"solar":false,"medical":false,"size":1.28,"u":0.4744,"v":0.161},{"id":353,"x":-118.75882,"y":34.03007,"battery":false,"solar":true,"medical":false,"size":1.0,"u":0.4528,"v":0.7254},{"id":354,"x":-118.758699,"y":34.030049,"battery":false,"solar":false,"medical":false,"size":1.43,"u":0.4094,"v":0.6573},{"id":355,"x":-118.759256,"y":34.030159,"battery":false,"solar":false,"medical":false,"size":1.43,"u":0.0779,"v":0.6116},{"id":356,"x":-118.758797,"y":34.030535,"battery":false,"solar":false,"medical":false,"size":1.41,"u":0.5985,"v":0.4316},{"id":357,"x":-118.75846,"y":34.030204,"battery":false,"solar":false,"medical":false,"size":0.77,"u":0.3754,"v":0.5271},{"id":358,"x":-118.758275,"y":34.02962,"battery":true,"solar":true,"medical":false,"size":1.05,"u":0.9879,"v":0.2},{"id":359,"x":-118.758283,"y":34.029902,"battery":false,"solar":true,"medical":false,"size":1.54,"u":0.3737,"v":0.8954},{"id":360,"x":-118.757853,"y":34.030196,"battery":false,"solar":false,"medical":false,"size":1.15,"u":0.2588,"v":0.9107},{"id":361,"x":-118.758313,"y":34.030392,"battery":false,"solar":false,"medical":false,"size":0.81,"u":0.5602,"v":0.762},{"id":362,"x":-118.757814,"y":34.029655,"battery":false,"solar":false,"medical":false,"size":1.04,"u":0.192,"v":0.9344},{"id":363,"x":-118.757701,"y":34.03018,"battery":true,"solar":true,"medical":false,"size":0.88,"u":0.1897,"v":0.8073},{"id":364,"x":-118.757266,"y":34.029783,"battery":false,"solar":false,"medical":false,"size":0.84,"u":0.3322,"v":0.3759},{"id":365,"x":-118.757153,"y":34.030401,"battery":false,"solar":false,"medical":false,"size":1.1,"u":0.3311,"v":0.7554},{"id":366,"x":-118.756733,"y":34.029969,"battery":false,"solar":false,"medical":false,"size":1.08,"u":0.1669,"v":0.0603},{"id":367,"x":-118.756601,"y":34.030495,"battery":false,"solar":false,"medical":false,"size":1.52,"u":0.1126,"v":0.6413},{"id":368,"x":-118.758302,"y":34.028386,"battery":false,"solar":false,"medical":false,"size":0.99,"u":0.5727,"v":0.588},{"id":369,"x":-118.757996,"y":34.027959,"battery":false,"solar":false,"medical":false,"size":1.21,"u":0.5494,"v":0.2544},{"id":370,"x":-118.758478,"y":34.027927,"battery":false,"solar":false,"medical":false,"size":0.95,"u":0.0998,"v":0.5164},{"id":371,"x":-118.757993,"y":34.027947,"battery":false,"solar":false,"medical":false,"size":1.25,"u":0.1972,"v":0.5813},{"id":372,"x":-118.75817,"y":34.027506,"battery":false,"solar":false,"medical":false,"size":1.37,"u":0.981,"v":0.4927},{"id":373,"x":-118.758605,"y":34.028232,"battery":false,"solar":false,"medical":false,"size":1.38,"u":0.5092,"v":0.1521},{"id":374,"x":-118.760976,"y":34.026527,"battery":false,"solar":false,"medical":false,"size":1.28,"u":0.9163,"v":0.9677},{"id":375,"x":-118.764968,"y":34.025875,"battery":false,"solar":false,"medical":false,"size":1.05,"u":0.0221,"v":0.418},{"id":376,"x":-118.764852,"y":34.02534,"battery":false,"solar":false,"medical":false,"size":0.98,"u":0.5508,"v":0.963},{"id":377,"x":-118.764553,"y":34.025897,"battery":false,"solar":false,"medical":false,"size":0.97,"u":0.3532,"v":0.2001},{"id":378,"x":-118.764222,"y":34.025453,"battery":true,"solar":true,"medical":false,"size":1.27,"u":0.3418,"v":0.1008},{"id":379,"x":-118.763963,"y":34.025883,"battery":false,"solar":false,"medical":false,"size":1.15,"u":0.6126,"v":0.2814},{"id":380,"x":-118.763636,"y":34.025481,"battery":true,"solar":true,"medical":false,"size":0.9,"u":0.65,"v":0.4424},{"id":381,"x":-118.763395,"y":34.025971,"battery":false,"solar":false,"medical":false,"size":1.31,"u":0.8104,"v":0.9272},{"id":382,"x":-118.763044,"y":34.025549,"battery":false,"solar":false,"medical":false,"size":1.43,"u":0.413,"v":0.7522},{"id":383,"x":-118.762809,"y":34.025999,"battery":false,"solar":false,"medical":false,"size":1.15,"u":0.9944,"v":0.6636},{"id":384,"x":-118.762467,"y":34.025642,"battery":false,"solar":false,"medical":false,"size":0.93,"u":0.9448,"v":0.6764},{"id":385,"x":-118.762193,"y":34.026079,"battery":true,"solar":true,"medical":false,"size":1.16,"u":0.1394,"v":0.0822},{"id":386,"x":-118.761948,"y":34.025594,"battery":false,"solar":false,"medical":false,"size":1.39,"u":0.3853,"v":0.0141},{"id":387,"x":-118.761602,"y":34.025997,"battery":false,"solar":false,"medical":false,"size":1.46,"u":0.825,"v":0.8223},{"id":388,"x":-118.76135,"y":34.025479,"battery":false,"solar":false,"medical":false,"size":1.52,"u":0.3167,"v":0.5194},{"id":389,"x":-118.761034,"y":34.026016,"battery":false,"solar":true,"medical":false,"size":1.26,"u":0.7555,"v":0.9768},{"id":390,"x":-118.760741,"y":34.025551,"battery":false,"solar":false,"medical":false,"size":0.84,"u":0.9678,"v":0.9098},{"id":391,"x":-118.76048,"y":34.026023,"battery":false,"solar":false,"medical":false,"size":1.57,"u":0.7779,"v":0.3985},{"id":392,"x":-118.760134,"y":34.025533,"battery":false,"solar":true,"medical":false,"size":1.29,"u":0.0329,"v":0.5682},{"id":393,"x":-118.759896,"y":34.026091,"battery":false,"solar":true,"medical":false,"size":1.04,"u":0.9975,"v":0.5952},{"id":394,"x":-118.759549,"y":34.025629,"battery":false,"solar":false,"medical":false,"size":1.35,"u":0.408,"v":0.4666},{"id":395,"x":-118.765288,"y":34.025548,"battery":false,"solar":true,"medical":false,"size":0.73,"u":0.2849,"v":0.498},{"id":396,"x":-118.765791,"y":34.025827,"battery":false,"solar":false,"medical":false,"size":1.05,"u":0.6921,"v":0.9374},{"id":397,"x":-118.765986,"y":34.02526,"battery":false,"solar":false,"medical":false,"size":1.08,"u":0.0444,"v":0.2189},{"id":398,"x":-118.766315,"y":34.025726,"battery":false,"solar":false,"medical":false,"size":1.6,"u":0.9344,"v":0.9004},{"id":399,"x":-118.766582,"y":34.025279,"battery":true,"solar":true,"medical":false,"size":0.74,"u":0.8807,"v":0.9492},{"id":400,"x":-118.7669,"y":34.025756,"battery":false,"solar":false,"medical":true,"size":1.29,"u":0.994,"v":0.6264},{"id":401,"x":-118.767172,"y":34.025168,"battery":false,"solar":false,"medical":false,"size":0.8,"u":0.3544,"v":0.6049},{"id":402,"x":-118.7675,"y":34.025725,"battery":false,"solar":false,"medical":false,"size":0.63,"u":0.5322,"v":0.9353},{"id":403,"x":-118.767742,"y":34.025141,"battery":false,"solar":true,"medical":false,"size":1.1,"u":0.0769,"v":0.7969},{"id":404,"x":-118.768083,"y":34.025694,"battery":false,"solar":false,"medical":false,"size":1.25,"u":0.8364,"v":0.9094},{"id":405,"x":-118.768331,"y":34.025114,"battery":false,"solar":false,"medical":false,"size":0.96,"u":0.7353,"v":0.1599},{"id":406,"x":-118.768624,"y":34.025182,"battery":false,"solar":false,"medical":false,"size":0.73,"u":0.6922,"v":0.0781},{"id":407,"x":-118.768595,"y":34.025063,"battery":false,"solar":false,"medical":false,"size":1.5,"u":0.7643,"v":0.5449},{"id":408,"x":-118.768946,"y":34.025512,"battery":true,"solar":true,"medical":false,"size":0.79,"u":0.074,"v":0.5451},{"id":409,"x":-118.769082,"y":34.025073,"battery":false,"solar":false,"medical":false,"size":1.07,"u":0.5348,"v":0.4936},{"id":410,"x":-118.769526,"y":34.025246,"battery":false,"solar":false,"medical":false,"size":0.69,"u":0.2546,"v":0.2781},{"id":411,"x":-118.769402,"y":34.025076,"battery":true,"solar":true,"medical":true,"size":1.01,"u":0.6124,"v":0.656},{"id":412,"x":-118.769836,"y":34.025194,"battery":false,"solar":false,"medical":false,"size":1.3,"u":0.9618,"v":0.8133},{"id":413,"x":-118.770029,"y":34.025747,"battery":false,"solar":false,"medical":true,"size":0.94,"u":0.4486,"v":0.2641},{"id":414,"x":-118.769583,"y":34.026113,"battery":true,"solar":true,"medical":false,"size":1.27,"u":0.2533,"v":0.9472},{"id":415,"x":-118.770165,"y":34.026202,"battery":true,"solar":true,"medical":false,"size":1.35,"u":0.3449,"v":0.8908},{"id":416,"x":-118.769785,"y":34.026564,"battery":false,"solar":false,"medical":false,"size":1.45,"u":0.8447,"v":0.8729},{"id":417,"x":-118.770192,"y":34.026581,"battery":false,"solar":false,"medical":false,"size":1.41,"u":0.2805,"v":0.9826},{"id":418,"x":-118.770072,"y":34.027141,"battery":false,"solar":false,"medical":false,"size":1.57,"u":0.6594,"v":0.5704},{"id":419,"x":-118.770639,"y":34.026888,"battery":false,"solar":false,"medical":false,"size":0.83,"u":0.3371,"v":0.8084},{"id":420,"x":-118.770418,"y":34.027336,"battery":false,"solar":false,"medical":false,"size":1.14,"u":0.1542,"v":0.132},{"id":421,"x":-118.770996,"y":34.027433,"battery":false,"solar":false,"medical":false,"size":1.15,"u":0.0212,"v":0.533},{"id":422,"x":-118.770559,"y":34.027799,"battery":false,"solar":false,"medical":false,"size":1.03,"u":0.6353,"v":0.7642},{"id":423,"x":-118.771045,"y":34.027942,"battery":false,"solar":false,"medical":false,"size":0.67,"u":0.9647,"v":0.7217},{"id":424,"x":-118.77072,"y":34.028269,"battery":false,"solar":true,"medical":false,"size":1.11,"u":0.853,"v":0.9702},{"id":425,"x":-118.771239,"y":34.028404,"battery":true,"solar":true,"medical":false,"size":1.15,"u":0.175,"v":0.8748},{"id":426,"x":-118.770776,"y":34.028762,"battery":false,"solar":false,"medical":false,"size":1.6,"u":0.4246,"v":0.5167},{"id":427,"x":-118.77131,"y":34.028894,"battery":false,"solar":false,"medical":false,"size":1.15,"u":0.4428,"v":0.8833},{"id":428,"x":-118.770894,"y":34.029257,"battery":false,"solar":false,"medical":false,"size":0.96,"u":0.9279,"v":0.5821},{"id":429,"x":-118.771424,"y":34.029361,"battery":false,"solar":false,"medical":false,"size":1.16,"u":0.5,"v":0.1783},{"id":430,"x":-118.771423,"y":34.029771,"battery":false,"solar":false,"medical":false,"size":0.72,"u":0.2971,"v":0.9894},{"id":431,"x":-118.771607,"y":34.029192,"battery":false,"solar":false,"medical":false,"size":0.83,"u":0.8929,"v":0.4997},{"id":432,"x":-118.772057,"y":34.029571,"battery":false,"solar":false,"medical":false,"size":1.18,"u":0.456,"v":0.6859},{"id":433,"x":-118.77213,"y":34.029058,"battery":false,"solar":false,"medical":false,"size":1.02,"u":0.8517,"v":0.3111},{"id":434,"x":-118.772091,"y":34.029027,"battery":false,"solar":false,"medical":false,"size":0.72,"u":0.2287,"v":0.4513},{"id":435,"x":-118.771491,"y":34.029014,"battery":false,"solar":false,"medical":false,"size":1.36,"u":0.3822,"v":0.082},{"id":436,"x":-118.770141,"y":34.026099,"battery":false,"solar":false,"medical":false,"size":1.05,"u":0.1289,"v":0.6072},{"id":437,"x":-118.770675,"y":34.026134,"battery":false,"solar":false,"medical":false,"size":1.46,"u":0.8477,"v":0.3389},{"id":438,"x":-118.770414,"y":34.026527,"battery":false,"solar":false,"medical":false,"size":1.4,"u":0.522,"v":0.685},{"id":439,"x":-118.770859,"y":34.026603,"battery":false,"solar":false,"medical":false,"size":1.2,"u":0.8576,"v":0.7063},{"id":440,"x":-118.772702,"y":34.025401,"battery":false,"solar":false,"medical":false,"size":0.86,"u":0.8071,"v":0.4521},{"id":441,"x":-118.773912,"y":34.025703,"battery":false,"solar":false,"medical":false,"size":1.48,"u":0.2987,"v":0.5431},{"id":442,"x":-118.774452,"y":34.025443,"battery":false,"solar":false,"medical":false,"size":1.3,"u":0.4267,"v":0.0679},{"id":443,"x":-118.773977,"y":34.025221,"battery":false,"solar":false,"medical":false,"size":1.41,"u":0.8863,"v":0.686},{"id":444,"x":-118.774479,"y":34.025133,"battery":false,"solar":false,"medical":false,"size":1.19,"u":0.3982,"v":0.4165},{"id":445,"x":-118.774312,"y":34.024779,"battery":true,"solar":true,"medical":false,"size":0.91,"u":0.4552,"v":0.8658},{"id":446,"x":-118.774786,"y":34.025069,"battery":false,"solar":false,"medical":false,"size":0.65,"u":0.6882,"v":0.0575},{"id":447,"x":-118.774784,"y":34.024476,"battery":false,"solar":false,"medical":false,"size":1.44,"u":0.3451,"v":0.2954},{"id":448,"x":-118.775372,"y":34.025853,"battery":false,"solar":false,"medical":false,"size":0.97,"u":0.4636,"v":0.0477},{"id":449,"x":-118.774957,"y":34.025469,"battery":false,"solar":false,"medical":false,"size":1.57,"u":0.151,"v":0.9392},{"id":450,"x":-118.77546,"y":34.025302,"battery":false,"solar":false,"medical":false,"size":1.55,"u":0.7339,"v":0.9222},{"id":451,"x":-118.775567,"y":34.025691,"battery":false,"solar":false,"medical":false,"size":1.26,"u":0.4998,"v":0.8154},{"id":452,"x":-118.776132,"y":34.025446,"battery":false,"solar":false,"medical":false,"size":0.9,"u":0.3861,"v":0.6018},{"id":453,"x":-118.775621,"y":34.025201,"battery":false,"solar":false,"medical":false,"size":1.17,"u":0.7328,"v":0.3763},{"id":454,"x":-118.776181,"y":34.024994,"battery":false,"solar":false,"medical":false,"size":0.62,"u":0.8251,"v":0.2929},{"id":455,"x":-118.77575,"y":34.024843,"battery":false,"solar":false,"medical":false,"size":0.62,"u":0.7506,"v":0.9265}],"events":[{"start":"2019-10-30 20:49","end":"2019-10-31 17:36","hours":20.8,"cut_at":"breaker","customers":2273},{"start":"2020-12-02 23:13","end":"2020-12-03 17:20","hours":18.1,"cut_at":"RAR8848","customers":456},{"start":"2020-12-08 00:52","end":"2020-12-09 03:11","hours":26.3,"cut_at":"breaker","customers":2342},{"start":"2021-01-14 21:11","end":"2021-01-15 13:34","hours":16.4,"cut_at":"breaker","customers":2355},{"start":"2021-11-21 09:43","end":"2021-11-21 19:38","hours":9.9,"cut_at":"breaker","customers":1129},{"start":"2021-11-24 17:17","end":"2021-11-25 21:59","hours":28.7,"cut_at":"breaker","customers":1128},{"start":"2023-10-29 08:12","end":"2023-10-29 23:46","hours":15.6,"cut_at":"breaker","customers":1128},{"start":"2024-10-18 12:14","end":"2024-10-19 12:08","hours":23.9,"cut_at":"breaker","customers":2415},{"start":"2024-11-06 09:14","end":"2024-11-07 21:32","hours":36.3,"cut_at":"breaker","customers":2407},{"start":"2024-12-09 18:45","end":"2024-12-11 11:39","hours":40.9,"cut_at":"breaker","customers":2406},{"start":"2025-01-07 10:39","end":"2025-01-10 18:28","hours":79.8,"cut_at":"breaker","customers":2407},{"start":"2025-01-12 04:31","end":"2025-01-12 21:25","hours":16.9,"cut_at":"breaker","customers":2406},{"start":"2025-01-13 07:55","end":"2025-01-14 12:34","hours":28.6,"cut_at":"breaker","customers":2405},{"start":"2025-01-15 06:37","end":"2025-01-16 11:44","hours":29.1,"cut_at":"breaker","customers":2405},{"start":"2025-01-21 00:19","end":"2025-01-21 15:02","hours":14.7,"cut_at":"breaker","customers":2407},{"start":"2025-01-23 04:31","end":"2025-01-24 09:38","hours":29.1,"cut_at":"breaker","customers":2407}],"prices":[{"date":"2025-10-01","v20":1.2242,"v50":0.8018,"v80":0.3207},{"date":"2025-10-02","v20":1.2811,"v50":0.8257,"v80":0.3303},{"date":"2025-10-03","v20":1.3995,"v50":0.9129,"v80":0.3651},{"date":"2025-10-04","v20":1.6055,"v50":1.0529,"v80":0.4211},{"date":"2025-10-05","v20":1.998,"v50":1.3063,"v80":0.5225},{"date":"2025-10-06","v20":1.4356,"v50":0.9355,"v80":0.3742},{"date":"2025-10-07","v20":1.1894,"v50":0.7777,"v80":0.3111},{"date":"2025-10-08","v20":1.0855,"v50":0.7041,"v80":0.2816},{"date":"2025-10-09","v20":0.7921,"v50":0.5412,"v80":0.2165},{"date":"2025-10-10","v20":0.5616,"v50":0.3886,"v80":0.1554},{"date":"2025-10-11","v20":1.5915,"v50":1.0584,"v80":0.4234},{"date":"2025-10-12","v20":1.7161,"v50":1.1149,"v80":0.446},{"date":"2025-10-13","v20":0.9729,"v50":0.6385,"v80":0.2554},{"date":"2025-10-14","v20":0.4287,"v50":0.3,"v80":0.12},{"date":"2025-10-15","v20":1.651,"v50":1.0692,"v80":0.4277},{"date":"2025-10-16","v20":1.6189,"v50":1.0407,"v80":0.4163},{"date":"2025-10-17","v20":1.7499,"v50":1.1596,"v80":0.4638},{"date":"2025-10-18","v20":1.5344,"v50":0.9755,"v80":0.3902},{"date":"2025-10-19","v20":1.4594,"v50":0.9375,"v80":0.375},{"date":"2025-10-20","v20":1.6824,"v50":1.0958,"v80":0.4383},{"date":"2025-10-21","v20":1.1707,"v50":0.7591,"v80":0.3036},{"date":"2025-10-22","v20":1.048,"v50":0.6882,"v80":0.2753},{"date":"2025-10-23","v20":1.3694,"v50":0.8884,"v80":0.3554},{"date":"2025-10-24","v20":1.1256,"v50":0.7325,"v80":0.293},{"date":"2025-10-25","v20":1.4429,"v50":0.9534,"v80":0.3814},{"date":"2025-10-26","v20":1.923,"v50":1.2929,"v80":0.5172},{"date":"2025-10-27","v20":1.42,"v50":0.9401,"v80":0.376},{"date":"2025-10-28","v20":1.4379,"v50":0.9209,"v80":0.3683},{"date":"2025-10-29","v20":1.3686,"v50":0.8903,"v80":0.3561},{"date":"2025-10-30","v20":1.146,"v50":0.7456,"v80":0.2983},{"date":"2025-10-31","v20":1.2276,"v50":0.8106,"v80":0.3242},{"date":"2025-11-01","v20":1.5986,"v50":1.0375,"v80":0.415},{"date":"2025-11-02","v20":1.6825,"v50":1.0632,"v80":0.4253},{"date":"2025-11-03","v20":1.0068,"v50":0.6919,"v80":0.2767},{"date":"2025-11-04","v20":1.2011,"v50":0.7824,"v80":0.3129},{"date":"2025-11-05","v20":0.7829,"v50":0.5183,"v80":0.2073},{"date":"2025-11-06","v20":1.2624,"v50":0.8295,"v80":0.3318},{"date":"2025-11-07","v20":1.268,"v50":0.8159,"v80":0.3264},{"date":"2025-11-08","v20":1.6381,"v50":1.0425,"v80":0.417},{"date":"2025-11-09","v20":1.7989,"v50":1.1518,"v80":0.4607},{"date":"2025-11-10","v20":0.9925,"v50":0.6631,"v80":0.2652},{"date":"2025-11-11","v20":0.757,"v50":0.5239,"v80":0.2096},{"date":"2025-11-12","v20":0.3761,"v50":0.2872,"v80":0.1149},{"date":"2025-11-13","v20":0.7164,"v50":0.4754,"v80":0.1902},{"date":"2025-11-14","v20":0.2755,"v50":0.1791,"v80":0.0716},{"date":"2025-11-15","v20":0.1413,"v50":0.0922,"v80":0.0369},{"date":"2025-11-16","v20":0.5571,"v50":0.3646,"v80":0.1458},{"date":"2025-11-17","v20":0.2664,"v50":0.1898,"v80":0.0759},{"date":"2025-11-18","v20":0.4699,"v50":0.3121,"v80":0.1248},{"date":"2025-11-19","v20":0.668,"v50":0.4529,"v80":0.1811},{"date":"2025-11-20","v20":0.4701,"v50":0.3244,"v80":0.1297},{"date":"2025-11-21","v20":0.3103,"v50":0.2121,"v80":0.0848},{"date":"2025-11-22","v20":0.4587,"v50":0.2887,"v80":0.1155},{"date":"2025-11-23","v20":1.434,"v50":0.9094,"v80":0.3638},{"date":"2025-11-24","v20":0.9556,"v50":0.6384,"v80":0.2553},{"date":"2025-11-25","v20":1.1589,"v50":0.7555,"v80":0.3022},{"date":"2025-11-26","v20":0.8284,"v50":0.5503,"v80":0.2201},{"date":"2025-11-27","v20":0.2383,"v50":0.1552,"v80":0.0621},{"date":"2025-11-28","v20":1.0006,"v50":0.6354,"v80":0.2542},{"date":"2025-11-29","v20":0.8244,"v50":0.5341,"v80":0.2136},{"date":"2025-11-30","v20":1.1584,"v50":0.7269,"v80":0.2908},{"date":"2025-12-01","v20":0.9699,"v50":0.6616,"v80":0.2647},{"date":"2025-12-02","v20":0.7999,"v50":0.5476,"v80":0.219},{"date":"2025-12-03","v20":0.7789,"v50":0.5414,"v80":0.2166},{"date":"2025-12-04","v20":0.7748,"v50":0.5293,"v80":0.2117},{"date":"2025-12-05","v20":0.6301,"v50":0.432,"v80":0.1728},{"date":"2025-12-06","v20":0.9575,"v50":0.6365,"v80":0.2546},{"date":"2025-12-07","v20":1.025,"v50":0.6633,"v80":0.2653},{"date":"2025-12-08","v20":0.6933,"v50":0.4652,"v80":0.1861},{"date":"2025-12-09","v20":0.5286,"v50":0.4022,"v80":0.1609},{"date":"2025-12-10","v20":0.4779,"v50":0.316,"v80":0.1264},{"date":"2025-12-11","v20":0.5597,"v50":0.3741,"v80":0.1496},{"date":"2025-12-12","v20":0.3571,"v50":0.2562,"v80":0.1025},{"date":"2025-12-13","v20":0.3921,"v50":0.2614,"v80":0.1046},{"date":"2025-12-14","v20":0.41,"v50":0.2615,"v80":0.1046},{"date":"2025-12-15","v20":0.48,"v50":0.3093,"v80":0.1237},{"date":"2025-12-16","v20":0.4116,"v50":0.2874,"v80":0.115},{"date":"2025-12-17","v20":0.4867,"v50":0.3336,"v80":0.1335},{"date":"2025-12-18","v20":0.3008,"v50":0.2032,"v80":0.0813},{"date":"2025-12-19","v20":0.3176,"v50":0.2201,"v80":0.0881},{"date":"2025-12-20","v20":0.334,"v50":0.2265,"v80":0.0906},{"date":"2025-12-21","v20":0.2459,"v50":0.1601,"v80":0.064},{"date":"2025-12-22","v20":0.3126,"v50":0.2011,"v80":0.0805},{"date":"2025-12-23","v20":0.0935,"v50":0.0626,"v80":0.0251},{"date":"2025-12-24","v20":0.1025,"v50":0.0662,"v80":0.0265},{"date":"2025-12-25","v20":0.3773,"v50":0.2451,"v80":0.098},{"date":"2025-12-26","v20":0.2005,"v50":0.1309,"v80":0.0524},{"date":"2025-12-27","v20":0.9475,"v50":0.6075,"v80":0.243},{"date":"2025-12-28","v20":1.0003,"v50":0.6368,"v80":0.2547},{"date":"2025-12-29","v20":0.7291,"v50":0.4887,"v80":0.1955},{"date":"2025-12-30","v20":0.3316,"v50":0.2296,"v80":0.0919},{"date":"2025-12-31","v20":0.1195,"v50":0.0764,"v80":0.0305}],"rates":{"battery":0.071,"solar_only":0.084,"medical":0.026},"burn_km":9.0};
+const P = window.PowerUPPilot;
+const $ = id => document.getElementById(id);
+const fmt$ = (x, d = 0) => (x < 0 ? '−$' : '$') + Math.abs(x).toLocaleString('en-US', { maximumFractionDigits: d, minimumFractionDigits: d });
+const fmtK = x => Math.abs(x) >= 1e6 ? fmt$(x / 1e6, 2) + 'M' : Math.abs(x) >= 1e4 ? fmt$(x / 1e3, 0) + 'k' : fmt$(x);
+let ruleId = 'notice';
+
+function opts() {
+  return {
+    free: +$('free').value, solarFirst: $('solarFirst').checked, solarKwhDay: $('smoke').checked ? P.SOLAR_KWH_DAY / 2 : P.SOLAR_KWH_DAY,
+    capex: +$('capex').value || 0, itc: +$('itc').value || 0, capacityPerKwMonth: +$('cap').value || 0,
+    capacityKw: +$('capkw').value || 0, elrpEventsPerYear: +$('elrp').value || 0
+  };
+}
+
+// ---------- map ----------
+const svg = $('map'), NS = 'http://www.w3.org/2000/svg';
+const KX = Math.cos(34.03 * Math.PI / 180);
+const allPts = DATA.lines.flat().concat(DATA.homes.map(h => [h.x, h.y]));
+const minX = Math.min(...allPts.map(p => p[0])), maxX = Math.max(...allPts.map(p => p[0]));
+const minY = Math.min(...allPts.map(p => p[1])), maxY = Math.max(...allPts.map(p => p[1]));
+const W = 800, H = 520, PAD = 30;
+const S = Math.min((W - 2 * PAD) / ((maxX - minX) * KX), (H - 2 * PAD) / (maxY - minY));
+const ox = (W - (maxX - minX) * KX * S) / 2, oy = (H - (maxY - minY) * S) / 2;
+const px = p => [ox + (p[0] - minX) * KX * S, H - oy - (p[1] - minY) * S];
+const el = (tag, attrs, parent) => { const e = document.createElementNS(NS, tag); for (const k in attrs) e.setAttribute(k, attrs[k]); (parent || svg).appendChild(e); return e; };
+const gLines = el('g', {}), gHomes = el('g', {}), gMarks = el('g', {});
+const path = pts => 'M' + pts.map(p => px(p).map(v => v.toFixed(1)).join(',')).join('L');
+DATA.lines.forEach(l => el('path', { d: path(l), fill: 'none', stroke: 'var(--wire)', 'stroke-width': 2, 'stroke-linecap': 'round', 'stroke-linejoin': 'round', 'vector-effect': 'non-scaling-stroke' }, gLines));
+el('path', { d: path(DATA.feed.slice(0, 60)), fill: 'none', stroke: 'var(--dark)', 'stroke-width': 1.5, 'stroke-dasharray': '4 4', 'vector-effect': 'non-scaling-stroke' }, gLines);
+const homeDots = DATA.homes.map(h => { const [x, y] = px([h.x, h.y]); return el('circle', { cx: x.toFixed(1), cy: y.toFixed(1), r: 3.2 }, gHomes); });
+function mark(p, label, shape, dx, dy, anchor) {
+  const [x, y] = px(p);
+  const g = el('g', { transform: `translate(${x},${y})` }, gMarks);
+  if (shape === 'sq') el('rect', { x: -6, y: -6, width: 12, height: 12, fill: 'var(--ink)' }, g);
+  else el('circle', { r: 6, fill: shape === 'open' ? 'var(--panel)' : 'var(--ink)', stroke: 'var(--ink)', 'stroke-width': 2 }, g);
+  const t = el('text', { x: dx, y: dy, 'text-anchor': anchor || 'start', style: 'fill:var(--ink);font-weight:500' }, g); t.textContent = label;
+  return g;
+}
+mark(DATA.switch, 'RAR8848 opens to form the island', 'dot', -4, -26);
+mark(DATA.upstream_switch, 'RCS0036', 'open', -10, 18, 'end');
+const t9 = el('text', { x: 14, y: 22 }); t9.textContent = `Bryson burn: ${DATA.burn_km} km northwest · Latigo substation: west, along the dashed feed`;
+// pan and zoom
+let vb = [0, 0, W, H];
+const setVb = () => { svg.setAttribute('viewBox', vb.map(v => v.toFixed(1)).join(' ')); const k = W / vb[2]; homeDots.forEach(c => c.setAttribute('r', (3.2 / Math.sqrt(k)).toFixed(2))); gMarks.querySelectorAll('g').forEach(g => { const m = g.getAttribute('transform').match(/translate\(([^,]+),([^)]+)\)/); g.setAttribute('transform', `translate(${m[1]},${m[2]}) scale(${1 / k})`); }); t9.setAttribute('transform', `translate(${vb[0]},${vb[1]}) scale(${1 / k})`); };
+const zoomAt = (f, cx, cy) => { const nw = Math.min(W * 1.2, Math.max(W / 25, vb[2] / f)), nh = nw * H / W; vb = [cx - (cx - vb[0]) * nw / vb[2], cy - (cy - vb[1]) * nh / vb[3], nw, nh]; setVb(); };
+const toSvg = (e) => { const r = svg.getBoundingClientRect(); return [vb[0] + (e.clientX - r.left) / r.width * vb[2], vb[1] + (e.clientY - r.top) / r.height * vb[3]]; };
+svg.addEventListener('wheel', e => { e.preventDefault(); const [x, y] = toSvg(e); zoomAt(e.deltaY < 0 ? 1.25 : 0.8, x, y); }, { passive: false });
+const ptrs = new Map(); let pinch0 = null;
+svg.addEventListener('pointerdown', e => { svg.setPointerCapture(e.pointerId); ptrs.set(e.pointerId, [e.clientX, e.clientY]); svg.style.cursor = 'grabbing'; });
+svg.addEventListener('pointermove', e => {
+  if (!ptrs.has(e.pointerId)) return;
+  const r = svg.getBoundingClientRect(), prev = ptrs.get(e.pointerId);
+  ptrs.set(e.pointerId, [e.clientX, e.clientY]);
+  if (ptrs.size === 1) { vb[0] -= (e.clientX - prev[0]) / r.width * vb[2]; vb[1] -= (e.clientY - prev[1]) / r.height * vb[3]; setVb(); }
+  else if (ptrs.size === 2) { const [a, b] = [...ptrs.values()]; const d = Math.hypot(a[0] - b[0], a[1] - b[1]); if (pinch0) zoomAt(d / pinch0, ...toSvg({ clientX: (a[0] + b[0]) / 2, clientY: (a[1] + b[1]) / 2 })); pinch0 = d; }
+});
+const up = e => { ptrs.delete(e.pointerId); if (ptrs.size < 2) pinch0 = null; svg.style.cursor = 'grab'; };
+svg.addEventListener('pointerup', up); svg.addEventListener('pointercancel', up);
+$('zin').onclick = () => zoomAt(1.5, vb[0] + vb[2] / 2, vb[1] + vb[3] / 2);
+$('zout').onclick = () => zoomAt(1 / 1.5, vb[0] + vb[2] / 2, vb[1] + vb[3] / 2);
+$('zreset').onclick = () => { vb = [0, 0, W, H]; setVb(); };
+
+const KINDS = [
+  ['startup', 'var(--sea)', 'Our free Base battery'], ['own', 'var(--own)', 'Own battery'], ['solar', 'var(--sun)', 'Solar, no battery'],
+  ['medical', 'var(--med)', 'Medical Baseline (ring)'], ['recv', 'var(--ink)', 'Receives from neighbors'], ['out', 'var(--dark)', 'Not taking part']
+];
+$('legend').innerHTML = KINDS.map(([k, c, t]) => k === 'medical' ? `<span><i style="background:transparent;border:2px solid ${c};width:7px;height:7px"></i>${t}</span>` : `<span><i style="background:${c}${k === 'out' ? ';opacity:.45' : ''}"></i>${t}</span>`).join('');
+
+function paintHomes(homes) {
+  homes.forEach((h, i) => {
+    const c = homeDots[i];
+    const k = h.owner === 'startup' ? 'var(--sea)' : h.owner === 'home' ? 'var(--own)' : h._solarOnly ? 'var(--sun)' : h.choice === 'receiver' ? 'var(--ink)' : 'var(--dark)';
+    c.setAttribute('fill', k);
+    c.setAttribute('opacity', h.choice === 'out' ? .4 : 1);
+    if (h.medical) { c.setAttribute('stroke', 'var(--med)'); c.setAttribute('stroke-width', 2); c.setAttribute('vector-effect', 'non-scaling-stroke'); }
+    else c.removeAttribute('stroke');
+  });
+}
+
+// ---------- render ----------
+let lastNeedKey = '';
+function render() {
+  const o = opts();
+  $('freeOut').textContent = o.free;
+  const R = P.evaluate(DATA, o);
+  const rule = R.rules.find(r => r.id === ruleId);
+  const c = R.counts, fleet = c.startup;
+  paintHomes(R.homes);
+  const solarHomes = R.homes.filter(h => h.solar_kwh_day > 0).length;
+
+  $('strip').innerHTML = [
+    [DATA.homes.length, 'homes behind the switch'], [DATA.line_km + ' km', 'of line, all on the coast'],
+    [DATA.events.length, `real shutoffs, ${Math.round(DATA.events.reduce((a, e) => a + e.hours, 0))} h in all`],
+    [`${rule.eventsFull} of ${DATA.events.length}`, 'carried in full by this setup'],
+    [fmtK(rule.fleetMoney.net), 'fleet earnings a year (with assumptions)']
+  ].map(([b, s]) => `<div><b>${b}</b><span>${s}</span></div>`).join('');
+
+  $('fleetFacts').innerHTML = [
+    ['Our batteries', fleet], ['Homes with their own battery', c.own], ['Roofs with solar', solarHomes],
+    ['Medical Baseline homes', c.medical], ['Homes receiving', c.receivers], ['Homes not taking part', c.out],
+    ['Money we put in', fmtK(fleet * o.capex * (1 - o.itc)) + ' after tax credit']
+  ].map(([a, b]) => `<dt>${a}</dt><dd>${b}</dd>`).join('');
+  const needKey = [o.solarFirst, o.solarKwhDay, ruleId].join();
+  if (needKey !== lastNeedKey) {
+    lastNeedKey = needKey;
+    const n = P.fleetFor(DATA, ruleId, o);
+    $('fleetNeed').textContent = n ? `With the selected rule, ${n} batteries carry all ${DATA.events.length} real shutoffs in full, including the 80-hour one in January 2025.` : `No fleet up to 300 batteries carries every real shutoff under this rule.`;
+  }
+
+  const m = rule.money;
+  const rows = [
+    ['Trading day-ahead prices', m.arbitrage, 'var(--sea)', 'real'], ['Capacity payments', m.capacity, 'var(--own)', 'assumed'],
+    ['Emergency events', m.elrp, 'var(--sun)', '$2/kWh real, count assumed'], ['Readiness holds', -m.readiness, 'var(--bad)', 'real prices']
+  ];
+  const max = Math.max(...rows.map(r => Math.abs(r[1])));
+  $('moneyBars').innerHTML = rows.map(([t, v, col, tag]) => `<div class="bar"><span>${t}<br><span class="tag ${tag.startsWith('real') ? 'real' : ''}">${tag}</span></span><div class="t"><div class="f" style="width:${(Math.abs(v) / max * 100).toFixed(1)}%;background:${col}"></div></div><span class="v">${fmt$(v)}</span></div>`).join('')
+    + `<div class="bar" style="border-top:1px solid var(--line);padding-top:8px"><b>Net per battery</b><span></span><b class="v">${fmt$(m.net)}</b></div>`;
+  $('fleetNet').textContent = fmt$(rule.fleetMoney.net);
+  $('moneyFacts').innerHTML = [
+    ['Payback, all income', isFinite(m.payback) ? m.payback.toFixed(1) + ' years' : 'never'],
+    ['Payback, trading only', isFinite(m.arbitrageOnlyPayback) ? Math.round(m.arbitrageOnlyPayback) + ' years' : 'never'],
+    ['Readiness cost, share of trading', (m.readiness / m.arbitrage * 100).toFixed(0) + '%'],
+    ['Holds a year (incl. false alarms)', m.holds.toFixed(1)]
+  ].map(([a, b]) => `<dt>${a}</dt><dd>${b}</dd>`).join('');
+
+  $('rules').innerHTML = R.rules.map(r => {
+    const s = r.eventsFull === DATA.events.length ? 'good' : r.eventsFull >= DATA.events.length * .75 ? 'warn' : 'bad';
+    const med = r.medicalEventsDark ? ` · medical homes short in ${r.medicalEventsDark}` : '';
+    return `<tr class="rule${r.id === ruleId ? ' on' : ''}" data-id="${r.id}" tabindex="0"><td>${r.label}${r.note ? `<div class="sub">${r.note}</div>` : ''}${r.early ? `<div class="sub">${r.early} batteries held from notice for the medical homes</div>` : ''}</td>
+      <td class="n">${r.lead ? r.lead + (r.early ? ' / ' + 3 : '') : '0'}</td><td class="n">${fmt$(r.money.readiness, 2)}</td><td class="n">${fmt$(r.fleetMoney.readiness)}</td>
+      <td class="n"><span class="pill ${s}">${r.eventsFull} / ${DATA.events.length}</span>${med}</td><td class="n">${Math.round(r.receiverHoursDark).toLocaleString()}</td></tr>`;
+  }).join('');
+  document.querySelectorAll('tr.rule').forEach(tr => {
+    const pick = () => { ruleId = tr.dataset.id; render(); };
+    tr.onclick = pick; tr.onkeydown = e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); pick(); } };
+  });
+
+  const maxH = Math.max(...DATA.events.map(e => e.hours));
+  $('evHead').textContent = `Rule: ${rule.label}. Teal is hours the island keeps receiving homes on at critical loads; red is hours they would have been dark.`;
+  $('events').innerHTML = rule.events.map(e => {
+    const on = e.carried / maxH * 100, off = (e.hours - e.carried) / maxH * 100;
+    const d = new Date(e.start.replace(' ', 'T'));
+    const label = d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+    return `<div class="ev"><span>${label}<br><span class="sub">${e.cut_at === 'breaker' ? 'whole circuit' : 'RAR8848 alone'}</span></span><div class="t"><div class="on" style="width:${on.toFixed(1)}%${off < .1 ? ';border-radius:3px' : ''}"></div><div class="off" style="left:${on.toFixed(1)}%;width:${off.toFixed(1)}%"></div></div><span class="r">${Math.round(e.carried)} of ${e.hours.toFixed(1)} h</span></div>`;
+  }).join('');
+}
+['free', 'solarFirst', 'smoke', 'capex', 'itc', 'cap', 'capkw', 'elrp'].forEach(id => $(id).addEventListener('input', render));
+setVb(); render();
+</script>
