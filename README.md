@@ -74,6 +74,8 @@ SCE already cuts partial circuits: 13 of the 55 Malibu shutoffs since 2019 were 
 
 For a 48-hour shutoff the underground coast section (313 customers) can island and the overhead branch beside it cannot. With a 400 kWh community battery (assumed size) it carries every receiver at the critical budget for 44 of 48 hours; with home batteries alone it does not form, since none is grid-forming. The Malibu page plans this live and puts SCE's eight Malibu line switches on the map at **estimated** positions, with **hypothetical** service transformers behind each (`islands/malibu_hypothetical_assets.geojson`).
 
+**The pilot: RAR8623 on Point Dume.** One of the two 66 kV lines feeding Latigo substation runs about 650 m inside the Bryson Fire perimeter, and all four Latigo circuits (Cuthbert, Galahad, Maguire, Merlin) hang off that substation. RAR8623 is the last known switch on Cuthbert's main line, with 84 Point Dume homes behind it. Cuthbert's breaker has opened 16 times in shutoffs since 2019, darkening those homes each time, and SCE opened RAR8623 on its own once (Jan 2021, 84 customers, 14.5 hours). Those homes go dark because of the canyon feed, not their own street, which makes them the first island to build. Real: SCE's shutoff records and the NIFC fire perimeter. Approximate or estimated: the 66 kV route (traced from the California Energy Commission's transmission map over aerial imagery) and the switch positions.
+
 ## Every day: how the same battery earns its keep
 
 - PowerUP prices readiness with real CAISO day-ahead prices for the SCE load zone (Q4 2025, `grace/data/prices/`): a free battery earns its daily arbitrage value, and readiness forfeits only what holding costs, only where the risk is.
