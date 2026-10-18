@@ -99,7 +99,7 @@ pilot/      the RAR8848 pilot: app/ is the PowerUP replay (engine, bridge to Int
 powerup/    SCE and CAISO data, spec, prior art, twists
 interlock/  the guard: engine, silence and behaviour checks, policy packs, Sept 6 2022 replay, demo page
 islands/    the neighborhood island planner and the SCE line-device shutoff records for Malibu
-submission/ Devpost story sections (devpost.md) and the other form fields with the video script (devpost-extras.md)
+submission/ Devpost story sections (devpost.md), the other form fields with the video script (devpost-extras.md) and the pitch deck text (pitch-deck.md)
 site.py     builds the two-page demo at the root and in site/
 ```
 
