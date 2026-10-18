@@ -2,7 +2,7 @@
 // Keys are demo stand-ins (see engine.mjs signatures note); real deployments hold per-sender public keys.
 
 export const DEMO_KEYS = {
-  'base-optimizer': 'k-opt-7f3a',   // Base's fleet optimizer (aggregator cloud)
+  'base-optimizer': 'k-opt-7f3a',   // our fleet optimizer (aggregator cloud)
   'site-ems': 'k-ems-19c2',         // on-site energy manager (installation pack)
   'sce-drms': 'k-sce-44d1',         // utility demand-response system
   'caiso-market': 'k-mkt-08be',     // market interface

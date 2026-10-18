@@ -142,7 +142,7 @@ export function createSim({ guard = true, seed = 7, pack = 'sce', strictness = n
   const ledger = { seen: {}, epochs: { [optSrc.id]: 42, 'sce-drms': 7, 'caiso-market': 3 }, admitted: {}, approved: {}, personApproved: {}, blocked: {} };
   for (const m of morning) ledger.seen[m.id] = m.sig;
 
-  // baseline optimizer (plain rule, stand-in for Base's own policy)
+  // baseline optimizer (plain rule, stand-in for our fleet's own daily policy)
   const loadKw = (h, min) => HOME_KWH_DAY * shapes[h.circuit][Math.floor(min / 60) % 24] * h.loadScale;
   const baseline = [{ at: 12 * 60, id: 'opt-noon-charge', kind: 'command', truth: 'legit', signer: 'optimizer', baseline: true,
     title: 'Optimizer: midday charge', command: { priority: 5, targets: { all: true }, payload: { type: 'CHARGE_KW', value: 3 }, durationMin: 240 } }];

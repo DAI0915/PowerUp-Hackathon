@@ -440,7 +440,7 @@ button:disabled { cursor: not-allowed; }
 
 <div class="gut">
   <section class="intro" aria-label="What Interlock does">
-    <p><b>Interlock</b> sits between a home-battery fleet's software and the batteries. Every order from the optimizer, a market bid or a utility event passes ordered checks: shape, signature, freshness, precedence, each home's backup floor, the inverter, the circuit, then size and ramp. Each check answers on the gentlest rung that keeps the rules, and Interlock can only shrink, slow or stop an order. It never counts a quiet battery as capacity. This replays CAISO's record-peak evening on four real SCE circuits, guard off against guard on.</p>
+    <p><b>Interlock</b> is PowerUP's guard. It sits between our home-battery fleet's software and the batteries. Every order from our optimizer, a market bid or a utility event passes ordered checks: shape, signature, freshness, precedence, each home's backup floor, the inverter, the circuit, then size and ramp. Each check answers on the gentlest rung that keeps the rules, and Interlock can only shrink, slow or stop an order. It never counts a quiet battery as capacity. This page is a second, harder test of the same guard: CAISO's record-peak evening (Sept 6, 2022) on four real SCE circuits, with a larger simulated fleet of 2,000 Base Core batteries, guard off against guard on. The main demo is the RAR8848 wildfire-shutoff pilot (456 homes, our 160 batteries).</p>
     <div class="ladder" id="introLadder" aria-label="Rungs, gentlest first"></div>
   </section>
   <section class="controls" aria-label="Run settings">
@@ -577,7 +577,7 @@ button:disabled { cursor: not-allowed; }
         <span class="ph-right"><span class="tag pre" title="Read from out/results.json, written by node cli.mjs">PRECOMPUTED</span><span class="tag assumed">ASSUMED prices</span><span class="tag sim">SIMULATED</span></span>
       </div>
       <div class="pb">
-        <p class="tol-cap" id="tolCap">The ordinary-day use: before Base ships a new dispatch policy, it replays a hard day against the guard and sees what the policy earns and which promises it breaks.</p>
+        <p class="tol-cap" id="tolCap">The ordinary-day use: before we ship a new dispatch policy to our fleet, we replay a hard day against the guard and sees what the policy earns and which promises it breaks.</p>
         <div class="tol-grid" id="tolGrid" style="margin-top:12px"></div>
       </div>
     </section>
@@ -1341,7 +1341,7 @@ function renderTol() {
   grid.innerHTML = `<div class="chart"><h3>Revenue, chaos day, guard on</h3>${bars('revenue', lowK, 'Revenue by backup floor', false)}</div>
     <div class="chart"><h3>Homes below the 20% / 50% promise</h3>${bars('promiseBreachHomes', n0, 'Homes below the member promise by backup floor', true)}</div>`;
   const r15 = tolerance.find((r) => Math.abs(r.floorPct - 0.15) < 1e-9), r20 = tolerance.find((r) => Math.abs(r.floorPct - 0.2) < 1e-9);
-  if (r15 && r20) $('tolCap').textContent = `The ordinary-day use: before Base ships a new dispatch policy, it replays a hard day against the guard. Here a 15% floor would earn ${money(r15.revenue - r20.revenue)} more than the 20% floor and break the backup promise for ${n0(r15.promiseBreachHomes)} homes. X axis: the policy's backup floor; the canary threshold scales with it. Sweep written by node cli.mjs for seed 7, SCE pack.`;
+  if (r15 && r20) $('tolCap').textContent = `The ordinary-day use: before we ship a new dispatch policy to our fleet, we replay a hard day against the guard. Here a 15% floor would earn ${money(r15.revenue - r20.revenue)} more than the 20% floor and break the backup promise for ${n0(r15.promiseBreachHomes)} homes. X axis: the policy's backup floor; the canary threshold scales with it. Sweep written by node cli.mjs for seed 7, SCE pack.`;
 }
 
 // ---------- controls ----------
