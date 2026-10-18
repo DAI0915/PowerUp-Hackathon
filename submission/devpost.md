@@ -92,10 +92,10 @@ The disaster that comes with warning and the one that doesn't need the same ladd
 
 **Make it global.**
 
-- **Australia:** bushfire shutoffs, a life-support register required by law, the world's largest home-battery fleets, and dynamic operating envelopes, which are per-connection limits the network updates every few minutes. Interlock is what enforces those envelopes on a fleet. Its Australia pack keeps every invariant on the same failures and earns $50,699 (the envelope is illustrative).
+- **Australia:** bushfire shutoffs, a life-support register required by law, the world's largest home-battery fleets, and dynamic operating envelopes, which are per-connection limits the network updates every few minutes. Interlock is what enforces those envelopes on a fleet. Its Australia pack keeps every invariant on the same failures in the tests (the envelope is illustrative).
 - **South Africa:** scheduled load shedding is a planned outage, announced ahead and repeated several times a day. That is PowerUP's ladder running daily, with hospitals and clinics in the Medical Baseline role.
 
-**What changed in the build:** region policy packs swap the risk signal, the priority register, the limits and the update rate without changing the engine, and a switch reruns the replay on any pack.
+**What changed in the build:** region policy packs swap the risk signal, the priority register, the limits and the update rate without changing the engine, and the tests run the same failures under every pack. The demo page shows only the SCE pack, since the pilot is in SCE territory.
 
 ## Twist 3
 

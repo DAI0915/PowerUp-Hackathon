@@ -2,7 +2,7 @@
 
 **The disaster layer for a home-battery fleet.** PowerUP keeps the power on for the people who need it most when the grid is the disaster, and keeps the fleet's own software from becoming the disaster.
 
-**Live demo:** https://mrbese.github.io/PowerUp/ (GitHub Pages, from `index.html` and `heatwave.html` at the repo root) or https://claude.ai/artifact/96RzoqMWxRzLsdrAyRJFv1. The pilot page replays the October 2026 Malibu shutoff on the 456 homes behind SCE switch RAR8848, with the guard panel, the pilot business and a link to the second page (`heatwave.html`), which replays the evening before the shutoff on the same 456 homes through Interlock alone. The earlier whole-Malibu version (six circuits) is kept on branch `archive/malibu-wide-v1`.
+**Live demo:** https://mrbese.github.io/PowerUp/ (GitHub Pages, from `index.html` and `heatwave.html` at the repo root) or https://claude.ai/artifact/96RzoqMWxRzLsdrAyRJFv1. The pilot page replays the October 2026 Malibu shutoff on the 456 homes behind SCE switch RAR8848, with the guard panel, the pilot business and a link to the second page (`heatwave.html`), which replays the evening before the shutoff on the same 456 homes through Interlock alone.
 
 Built for the InnovateLA Dual-Use Hackathon (USC, Oct 16 to 18, 2026), Energy & Grid Hardening lens with Base Power. We are a startup that owns and runs a fleet of Base batteries (Base Core: 39.2 kWh, 20 kW). The seat is our fleet's dispatcher.
 

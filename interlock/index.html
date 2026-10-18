@@ -457,8 +457,6 @@ button:disabled { cursor: not-allowed; }
       <span class="ctl-k">Policy pack</span>
       <div class="seg" role="group" aria-label="Policy pack">
         <button type="button" id="packSce" aria-pressed="true">SCE homes</button>
-        <button type="button" id="packInstallation" aria-pressed="false">Military installation</button>
-        <button type="button" id="packAustralia" aria-pressed="false">Australia envelope</button>
       </div>
       <p class="ctl-note" id="packNote">Default pack for an SCE-territory fleet.</p>
       <div id="reviewerRow" class="ctl" hidden>
@@ -1209,7 +1207,7 @@ function renderDecision(v) {
       ${v.k < (W?.k ?? 0) ? `<p class="dc-idle">Your choice re-runs both evenings from 12:00 with the decision at ${hhmm(clockMin(v.k))}, then plays on.</p>` : ''}
     </div>`;
   } else {
-    html += `<p class="dc-idle">Nothing is waiting for a person at ${hhmm(clockMin(v.k))}. Interlock hands an order to the dispatcher when its signature fails, or, under the installation pack, when it is fleet-wide. The card opens here with the sender, the order, the reason and your choices.</p>`;
+    html += `<p class="dc-idle">Nothing is waiting for a person at ${hhmm(clockMin(v.k))}. Interlock hands an order to the dispatcher when its signature fails. The card opens here with the sender, the order, the reason and your choices.</p>`;
   }
   if (hist.length) {
     html += `<h3 class="ctl-k" style="margin:14px 0 6px">Handed to a person so far</h3><ul class="hist">${hist.map((x) => `<li><span class="t">${hhmm(x.t)}</span><span><b>${esc(x.title)}</b>. ${esc(x.outcome)}</span></li>`).join('')}</ul>`;
@@ -1358,7 +1356,7 @@ function renderTol() {
 function setPressed(ids, on) { for (const id of ids) $(id).setAttribute('aria-pressed', String(id === on)); }
 function renderControls() {
   setPressed(['modeReplay', 'modeDrive'], ui.mode === 'replay' ? 'modeReplay' : 'modeDrive');
-  setPressed(['packSce', 'packInstallation', 'packAustralia'], { sce: 'packSce', installation: 'packInstallation', australia: 'packAustralia' }[ui.pack]);
+  setPressed(['packSce'], 'packSce');
   setPressed(['revAuto', 'revPerson'], ui.reviewer === 'auto' ? 'revAuto' : 'revPerson');
   setPressed(['viewBoth', 'viewOff', 'viewOn'], { both: 'viewBoth', off: 'viewOff', on: 'viewOn' }[ui.view]);
   setPressed(['logAll', 'logArr', 'logHeld'], { all: 'logAll', arr: 'logArr', held: 'logHeld' }[ui.logFilter]);
@@ -1402,8 +1400,6 @@ function setPack(p) {
   renderTol();
 }
 $('packSce').addEventListener('click', () => setPack('sce'));
-$('packInstallation').addEventListener('click', () => setPack('installation'));
-$('packAustralia').addEventListener('click', () => setPack('australia'));
 function setReviewer(r) { if (ui.reviewer === r) return; ui.reviewer = r; renderControls(); rebuildKeep(r === 'person' ? 'Fleet-wide orders now wait for you.' : 'The modelled reviewer approves after 10 minutes again.'); }
 $('revAuto').addEventListener('click', () => setReviewer('auto'));
 $('revPerson').addEventListener('click', () => setReviewer('person'));

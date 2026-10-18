@@ -108,7 +108,7 @@ Editable copy (Claude Doc): https://claude.ai/code/artifact/3dedb88f-58ac-4ee2-8
 - Military: Naval Base Ventura County is in the same shutoff region. Interlock has a pack for a base: only local, signed orders, and a second person for each fleet-wide order.
 - Australia: bushfire shutoffs and a legal life-support register. Interlock keeps the per-home limits that the network sets.
 - South Africa: planned load shedding many times a day. Clinics take the place of Medical Baseline homes.
-- Show: the pack switch on the Interlock evening page, the RAR8848 pilot the night before the shutoff (SCE homes, military installation, Australia).
+- Show: the Interlock evening page, the RAR8848 pilot the night before the shutoff.
 
 ## Slide 10: Safe to use, and what is next
 
