@@ -6,7 +6,8 @@ Editable copy (Claude Doc): https://claude.ai/code/artifact/3dedb88f-58ac-4ee2-8
 
 ## Slide 1: PowerUP, the disaster layer for a home-battery fleet
 
-- PowerUP is software for a fleet of home batteries, like Base Power's.
+- We are a startup. We own and run a fleet of Base batteries.
+- PowerUP is our software for that fleet.
 - PowerUP plans: it makes homes ready before a wildfire power shutoff.
 - Interlock guards: it checks every order before it gets to a battery.
 - Islands share: neighbors share batteries behind a switch of the utility.
@@ -45,7 +46,7 @@ Editable copy (Claude Doc): https://claude.ai/code/artifact/3dedb88f-58ac-4ee2-8
 
 ## Slide 5: Interlock guards every order
 
-- Many senders give orders to the batteries: Base's optimizer, the market, SCE. A thief can try too.
+- Many senders give orders to the batteries: our daily optimizer, the market, SCE. A thief can try too.
 - Interlock checks every order in eight steps before it gets to a battery.
 - It checks the signature, the age, the priority, the backup of each home, the inverter, the circuit and the speed.
 - It gives each order the gentlest answer that keeps the home and the circuit safe: run, slow, test on 1% first, hold, or hand to a person.
@@ -76,6 +77,7 @@ Editable copy (Claude Doc): https://claude.ai/code/artifact/3dedb88f-58ac-4ee2-8
 - Medical Baseline homes get a free battery first. Then homes with solar get one, because solar fills them again each day.
 - Homes without a battery can pay $9.99 a month for emergency power. We assume 90% say yes: 226 homes. Medical Baseline homes and host homes do not pay.
 - When SCE opens RAR8848, the 456 homes run as one island on the batteries and the rooftop solar.
+- We assume two things: SCE's grid can open the switch and run the island, and our batteries are grid-forming, not only grid-following.
 - In a shutoff, everyone on the island pays $1.20 per kWh. That is 2 times SCE's top home rate (assumed $0.60).
 - SCE sends the bill and keeps $0.20 for delivery (assumed). Each seller gets $1.00: our batteries, neighbors who sell from their battery, and every solar roof.
 - Show: the "Pilot business" section of the app.
@@ -113,8 +115,8 @@ Editable copy (Claude Doc): https://claude.ai/code/artifact/3dedb88f-58ac-4ee2-8
 - Every number in the app has a label: real, assumed or simulated.
 - Responsible use: PowerUP sees only a priority tier, not a medical record. Interlock never takes a home below its own backup.
 - A person approves every restart, every EV trip and every island. SCE keeps control of every switch.
-- Next: the RAR8848 pilot with SCE's real switch map, one grid-forming battery at the switch, and the 160 free batteries.
+- Next: the RAR8848 pilot with SCE's real switch map and the 160 free batteries.
 - Next: a shutoff tariff with SCE and the CPUC, so SCE can bill island power at the fixed price.
-- Next: replay Base's own dispatch logs through Interlock, then run it on 1% of a fleet.
-- The ask: one engineer at Base and one shutoff officer at SCE to test the pilot with us.
+- Next: replay real fleet dispatch logs through Interlock, then run it on 1% of our fleet.
+- The ask: one engineer at Base to support battery sharing, and one shutoff officer at SCE to test the pilot with us.
 - Show: the link and a QR code to https://mrbese.github.io/PowerUp/.

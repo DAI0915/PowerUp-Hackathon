@@ -11,7 +11,7 @@ The story sections are in `devpost.md`. These are the rest of the form.
 
 **Lens:** Energy & Grid Hardening (Base Power)
 
-**One-liner:** The disaster layer for a home-battery fleet: PowerUP plans each home's backup before a wildfire shutoff, Interlock guards every order to the batteries, and neighborhood islands share batteries behind the utility's own switches.
+**One-liner:** The disaster layer for our home-battery fleet: PowerUP plans each home's backup before a wildfire shutoff, Interlock guards every order to the batteries, and neighborhood islands share batteries behind the utility's own switches.
 
 ## Responsible-use note
 
@@ -35,4 +35,4 @@ JavaScript, Node.js, Python, HTML Canvas, Playwright, SCE open data (PSPS record
 4. **1:30 to 1:55, guard off.** Switch to "Six failures, guard off". The map goes dark: all 189 battery homes, every Medical Baseline home included. Switch back.
 5. **1:55 to 2:15, restoration.** Jump to Oct 18. The rebound is slowed so Cuthbert stays under its cap; the officer approves the recharge.
 6. **2:15 to 2:40, the pilot business.** Scroll to the pilot business: 160 free batteries and 226 $9.99-a-month subscribers, carried through all 16 real shutoffs, with shutoff power sold at $1.20 a kWh. Pick a readiness rule to show holding from SCE's notice costs $28 a battery a year.
-7. **2:40 to 3:00, close.** Open the heat-wave replay for one second of the scoreboard. "PowerUP plans, Interlock guards. Base can run it on its fleet."
+7. **2:40 to 3:00, close.** Open the heat-wave replay for one second of the scoreboard. "PowerUP plans, Interlock guards. Our fleet runs on Base batteries; any fleet can run PowerUP."

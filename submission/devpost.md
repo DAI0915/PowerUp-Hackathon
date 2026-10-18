@@ -10,17 +10,17 @@ The hackathon prompt asks for automation that knows when to watch, ask, slow, ho
 
 ## What it does
 
-PowerUP is the disaster layer for a home-battery fleet like Base Power's. It has three parts that share one ladder.
+We are a startup that owns and runs a fleet of Base batteries (Base Core: 39.2 kWh, 20 kW). PowerUP is our disaster layer for that fleet, and it has three parts that share one ladder.
 
 **PowerUP plans (over days).** It starts from SCE's own shutoff circuit list. Watch: Medical Baseline homes fill to 100% at the first wind signal. Ask: owners on named circuits are asked to pre-fill, and everyone else gets a raised 50% floor. Fill, then Hold: every battery runs its home on a per-home outage budget (critical 8, essential 16, normal 32 kWh a day) sized to the planned outage. Hand: SCE's shutoff officer approves a staggered recharge, one circuit at a time, so restoration doesn't overload the circuit.
 
-**Interlock guards (in seconds).** Every order to the fleet, from any sender, passes eight checks: shape, signature, freshness, precedence, each home's backup floor, inverter limit, circuit headroom (no export onto a de-energized line) and ramp. Each check answers on the gentlest rung that keeps homes and the circuit safe: run, clamp, canary (1%, then 10%, then everyone), hold, or hand to a person. It can only shrink, slow or stop an order, never create one. The plan never talks to a battery directly: its orders go through Interlock like anyone else's, and the reserve it plans for each home becomes the floor Interlock enforces against every sender, Base's own optimizer and SCE's emergency event included.
+**Interlock guards (in seconds).** Every order to the fleet, from any sender, passes eight checks: shape, signature, freshness, precedence, each home's backup floor, inverter limit, circuit headroom (no export onto a de-energized line) and ramp. Each check answers on the gentlest rung that keeps homes and the circuit safe: run, clamp, canary (1%, then 10%, then everyone), hold, or hand to a person. It can only shrink, slow or stop an order, never create one. The plan never talks to a battery directly: its orders go through Interlock like anyone else's, and the reserve it plans for each home becomes the floor Interlock enforces against every sender, our own daily optimizer and SCE's emergency event included.
 
 **Silent batteries.** When a battery stops talking, Interlock tells broken, tripped and not talking apart by what went quiet with it. A whole open circuit means tripped. A whole cell tower or internet provider means not talking, and one firmware version going quiet together is held. One home alone with a fault code is broken and goes to a person. Before the towers fail, PowerUP sends each battery its full plan, so a silent battery keeps following it on its own, and homes report over mesh radio to a Starlink dish.
 
 **Islands (for the homes that are dark only because of where their wire runs).** SCE already opens partial circuits: 13 of the 55 shutoffs on these six circuits since 2019 were opened at a switch on the line. The island planner finds the homes that go dark only because their feed runs through a risky stretch, checks three hard rules (never re-energize overhead line in a fire area, a switch to every dead neighbor, one grid-forming source), and plans an opt-in neighborhood island behind the existing switch, with SCE opening and closing it.
 
-**Proof 1, the real October 2026 Malibu shutoff on our pilot.** The pilot is the 456 homes behind RAR8848, the last SCE switch on one Cuthbert branch, on the coastal flats 9 km from the Bryson burn. 189 of them have a battery (our 160 free batteries plus 29 of the homes' own), 16 of them Medical Baseline. PowerUP's five orders run alongside Base's ordinary daily optimizer, and six failures are injected on the real timeline.
+**Proof 1, the real October 2026 Malibu shutoff on our pilot.** The pilot is the 456 homes behind RAR8848, the last SCE switch on one Cuthbert branch, on the coastal flats 9 km from the Bryson burn. 189 of them have a battery (our 160 free batteries plus 29 of the homes' own), 16 of them Medical Baseline. PowerUP's five orders run alongside our daily optimizer, and six failures are injected on the real timeline.
 
 | Same shutoff, same orders | Guard off | Guard on |
 |---|---|---|
@@ -38,7 +38,7 @@ The same run on all six Malibu circuits (1,032 battery homes) gave the same answ
 
 **Proof 3, the pilot business behind RAR8848.** SCE opened RAR8848 on its own once (Dec 2020, 18 hours), and the homes behind it went dark 15 more times when SCE opened the whole Cuthbert circuit at the breaker: 16 shutoffs since 2019, 435 hours. The upstream reason is real too: one of the two 66 kV lines feeding Latigo substation runs about 650 m inside the Bryson Fire perimeter. Few homes behind the switch have their own battery at Malibu's real rates, so we deploy 160 free Base Core batteries at once with volunteer homes, Medical Baseline homes first and then solar roofs, since those refill every day. Homes with no battery can opt in to emergency power for $9.99 a month; Medical Baseline homes and the homes hosting our batteries don't pay. At an assumed 90% opt-in, 226 homes subscribe, about $27,100 a year ($169 per battery). In a shutoff, everyone on the island pays $1.20 per kWh, twice SCE's top residential time-of-use rate (assumed $0.60). SCE bills it and keeps an assumed $0.20 for delivery, and the sellers get $1.00: our batteries, neighbors who choose to sell from their own battery, and every solar roof, which sells all it makes. Battery owners who keep their battery to themselves stay outside the island. A host uses the bottom 20% of our battery first and pays the same price for it; everything above 20% is ours to sell. That is about 20,300 kWh of shutoff power a year: $14,400 to our batteries ($90 each), $2,800 to neighbors selling, $3,800 to host solar and $3,400 to SCE for delivery. The batteries carry every subscriber at the critical budget through all 16 real shutoffs at clear-sky solar (150 is the minimum), and 15 of 16 with smoke halving the solar (all 16 would take 228). On ordinary days each battery trades for about $334 a year at real CAISO prices for the SCE zone, about $53,400 for the fleet, and holding it full from SCE's shutoff notice costs about $28 a year, 8% of that. The fleet costs about $2.24M after the 30% tax credit (installed cost assumed) and nets about $341,000 a year: it pays back in about 6.6 years with the assumed capacity and emergency-event income, 25 years on trading, subscriptions and shutoff sales, and 46 on trading alone.
 
-**Every day.** The same battery earns its keep on ordinary days, so readiness costs only the arbitrage it gives up, and only where the risk is. Interlock doubles as Base's test bench: replay a new dispatch policy through the guard, then roll it out to 1%, 10% and 100% of the fleet.
+**Every day.** The same battery earns its keep on ordinary days, so readiness costs only the arbitrage it gives up, and only where the risk is. Interlock doubles as our test bench: replay a new dispatch policy through the guard, then roll it out to 1%, 10% and 100% of the fleet.
 
 ## How we built it
 
@@ -50,7 +50,7 @@ The same run on all six Malibu circuits (1,032 battery homes) gave the same answ
 - **Data:** SCE PSPS records, circuit lines and load profiles, SCE interconnection records for real solar and battery counts by ZIP, the NIFC fire perimeter, the California Energy Commission's transmission map, and CAISO day-ahead prices.
 - **Tests:** 58 node checks (`npm test`), including the guard-on and guard-off results on the pilot.
 
-Every number in the apps is labelled real, assumed or simulated.
+Every number in the apps is labelled real, assumed or simulated. Two things we take as given, not as open problems: SCE's grid can already open a line switch and run the section behind it as an island, and the batteries are grid-forming (they can set the island's voltage and frequency), not only grid-following.
 
 ## Challenges we ran into
 
@@ -72,10 +72,10 @@ The disaster that comes with warning and the one that doesn't need the same ladd
 
 ## What's next for PowerUP
 
-- The RAR8848 pilot: SCE's segment and switch map for that branch, one grid-forming community battery at the switch, and 160 free Base batteries for volunteer homes, Medical Baseline and solar homes first.
+- The RAR8848 pilot: SCE's segment and switch map for that branch, and 160 free grid-forming Base batteries for volunteer homes, Medical Baseline and solar homes first.
 - A shutoff tariff with SCE and the CPUC, so SCE can bill island power at the fixed price and pay sellers, as the pilot assumes.
 - Real signatures (per-sender certificates, as OpenADR 3 and IEEE 2030.5 use) in place of the demo stand-in.
-- A replay against Base's own dispatch logs, then PowerUP and Interlock in front of one dispatch policy at 1% of a fleet.
+- A replay against real fleet dispatch logs, then PowerUP and Interlock in front of one dispatch policy at 1% of our fleet.
 
 ## Twist 1
 
