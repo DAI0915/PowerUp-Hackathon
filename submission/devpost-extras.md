@@ -15,7 +15,7 @@ The story sections are in `devpost.md`. These are the rest of the form.
 
 ## Responsible-use note
 
-PowerUP could be used to throttle or lock owners out of their own batteries, or become a single point of attack. It sees a priority tier per home, never a medical record. Interlock can only shrink or stop an order, never below a home's own backup. Each battery falls back to a signed local plan if PowerUP fails, and every hold is logged where the owner can see it. A person approves every restoration recharge, EV trip and island, and the utility keeps control of every switch.
+PowerUP could be used to throttle or lock owners out of their own batteries, or become a single point of attack. It sees a priority tier per home, never a medical record. Interlock can only shrink or stop an order, never below a home's own backup. Each battery falls back to a signed local plan if PowerUP fails, and every hold is logged where the owner can see it. A person approves every restoration recharge, EV trip and island, and the utility keeps control of every switch. Shutoff power could be priced up mid-crisis, so the price is fixed in advance at twice SCE's top residential rate, billed by SCE, and Medical Baseline homes always host a free battery.
 
 ## Built with
 

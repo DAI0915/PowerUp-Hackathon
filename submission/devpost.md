@@ -70,6 +70,7 @@ The disaster that comes with warning and the one that doesn't need the same ladd
 ## What's next for PowerUP
 
 - The RAR8848 pilot: SCE's segment and switch map for that branch, one grid-forming community battery at the switch, and 160 free Base batteries for volunteer homes, Medical Baseline and solar homes first.
+- A shutoff tariff with SCE and the CPUC, so SCE can bill island power at the fixed price and pay sellers, as the pilot assumes.
 - Real signatures (per-sender certificates, as OpenADR 3 and IEEE 2030.5 use) in place of the demo stand-in.
 - A replay against Base's own dispatch logs, then PowerUP and Interlock in front of one dispatch policy at 1% of a fleet.
 
