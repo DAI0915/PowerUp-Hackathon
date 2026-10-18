@@ -18,22 +18,22 @@ PowerUP is the disaster layer for a home-battery fleet like Base Power's. It has
 
 **Islands (for the homes that are dark only because of where their wire runs).** SCE already opens partial circuits: 13 of the 55 shutoffs on these six circuits since 2019 were opened at a switch on the line. The island planner finds the homes that go dark only because their feed runs through a risky stretch, checks three hard rules (never re-energize overhead line in a fire area, a switch to every dead neighbor, one grid-forming source), and plans an opt-in neighborhood island behind the existing switch, with SCE opening and closing it.
 
-**Proof 1, the real October 2026 Malibu shutoff on our pilot.** The pilot is the 456 homes behind RAR8848, the last SCE switch on one Cuthbert branch, on the coastal flats 9 km from the Bryson burn. 86 of them have a battery (assumed: our free batteries plus the homes' own), 13 of them Medical Baseline. PowerUP's five orders run alongside Base's ordinary daily optimizer, and six failures are injected on the real timeline.
+**Proof 1, the real October 2026 Malibu shutoff on our pilot.** The pilot is the 456 homes behind RAR8848, the last SCE switch on one Cuthbert branch, on the coastal flats 9 km from the Bryson burn. 189 of them have a battery (our 160 free batteries plus 29 of the homes' own), 16 of them Medical Baseline. PowerUP's five orders run alongside Base's ordinary daily optimizer, and six failures are injected on the real timeline.
 
 | Same shutoff, same orders | Guard off | Guard on |
 |---|---|---|
 | PowerUP's own orders held or clamped | n/a | 0 of 5 |
-| Battery homes that go dark | 85 of 86 | 0 |
-| Medical Baseline homes that go dark | 13 of 13 | 0 |
+| Battery homes that go dark | 189 of 189 | 0 |
+| Medical Baseline homes that go dark | 16 of 16 | 0 |
 | Fleet charge when the power goes off | 9% | 99% |
-| Battery-hours pushing power onto a de-energized line | 258 | 0 |
-| Worst circuit overload at restoration | 1.6 MW over Cuthbert's cap | none |
+| Battery-hours pushing power onto a de-energized line | 567 | 0 |
+| Worst circuit overload at restoration | 3.4 MW over Cuthbert's cap | none |
 
 The same run on all six Malibu circuits (1,032 battery homes) gave the same answer: 1,028 dark with the guard off, none with it on. It also held at Malibu's real battery share today, 7.1 per 100 homes (SCE interconnection records): 483 of 484 dark with the guard off, none with it on.
 
 **Proof 2, CAISO's record-peak evening (Sept 6, 2022).** Four real SCE circuits, 2,000 simulated Base Core homes, the real EEA 3 emergency and ten failures. With the guard on: zero homes drained below their backup (2,000 with it off), zero export onto a dead line (18,490 battery-minutes), and $51,965 of revenue against $17,758, because a fleet that keeps its charge can deliver 28.2 MWh to the emergency instead of 13.3.
 
-**Proof 3, the pilot business behind RAR8848.** SCE opened RAR8848 on its own once (Dec 2020, 18 hours), and the homes behind it went dark 15 more times when SCE opened the whole Cuthbert circuit at the breaker: 16 shutoffs since 2019, 435 hours. The upstream reason is real too: one of the two 66 kV lines feeding Latigo substation runs about 650 m inside the Bryson Fire perimeter. At Malibu's real rates there are about 35 home-owned batteries behind the switch. We deploy 160 free Base Core batteries at once with volunteer homes, Medical Baseline homes first and then solar roofs, since those refill every day. That carries every neighbor at the critical budget through all 16 real shutoffs at clear-sky solar (39 is the bare minimum), and through 15 of the 16 even if smoke halves the solar. On ordinary days each battery trades for about $334 a year at real CAISO prices for the SCE zone, about $53,400 for the fleet, and holding it full from SCE's shutoff notice costs about $28 a year, 8% of that.
+**Proof 3, the pilot business behind RAR8848.** SCE opened RAR8848 on its own once (Dec 2020, 18 hours), and the homes behind it went dark 15 more times when SCE opened the whole Cuthbert circuit at the breaker: 16 shutoffs since 2019, 435 hours. The upstream reason is real too: one of the two 66 kV lines feeding Latigo substation runs about 650 m inside the Bryson Fire perimeter. Few homes behind the switch have their own battery at Malibu's real rates, so we deploy 160 free Base Core batteries at once with volunteer homes, Medical Baseline homes first and then solar roofs, since those refill every day. That carries every neighbor at the critical budget through all 16 real shutoffs at clear-sky solar (39 is the bare minimum), and through 15 of the 16 even if smoke halves the solar. On ordinary days each battery trades for about $334 a year at real CAISO prices for the SCE zone, about $53,400 for the fleet, and holding it full from SCE's shutoff notice costs about $28 a year, 8% of that. The fleet costs about $2.24M after the 30% tax credit (installed cost assumed); it pays back in about 7.5 years only with assumed capacity and emergency-event income, and in 46 years on trading alone.
 
 **Every day.** The same battery earns its keep on ordinary days, so readiness costs only the arbitrage it gives up, and only where the risk is. Interlock doubles as Base's test bench: replay a new dispatch policy through the guard, then roll it out to 1%, 10% and 100% of the fleet.
 

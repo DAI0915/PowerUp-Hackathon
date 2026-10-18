@@ -32,7 +32,7 @@ JavaScript, Node.js, Python, HTML Canvas, Playwright, SCE open data (PSPS record
 1. **0:00 to 0:20, the problem.** "October 2026: SCE cuts power across Malibu for nine days, and the Bryson Fire starts in the middle of it. 456 homes behind one switch on the Cuthbert circuit have gone dark 16 times since 2019. A home-battery fleet can keep them lit, if it's full when the power goes off and if its own software doesn't drain it."
 2. **0:20 to 0:50, PowerUP plans.** Click Watch, Ask, Fill on the ladder. Medical Baseline homes fill first; the map shows the fleet at 99% at Hold.
 3. **0:50 to 1:30, the failures.** In the guard panel, scroll the log: the sell-down three hours before power-off is held back, the stolen key is handed to a person, the export onto the dead Cuthbert line is held, SCE's own event stops at each home's reserve.
-4. **1:30 to 1:55, guard off.** Switch to "Six failures, guard off". The map goes dark: 85 of 86 battery homes and every Medical Baseline home. Switch back.
+4. **1:30 to 1:55, guard off.** Switch to "Six failures, guard off". The map goes dark: all 189 battery homes, every Medical Baseline home included. Switch back.
 5. **1:55 to 2:15, restoration.** Jump to Oct 18. The rebound is slowed so Cuthbert stays under its cap; the officer approves the recharge.
 6. **2:15 to 2:40, the pilot business.** Scroll to the pilot business: 160 free batteries carry all 16 real shutoffs. Tick smoky days to show it still carries 15, then pick a readiness rule to show holding from SCE's notice costs $28 a battery a year.
 7. **2:40 to 3:00, close.** Open the heat-wave replay for one second of the scoreboard. "PowerUP plans, Interlock guards. Base can run it on its fleet."
