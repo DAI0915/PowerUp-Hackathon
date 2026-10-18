@@ -17,6 +17,10 @@ scale = N / cut['customers']
 cut.update(customers=N, customers_source='SCE PSPS record: RAR8848 cut 456 customers, Dec 2 2020',
            shutoffs_on_record=len(pilot['events']), longest_hours=max(e['hours'] for e in pilot['events']),
            section='RAR8848', note='Only the stretch behind switch RAR8848; the rest of Cuthbert is outside the pilot.')
+# context for the map: every Malibu circuit line, the Bryson perimeter and the 66 kV lines into Latigo (drawn, not simulated)
+d['context_lines'] = {c: v for c, v in d['lines'].items()}
+d['fire_perimeter'] = json.load(open(os.path.join(HERE, 'bryson_perimeter.json')))
+d['latigo_66kv'] = json.load(open(os.path.join(HERE, 'latigo_66kv.json')))
 d['named'] = ['Cuthbert']
 d['circuits'] = {'Cuthbert': cut}
 d['lines'] = {'Cuthbert': pilot['lines']}

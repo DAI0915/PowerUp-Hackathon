@@ -331,6 +331,10 @@ canvas.chart { display: block; width: 100%; }
 @media (prefers-reduced-motion: no-preference) { .btn, .map-ctl button { transition: border-color 0.12s; } }
 
 
+/* RAR8848 pilot map context */
+.ctxleg { list-style: none; margin: 2px 0 6px; padding: 0; font-size: 12px; display: grid; gap: 2px; }
+.ctxleg i { display: inline-block; width: 14px; height: 8px; margin-right: 6px; vertical-align: 0; }
+.ctxleg i.dash { height: 0; border-top: 2px dashed currentColor; vertical-align: 3px; }
 /* RAR8848 pilot business band */
 .pl-ctl { display: grid; gap: 6px; margin: 6px 0 8px; font-size: 13px; }
 .pl-ctl label { display: grid; gap: 2px; }
@@ -434,15 +438,23 @@ canvas.chart { display: block; width: 100%; }
           <button id="zoomOut" title="Zoom out" aria-label="Zoom out">&minus;</button>
           <button id="zoomReset" title="Reset view" aria-label="Reset view">&#8634;</button>
           <button id="legendBtn" title="Legend" aria-label="Toggle legend" aria-pressed="true">&#9776;</button>
+          <button id="wideBtn" title="Show Malibu and the Bryson Fire" aria-label="Show Malibu and the Bryson Fire" aria-pressed="false">&#10530;</button>
         </div>
         <div class="legend" id="legend">
           <span class="lab">Battery homes</span>
           <ul id="legendStates"></ul>
           <span class="lab" style="margin-top:6px">Circuits (click)</span>
           <div class="circ" id="legendCircuits"></div>
+          <span class="lab" style="margin-top:6px">Malibu and the fire</span>
+          <ul class="ctxleg">
+            <li><i style="background:var(--c-galahad);opacity:.6"></i>Other Malibu circuits, faint</li>
+            <li><i class="dash" style="color:var(--h-standby)"></i>66 kV into Latigo (CEC)</li>
+            <li><i style="background:var(--fire-fill);border:1px solid var(--fire)"></i>Bryson Fire perimeter (NIFS)</li>
+          </ul>
+          <button class="btn sm" id="ctxBtn" aria-pressed="true">Hide Malibu context</button>
         </div>
         <div class="card" id="homeCard" hidden></div>
-        <div class="map-note" id="mapNote">N up. Lines from SCE GIS, coast approximate</div>
+        <div class="map-note" id="mapNote">N up. N up. Lines from SCE GIS, coast approximate#10530; shows Malibu and the fire. Lines from SCE GIS</div>
       </div>
 
       <div class="timeline" id="timeline">
@@ -714,6 +726,8 @@ function setGuardMode(m) {
 const mapWrap = $('mapWrap'), canvas = $('map'), ctx = canvas.getContext('2d');
 const view = { cx: 0, cy: 0, scale: 10 };
 let W = 0, H = 0, dpr = 1;
+let pilotBox = null, wideBox = null, wideView = false;
+let ctxKm = {}, perimKm = null, txKm = [], latigoKm = null;
 let coastKm = null, bandsKm = null, linesKm = null, placesKm = null, fireKm = null, switchesKm = [], contentBox = null;
 let hoverId = -1, pinnedId = -1, pinnedPos = null;
 let needsDraw = true;
@@ -734,14 +748,27 @@ function prepGeometry() {
   placesKm = DATA.places.map(p => ({ n: p.n, p: G.toKm(p.lon, p.lat, bb) }));
   fireKm = G.toKm(DATA.fire.lon, DATA.fire.lat, bb);
   switchesKm = (DATA.switches || []).map(sw => ({ sw, p: G.toKm(sw.lon, sw.lat, bb) }));
+  // pilot context: every Malibu line, the Bryson perimeter, the 66 kV lines into Latigo; the first view fits the pilot and the fire
+  for (const c of Object.keys(DATA.context_lines || {})) ctxKm[c] = DATA.context_lines[c].map(pl => pl.map(p => G.toKm(p[0], p[1], bb)));
+  pilotBox = { minx, miny, maxx, maxy };
+  if (DATA.fire_perimeter) {
+    perimKm = DATA.fire_perimeter.lonlat.map(p => G.toKm(p[0], p[1], bb));
+    for (const p of perimKm) { if (p[0] < minx) minx = p[0]; if (p[0] > maxx) maxx = p[0]; if (p[1] < miny) miny = p[1]; if (p[1] > maxy) maxy = p[1]; }
+  }
+  wideBox = { minx: minx - 2, miny, maxx: maxx + 2, maxy };
+  if (DATA.latigo_66kv) {
+    txKm = DATA.latigo_66kv.lines.map(l => Object.assign({}, l, { km: l.parts.map(pt => pt.map(p => G.toKm(p[0], p[1], bb))) }));
+    latigoKm = G.toKm(DATA.latigo_66kv.substation.lonlat[0], DATA.latigo_66kv.substation.lonlat[1], bb);
+  }
   contentBox = { minx, miny, maxx, maxy };
 }
 function resetView(animate) {
-  const pad = 0.6;
+  contentBox = wideView ? wideBox : pilotBox;
+  const pad = wideView ? 0.6 : 0.25;
   const w = contentBox.maxx - contentBox.minx + pad * 2, h = contentBox.maxy - contentBox.miny + pad * 2;
   let scale = Math.min(W / w, H / h);
   let cx = (contentBox.minx + contentBox.maxx) / 2, cy = (contentBox.miny + contentBox.maxy) / 2;
-  if (W < 600) { scale = Math.min(W / w, H / h) * 1.9; cx = (contentBox.minx + contentBox.maxx) / 2 - 1.5; cy += 0.8; }
+  if (W < 600 && wideView) { scale = Math.min(W / w, H / h) * 1.6; }
   setView({ cx, cy, scale }, animate);
 }
 let anim = null;
@@ -781,6 +808,7 @@ function resize() {
 
 function homeRadius() { return Math.max(2.2, Math.min(6, view.scale * 0.11)); }
 function fireVisible() { return hour >= FIRE_H; }
+let ctxHidden = false;
 
 function drawMap(now) {
   labelBoxes = [];
@@ -844,6 +872,32 @@ function drawMap(now) {
     const named = k === 'Tuna';
     ctx.fillStyle = named ? T.band : 'rgba(0,0,0,0)'; if (named) ctx.fill();
     ctx.setLineDash([5, 4]); ctx.strokeStyle = named ? T['c-tuna'] : T['band-line']; ctx.lineWidth = named ? 1.5 : 1; ctx.globalAlpha = named ? 1 : 0.6; ctx.stroke(); ctx.globalAlpha = 1; ctx.setLineDash([]);
+  }
+
+  // Malibu context: the other circuits' lines, faint and unselectable, then the 66 kV feeds into Latigo
+  const strokePl = pls => { ctx.beginPath(); for (const pl of pls) for (let i = 0; i < pl.length; i++) { const q = toPx(pl[i][0], pl[i][1]); if (i) ctx.lineTo(q[0], q[1]); else ctx.moveTo(q[0], q[1]); } ctx.stroke(); };
+  if (!ctxHidden) {
+    ctx.lineJoin = 'round'; ctx.lineCap = 'round';
+    for (const c of Object.keys(ctxKm)) {
+      ctx.globalAlpha = c === 'Cuthbert' ? 0.3 : 0.4; ctx.strokeStyle = circColor(c) || T['c-nicholas']; ctx.lineWidth = 1.3;
+      if (h >= RUNGS.hold && h < RUNGS.hand && c !== 'Nicholas') ctx.setLineDash([5, 4]);
+      strokePl(ctxKm[c]); ctx.setLineDash([]);
+    }
+    ctx.globalAlpha = 1;
+    if (view.scale < 160) for (const c of Object.keys(ctxKm)) {
+      if (c === 'Cuthbert' || c === 'Nicholas') continue;
+      const pts = ctxKm[c].flat(); const mid = pts[Math.floor(pts.length * 0.45)]; const q = toPx(mid[0], mid[1]);
+      if (q[0] > 20 && q[0] < W - 20 && q[1] > 30 && q[1] < H - 20) labelFit(c, q[0], q[1] - 8, circColor(c), 'center', 11);
+    }
+    for (const t of txKm) {
+      ctx.strokeStyle = T['h-standby']; ctx.lineWidth = 2; ctx.setLineDash([7, 4]); strokePl(t.km); ctx.setLineDash([]);
+    }
+    if (latigoKm) {
+      const q = toPx(latigoKm[0], latigoKm[1]);
+      ctx.fillStyle = T.fg; ctx.fillRect(q[0] - 5, q[1] - 5, 10, 10);
+      labelFit('Latigo substation', q[0] - 8, q[1] - 10, T.label, 'right', 11, true);
+      if (txKm.length && view.scale < 220) { const pt = txKm[0].km[0][Math.floor(txKm[0].km[0].length * 0.6)]; const r = toPx(pt[0], pt[1]); labelFit('66 kV into Latigo', r[0], r[1] - 8, T['h-standby'], 'center', 11); }
+    }
   }
 
   // lines
@@ -957,7 +1011,10 @@ function drawMap(now) {
   if (fireVisible()) {
     const q = toPx(fireKm[0], fireKm[1]);
     const acres = DATA.fire.acres, rkm = Math.sqrt(acres * 0.00404686 / Math.PI);
-    ctx.fillStyle = T['fire-fill']; ctx.beginPath(); ctx.arc(q[0], q[1], Math.max(6, rkm * view.scale), 0, Math.PI * 2); ctx.fill();
+    if (perimKm) {
+      ctx.beginPath(); perimKm.forEach((p, i) => { const r = toPx(p[0], p[1]); if (i) ctx.lineTo(r[0], r[1]); else ctx.moveTo(r[0], r[1]); }); ctx.closePath();
+      ctx.fillStyle = T['fire-fill']; ctx.fill(); ctx.strokeStyle = T.fire; ctx.lineWidth = 1.5; ctx.stroke();
+    } else { ctx.fillStyle = T['fire-fill']; ctx.beginPath(); ctx.arc(q[0], q[1], Math.max(6, rkm * view.scale), 0, Math.PI * 2); ctx.fill(); }
     ctx.fillStyle = T.fire; ctx.beginPath(); ctx.arc(q[0], q[1], 4, 0, Math.PI * 2); ctx.fill();
     const pulse = reduceMotion.matches ? 0.5 : ((now / 1600) % 1);
     ctx.strokeStyle = T.fire; ctx.globalAlpha = 1 - pulse; ctx.lineWidth = 2; ctx.beginPath(); ctx.arc(q[0], q[1], 6 + pulse * 22, 0, Math.PI * 2); ctx.stroke(); ctx.globalAlpha = 1;
@@ -2031,6 +2088,8 @@ buildDrawer();
 buildStatic();
 renderIslands();
 $('circuitSel').addEventListener('change', e => selectCircuit(e.target.value, false));
+$('wideBtn').addEventListener('click', () => { wideView = !wideView; $('wideBtn').setAttribute('aria-pressed', String(wideView)); $('wideBtn').title = wideView ? 'Back to the pilot' : 'Show Malibu and the Bryson Fire'; resetView(true); });
+$('ctxBtn').addEventListener('click', () => { ctxHidden = !ctxHidden; $('ctxBtn').setAttribute('aria-pressed', String(!ctxHidden)); $('ctxBtn').textContent = ctxHidden ? 'Show Malibu context' : 'Hide Malibu context'; needsDraw = true; });
 if (window.innerWidth < 900) { $('mathBody').hidden = true; $('mathBtn').textContent = 'Open'; $('mathBtn').setAttribute('aria-expanded', 'false'); $('bulletin').title = 'Tap to expand'; }
 const hash = (location.hash || '').slice(1);
 if (RUNGS[hash] !== undefined) hour = RUNGS[hash];
