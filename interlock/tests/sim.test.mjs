@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { runReplay } from '../src/sim.mjs';
+import { runReplay, createSim } from '../src/sim.mjs';
 
 const memo = new Map();
 const run = (opts) => {
@@ -29,12 +29,29 @@ test('guard on: 0 floor breaches and 0 dead-line exports; guard off: more than 0
   assert.equal(on.legitHeld, 0, 'no legitimate command held');
 });
 
-test('the EEA 3 event rolls out 1% -> 10% -> 100% in the replay log', () => {
-  const log = run({ guard: true, seed: 7 }).log.filter((e) => e.id?.startsWith('eea3-event'));
+test('the SCE event runs at once on the 189-home branch: below the pack\'s canary size, nothing held', () => {
+  const r = run({ guard: true, seed: 7 });
+  const log = r.log.filter((e) => e.id?.startsWith('sce-event'));
+  assert.ok(log.length > 0);
+  assert.ok(!log.some((e) => e.reasons?.some((x) => x.code === 'CANARY')), 'no canary below 600 homes / 5 MW');
+  assert.ok(r.commands.find((c) => c.event === 'sce-event').kwh > 0);
+  assert.ok(r.scoreboard.eventMWh > 0);
+});
+
+test('with a canary threshold below the branch size, the SCE event rolls out 1% -> 10% -> 100%', () => {
+  const log = run({ guard: true, seed: 7, strictness: { canaryHomes: 50, canaryMW: 0.5 } }).log.filter((e) => e.id?.startsWith('sce-event'));
   const canary = log.filter((e) => e.reasons?.some((r) => r.code === 'CANARY'));
   assert.ok(canary.some((e) => /step 1 of 3 \(1%/.test(e.reasons.find((r) => r.code === 'CANARY').detail)));
   assert.ok(canary.some((e) => /step 2 of 3 \(10%/.test(e.reasons.find((r) => r.code === 'CANARY').detail)));
   assert.ok(log.some((e) => e.phase === 'step' && !e.reasons.some((r) => r.code === 'CANARY')), 'reaches full rollout');
+});
+
+test('the pilot fleet: 189 battery homes behind RAR8848, 160 ours, 16 Medical Baseline, all Base Core', () => {
+  const { homes } = createSim({ guard: true, seed: 7 }).S;
+  assert.equal(homes.length, 189);
+  assert.equal(homes.filter((h) => h.owner === 'ours').length, 160);
+  assert.equal(homes.filter((h) => h.medical).length, 16);
+  assert.ok(homes.every((h) => h.circuit === 'rar8848' && h.capacityKWh === 39.2 && h.maxKw === 20));
 });
 
 // Guard off earns part of its revenue by draining homes below their promised backup.

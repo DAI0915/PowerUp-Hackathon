@@ -1,9 +1,9 @@
 #!/usr/bin/env node
-// Runs the Sept 6, 2022 replay guard off vs guard on (and the three packs), prints a scoreboard, writes out/results.json.
+// Runs the Oct 14, 2026 RAR8848 pilot evening guard off vs guard on (and the three packs), prints a scoreboard, writes out/results.json.
 import { mkdirSync, writeFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { runReplay, toleranceMap, SCENARIO, FACTS, ASSUMPTIONS, DAY } from './src/sim.mjs';
+import { runReplay, toleranceMap, SCENARIO, FACTS, EVENT, ASSUMPTIONS, DAY } from './src/sim.mjs';
 import { PACKS } from './src/packs.mjs';
 import circuits from './data/circuits.mjs';
 
@@ -43,8 +43,10 @@ const head = ['', 'Guard off', 'Guard on (SCE)', 'Installation', 'Australia', 'L
 const fmt = (v) => (v === null || v === undefined ? '-' : typeof v === 'number' ? (Number.isInteger(v) ? v.toLocaleString('en-US') : v.toLocaleString('en-US', { maximumFractionDigits: 2 })) : String(v));
 const table = [head, ...rows.map(([label, k]) => [label, ...cols.map((c) => fmt(runs[c].scoreboard[k]))])];
 const widths = head.map((_, i) => Math.max(...table.map((r) => r[i].length)));
-console.log(`\nInterlock replay: ${DAY.weekday} ${DAY.date}, 12:00-22:00, seed ${seed}. CAISO peak ${FACTS.caisoPeakMW.toLocaleString()} MW, EEA 3 5:17-8:00 PM (REAL).`);
-console.log(`Circuits (REAL SCE data): ${circuits.circuits.map((c) => `${c.id} ${c.name}/${c.substation}`).join(', ')}\n`);
+const hm = (m) => `${Math.floor(m / 60)}:${String(m % 60).padStart(2, '0')}`;
+console.log(`\nInterlock replay: ${DAY.weekday} ${DAY.date}, 12:00-22:00, seed ${seed}. The evening before SCE's shutoff (power off ${FACTS.powerOff}, REAL).`);
+console.log(`Branch: ${circuits.circuits.map((c) => `${c.name}, ${c.substation} substation, ${c.homes} homes (REAL), load = Cuthbert Oct ${c.year} x ${c.scale} (ASSUMED), import limit ${c.importLimitMW} MW, export cap ${c.exportCapMW} MW (ASSUMED)`).join('; ')}`);
+console.log(`Fleet: ${ASSUMPTIONS.homes.value} battery homes (${ASSUMPTIONS.ourBatteries.value} ours, ${ASSUMPTIONS.homeOwned.value} home-owned, ${ASSUMPTIONS.medicalHomes.value} Medical Baseline), SIMULATED. SCE flex event ${hm(EVENT.startMin)}-${hm(EVENT.endMin)}, SIMULATED.\n`);
 for (const r of table) console.log(r.map((x, i) => (i === 0 ? x.padEnd(widths[i]) : x.padStart(widths[i]))).join('  '));
 const rc = (s) => Object.entries(s.rungCounts).filter(([, n]) => n).map(([k, n]) => `${k} ${n}`).join(', ');
 console.log(`\nRung counts, guard on (SCE): ${rc(runs.guardOn.scoreboard)}`);
@@ -62,8 +64,8 @@ console.log(`  excluding guard-off money made by spending promised backup: ${pct
 console.log(`  chaos day, guard on vs clean day guard off: ${pct(ratios.chaosDayVsCleanDay)}; chaos day revenue from legit commands, on vs off: ${pct(ratios.chaosDayLegitAttributed)}`);
 console.log('Silence confusion (truth>predicted, home-steps), guard on:', JSON.stringify(runs.guardOn.scoreboard.silenceConfusion));
 console.log('\nTolerance map (guard on, SCE, same seed):');
-console.log('floor  canaryHomes canaryMW  revenue$   eventMWh  belowPromise  <8h@8PM');
-for (const r of tolerance) console.log(`${(r.floorPct * 100).toFixed(0).padStart(4)}%  ${String(r.canaryHomes).padStart(10)}  ${r.canaryMW.toFixed(1).padStart(7)}  ${fmt(r.revenue).padStart(9)}  ${fmt(r.eventMWh).padStart(8)}  ${String(r.promiseBreachHomes).padStart(12)}  ${String(r.lowBackupHomes8pm).padStart(7)}`);
+console.log('floor  revenue$   eventMWh  belowPromise  <8h@8PM');
+for (const r of tolerance) console.log(`${(r.floorPct * 100).toFixed(0).padStart(4)}%  ${fmt(r.revenue).padStart(9)}  ${fmt(r.eventMWh).padStart(8)}  ${String(r.promiseBreachHomes).padStart(12)}  ${String(r.lowBackupHomes8pm).padStart(7)}`);
 
 console.log('\nVerdict log, guard on (SCE), command arrivals:');
 for (const e of runs.guardOn.log.filter((x) => x.phase === 'arrival' || x.kind === 'silence' || x.kind === 'behaviour')) {
@@ -73,8 +75,8 @@ for (const e of runs.guardOn.log.filter((x) => x.phase === 'arrival' || x.kind =
 
 mkdirSync(join(here, 'out'), { recursive: true });
 const out = {
-  generatedBy: 'interlock cli.mjs', seed, day: DAY, facts: FACTS, assumptions: ASSUMPTIONS,
-  circuits: circuits.circuits.map(({ septHourly, ...c }) => c), circuitLabels: circuits.labels,
+  generatedBy: 'interlock cli.mjs', seed, day: DAY, facts: FACTS, event: EVENT, assumptions: ASSUMPTIONS,
+  circuits: circuits.circuits.map(({ hourly, ...c }) => c), circuitLabels: circuits.labels,
   scenario: SCENARIO, packs: Object.fromEntries(Object.entries(PACKS).map(([k, p]) => [k, { label: p.label, description: p.description }])),
   revenueRatios: ratios,
   runs, tolerance,

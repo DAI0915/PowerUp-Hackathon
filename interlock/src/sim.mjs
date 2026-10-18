@@ -1,25 +1,34 @@
-// Deterministic replay of Tuesday Sept 6, 2022 (CAISO record peak, EEA 3 5:17-8:00 PM) on 4 real SCE circuits.
-// Fleet, chaos and prices are SIMULATED / ASSUMED (see ASSUMPTIONS). Pure ES module, no I/O.
+// Deterministic replay of an ordinary evening on the RAR8848 pilot: Wednesday Oct 14, 2026, the evening before SCE's
+// shutoff (power off Oct 15, 4 PM) and the Bryson Fire, on the 456 homes behind SCE switch RAR8848 on the Cuthbert circuit.
+// Loads are REAL in shape (Cuthbert, October 2024), scaled to the branch (ASSUMED). The fleet, the chaos and the utility
+// event are SIMULATED; prices are ASSUMED SCE TOU (see ASSUMPTIONS). Pure ES module, no I/O.
 import circuitsData from '../data/circuits.mjs';
 import { evaluate, signCommand, requestedKw, floorKWh, lastSafePlan, lastSafePlanKw, fmtTime, BASE_CORE, maxRung, orderDigest } from './engine.mjs';
 import { classifySilence, checkBehaviour } from './silence.mjs';
 import { getPack, PACKS, DEMO_KEYS } from './packs.mjs';
 
-export const DAY = { date: '2022-09-06', weekday: 'Tuesday', startMin: 12 * 60, endMin: 22 * 60, stepMin: 5 };
+export const DAY = { date: '2026-10-14', weekday: 'Wednesday', startMin: 12 * 60, endMin: 22 * 60, stepMin: 5 };
 
-export const FACTS = { // REAL (Utility Dive, 2022-09-07)
-  caisoPeakMW: 52061, eea3StartMin: 17 * 60 + 17, eea3EndMin: 20 * 60, rotatingOutages: false,
-  source: 'https://utilitydive.com/news/california-iso-narrowly-avoids-outages-but-warns-as-peak-demand-hits-record/631280',
+const BRANCH = circuitsData.circuits[0];
+export const FACTS = { // REAL (SCE PSPS records, the October 2026 Malibu shutoff timeline in pilot/app/data.json)
+  circuit: 'Cuthbert', substation: 'Latigo', switch: 'RAR8848', branchHomes: BRANCH.homes, circuitCustomers: BRANCH.circuitCustomers,
+  namedOn: '2026-10-12', powerOff: '2026-10-15 16:00', fire: { name: 'Bryson Fire', started: '2026-10-15 16:41' },
+  wholesale: circuitsData.wholesale,
 };
+// The one utility event of the evening: SIMULATED (no emergency was called on Oct 14, 2026).
+export const EVENT = { id: 'sce-event', startMin: 18 * 60, endMin: 20 * 60, label: 'SIMULATED' };
 
 export const ASSUMPTIONS = {
-  homes: { value: 2000, label: 'SIMULATED' }, homesPerCircuit: { value: 500, label: 'SIMULATED' },
+  homes: { value: 189, label: 'ASSUMED (the pilot: our 160 free Base Core batteries plus 29 home-owned)' },
+  ourBatteries: { value: 160, label: 'ASSUMED (the pilot plan)' }, homeOwned: { value: 29, label: 'ASSUMED (modelled at Base Core spec, as in the pilot app)' },
+  medicalHomes: { value: 16, label: 'ASSUMED (the pilot: free batteries go to Medical Baseline homes first)' },
+  branchHomes: { value: BRANCH.homes, label: 'REAL (SCE PSPS record: RAR8848 cut 456 customers)' },
   capacityKWh: { value: 39.2, label: 'REAL (Base Core)' }, maxKw: { value: 20, label: 'REAL (Base Core)' },
-  noonSocPct: { value: '60-90', label: 'SIMULATED (seeded)' }, medicalShare: { value: 0.05, label: 'ASSUMED' },
-  homeKWhPerDay: { value: 40, label: 'ASSUMED (heat-day home)' },
-  touPeak: { value: 0.58, label: 'ASSUMED (SCE TOU-D-4-9PM summer weekday 4-9 PM, check)' },
-  touOff: { value: 0.30, label: 'ASSUMED (check)' },
-  eventPay: { value: 1.0, label: 'ASSUMED (ELRP-style $/kWh; sources conflict between $1 and $2)' },
+  noonSocPct: { value: '60-90', label: 'SIMULATED (seeded)' },
+  homeKWhPerDay: { value: 32, label: 'REAL (SCE usage by ZIP: Malibu 90265 averaged about 32 kWh a day in Oct 2025)' },
+  touPeak: { value: 0.60, label: 'ASSUMED (SCE TOU-D-4-9PM on-peak 4-9 PM, about $0.60 in 2025, as in the pilot)' },
+  touOff: { value: 0.30, label: 'ASSUMED (as in the pilot)' },
+  eventPay: { value: 2.0, label: 'REAL rate (CPUC ELRP pays $2/kWh exported); the event itself is SIMULATED' },
   exportCredit: { value: 'same as TOU price', label: 'ASSUMED (simplification; NBT export credits differ)' },
   roundTrip: { value: 1.0, label: 'ASSUMED (losses ignored)' },
   criticalLoadKw: { value: 0.8, medical: 1.5, label: 'ASSUMED (critical-load backup draw)' },
@@ -27,9 +36,9 @@ export const ASSUMPTIONS = {
   firmwareMix: { value: 'v2.2 70% / v2.3 30%', label: 'SIMULATED' },
 };
 
-const TOU = (min) => (min >= 16 * 60 && min < 21 * 60 ? 0.58 : 0.30);
-const EVENT_PAY = 1.0;
-const HOME_KWH_DAY = 40;
+const TOU = (min) => (min >= 16 * 60 && min < 21 * 60 ? 0.60 : 0.30);
+const EVENT_PAY = 2.0;
+const HOME_KWH_DAY = 32;
 const CRIT_KW = 0.8, CRIT_KW_MED = 1.5, BACKUP_H = 8;
 const BLIP_P = 0.0003; // per home-step chance of an isolated comms blip (SIMULATED)
 
@@ -46,71 +55,77 @@ export function mulberry32(seed) {
 
 // ---------- the chaos schedule (SIMULATED, modelled on real incident types). One array; the UI can fire entries. ----------
 // signer: optimizer | utility | market | attacker. truth: legit | unsafe | malicious (ground truth for scoring).
+const B = BRANCH.id;
 export const SCENARIO = [
   { at: 14 * 60, id: 'price-glitch', kind: 'command', truth: 'unsafe', signer: 'optimizer', expect: 'circuit',
-    title: 'Price-feed glitch', story: 'A bad price tick makes the optimizer order every battery to charge at full power.',
+    title: 'Price-feed glitch', story: 'A bad price tick makes our optimizer order all 189 batteries to charge at full power, 3.8 MW on a branch that peaks under 1 MW.',
     command: { priority: 5, targets: { all: true }, payload: { type: 'CHARGE_KW', value: 20 }, durationMin: 30 } },
   { at: 15 * 60, id: 'stolen-key', kind: 'command', truth: 'malicious', signer: 'attacker', expect: 'auth',
-    title: 'Stolen key', story: 'Someone signs a fleet-wide full discharge with a key that is not on the trust list, posing as the utility.',
+    title: 'Stolen key', story: 'Someone signs a fleet-wide full discharge with a key that is not on the trust list, posing as SCE, the day before the shutoff.',
     source: { id: 'sce-drms-2', role: 'utility' }, key: 'k-stolen-0000',
     command: { priority: 0, targets: { all: true }, payload: { type: 'DISCHARGE_KW', value: 20 }, durationMin: 60 } },
   { at: 15 * 60 + 30, id: 'replay', kind: 'command', truth: 'malicious', signer: 'replay', expect: 'freshness',
-    title: 'Replay', story: 'A captured 7 AM utility test order is re-sent, with its old epoch and valid signature.',
+    title: 'Replay', story: 'A captured 7 AM SCE test order is re-sent, with its old epoch and valid signature.',
     replayOf: 'sce-0700-test' },
-  { at: 16 * 60, id: 'bad-forecast', kind: 'command', truth: 'unsafe', signer: 'optimizer', expect: 'floor',
-    title: 'Bad forecast', story: 'A broken forecast tells the optimizer to drain every battery to 5% by 9 PM.',
+  { at: 16 * 60 + 15, id: 'bad-forecast', kind: 'command', truth: 'unsafe', signer: 'optimizer', expect: 'floor',
+    title: 'Bad forecast', story: 'A broken forecast tells our optimizer to drain every battery to 5% by 9 PM, the night before the power goes off.',
     command: { priority: 5, targets: { all: true }, payload: { type: 'SOC_TARGET', value: 5 }, durationMin: 300 } },
-  { at: 17 * 60, id: 'circuit-open', kind: 'grid', truth: 'grid', expect: 'circuit',
-    title: 'Utility opens circuit 3', story: 'The utility de-energizes circuit 3 for switching; its homes island.',
-    action: { type: 'openCircuit', circuit: 'c3', untilMin: 18 * 60 + 30, silentFrac: 0.7 } },
-  { at: 17 * 60, id: 'market-export', kind: 'command', truth: 'unsafe', signer: 'market', expect: 'circuit',
-    title: 'Market export on a dead line', story: 'A market award asks circuit 3 to export while it is de-energized.',
-    command: { priority: 7, targets: { circuits: ['c3'] }, payload: { type: 'EXPORT_KW', value: 10 }, durationMin: 60 } },
-  { at: 17 * 60 + 17, id: 'eea3-event', kind: 'command', truth: 'legit', signer: 'utility', expect: 'ramp',
-    title: 'Utility emergency (EEA 3)', story: 'Valid, signed, priority 0: export 8 kW per home until 8 PM.',
-    command: { priority: 0, targets: { all: true }, payload: { type: 'EXPORT_KW', value: 8 }, durationMin: 163 } },
-  { at: 18 * 60, id: 'tower-drop', kind: 'comms', truth: 'not_talking', expect: 'silence',
-    title: 'Cell tower drops', story: 'Tower c2-a goes down; about 300 homes go quiet at once.',
-    action: { type: 'towerDrop', tower: 'c2-a', untilMin: 19 * 60 } },
-  { at: 18 * 60 + 30, id: 'stuck-soc', kind: 'device', truth: 'lying', expect: 'behaviour',
-    title: 'Stuck-SOC bug', story: 'Most v2.3 units on circuit 4 keep reporting the same SOC while they discharge.',
-    action: { type: 'stuckSoc', firmware: 'v2.3', circuit: 'c4', frac: 0.8 } },
+  { at: 16 * 60 + 30, id: 'circuit-open', kind: 'grid', truth: 'grid', expect: 'circuit',
+    title: 'SCE opens RAR8848', story: 'SCE opens switch RAR8848 for 45 minutes of switching ahead of tomorrow\'s shutoff; the 456 homes behind it island.',
+    action: { type: 'openCircuit', circuit: B, untilMin: 17 * 60 + 15, silentFrac: 0.7 } },
+  { at: 16 * 60 + 30, id: 'market-export', kind: 'command', truth: 'unsafe', signer: 'market', expect: 'circuit',
+    title: 'Market export on a dead line', story: 'A market award asks the branch to export 10 kW per home while RAR8848 is open.',
+    command: { priority: 7, targets: { circuits: [B] }, payload: { type: 'EXPORT_KW', value: 10 }, durationMin: 30 } },
+  { at: EVENT.startMin, id: EVENT.id, kind: 'command', truth: 'legit', signer: 'utility', expect: 'ramp',
+    title: 'SCE flex event', story: 'Valid, signed, priority 0: export 3 kW per home from 6 to 8 PM. No emergency was called that evening; this one is simulated.',
+    command: { priority: 0, targets: { all: true }, payload: { type: 'EXPORT_KW', value: 3 }, durationMin: EVENT.endMin - EVENT.startMin } },
+  { at: 18 * 60 + 15, id: 'tower-drop', kind: 'comms', truth: 'not_talking', expect: 'silence',
+    title: 'Cell tower drops', story: 'The cell tower serving most of the branch goes down; about 80 batteries go quiet at once.',
+    action: { type: 'towerDrop', tower: `${B}-a`, untilMin: 19 * 60 } },
+  { at: 18 * 60 + 45, id: 'stuck-soc', kind: 'device', truth: 'lying', expect: 'behaviour',
+    title: 'Stuck-SOC bug', story: 'Most v2.3 units on the branch keep reporting the same SOC while they export.',
+    action: { type: 'stuckSoc', firmware: 'v2.3', circuit: B, frac: 0.8 } },
   { at: 19 * 60, id: 'bms-fault', kind: 'device', truth: 'broken', expect: 'silence',
-    title: 'BMS fault', story: 'One battery on circuit 1 reports a BMS fault and goes silent.',
-    action: { type: 'bmsFault', circuit: 'c1' } },
+    title: 'BMS fault', story: 'One battery behind RAR8848 reports a BMS fault and goes silent.',
+    action: { type: 'bmsFault', circuit: B } },
   { at: 20 * 60 + 5, id: 'rebound', kind: 'command', truth: 'unsafe', signer: 'optimizer', expect: 'circuit',
-    title: 'Rebound at peak', story: 'Right after the event the optimizer orders every battery to recharge at full power.',
+    title: 'Rebound after the event', story: 'Right after the event our optimizer orders every battery to recharge at full power, 3.8 MW on the branch.',
     command: { priority: 5, targets: { all: true }, payload: { type: 'CHARGE_KW', value: 20 }, durationMin: 60 } },
 ];
 
-// ---------- fleet ----------
+// ---------- fleet: 189 battery homes behind RAR8848 (160 ours, 29 home-owned, 16 Medical Baseline) ----------
 function buildFleet(seed, circuits) {
   const rng = mulberry32(seed);
   const homes = [];
-  circuits.forEach((c, ci) => {
-    for (let j = 0; j < 500; j++) {
-      const i = ci * 500 + j;
-      const tr = rng();
-      homes.push({
-        id: 'h' + String(i).padStart(4, '0'), idx: i, circuit: c.id,
-        tower: `${c.id}-${tr < 0.6 ? 'a' : tr < 0.85 ? 'b' : 'c'}`,
-        isp: rng() < 0.55 ? 'isp-A' : 'isp-B',
-        firmware: rng() < 0.7 ? 'v2.2' : 'v2.3',
-        medical: rng() < 0.05,
-        soc0: (0.6 + 0.3 * rng()) * BASE_CORE.capacityKWh,
-        loadScale: 0.75 + 0.5 * rng(),
-        capacityKWh: BASE_CORE.capacityKWh, maxKw: BASE_CORE.maxKw,
-      });
-    }
-  });
+  const N = ASSUMPTIONS.homes.value, OURS = ASSUMPTIONS.ourBatteries.value, MED = ASSUMPTIONS.medicalHomes.value;
+  // free batteries go to Medical Baseline homes first: 16 of our 160, picked by a seeded shuffle
+  const order = Array.from({ length: OURS }, (_, i) => i);
+  const mr = mulberry32(seed * 13 + 1);
+  for (let i = order.length - 1; i > 0; i--) { const j = Math.floor(mr() * (i + 1)); [order[i], order[j]] = [order[j], order[i]]; }
+  const medical = new Set(order.slice(0, MED));
+  const c = circuits[0];
+  for (let i = 0; i < N; i++) {
+    const tr = rng();
+    homes.push({
+      id: 'h' + String(i).padStart(4, '0'), idx: i, circuit: c.id,
+      owner: i < OURS ? 'ours' : 'home',
+      tower: `${c.id}-${tr < 0.45 ? 'a' : tr < 0.8 ? 'b' : 'c'}`,
+      isp: rng() < 0.55 ? 'isp-A' : 'isp-B',
+      firmware: rng() < 0.7 ? 'v2.2' : 'v2.3',
+      medical: medical.has(i),
+      soc0: (0.6 + 0.3 * rng()) * BASE_CORE.capacityKWh,
+      loadScale: 0.75 + 0.5 * rng(),
+      capacityKWh: BASE_CORE.capacityKWh, maxKw: BASE_CORE.maxKw,
+    });
+  }
   return { homes, rng };
 }
 
 function circuitShapes(circuits) {
   const shapes = {};
   for (const c of circuits) {
-    const tot = c.septHourly.reduce((s, h) => s + h.maxMW, 0);
-    shapes[c.id] = c.septHourly.map((h) => h.maxMW / tot);
+    const tot = c.hourly.reduce((s, h) => s + h.maxMW, 0);
+    shapes[c.id] = c.hourly.map((h) => h.maxMW / tot);
   }
   return shapes;
 }
@@ -128,7 +143,7 @@ export function createSim({ guard = true, seed = 7, pack = 'sce', strictness = n
   for (const h of homes) homeMap[h.id] = { id: h.id, circuit: h.circuit, socKWh: h.soc0, capacityKWh: h.capacityKWh, maxKw: h.maxKw, medical: h.medical, loadKw: 0 };
   const circ = {};
   for (const c of circuits) circ[c.id] = { id: c.id, name: c.name, substation: c.substation, open: false, openUntil: 0,
-    baseLoadMW: 0, importLimitMW: c.importLimitMW, exportCapMW: c.exportCapMW, staticImportMW: c.importLimitMW, staticExportMW: c.exportCapMW, otherFleetKw: 0, hourly: c.septHourly };
+    baseLoadMW: 0, importLimitMW: c.importLimitMW, exportCapMW: c.exportCapMW, staticImportMW: c.importLimitMW, staticExportMW: c.exportCapMW, otherFleetKw: 0, hourly: c.hourly };
 
   const optSrc = policy.optimizerSource;
   const keyOf = (id) => DEMO_KEYS[id];
@@ -152,7 +167,7 @@ export function createSim({ guard = true, seed = 7, pack = 'sce', strictness = n
     for (let m = 16 * 60; m < 21 * 60; m += 60) for (const h of hs) s += loadKw(h, m);
     const avg = Math.round((s / (5 * hs.length)) * 10) / 10;
     baseline.push({ at: 16 * 60, id: `opt-evening-${c.id}`, kind: 'command', truth: 'legit', signer: 'optimizer', baseline: true,
-      title: `Optimizer: cover evening load on ${c.id}`, command: { priority: 5, targets: { circuits: [c.id] }, payload: { type: 'DISCHARGE_KW', value: avg }, durationMin: 300 } });
+      title: `Optimizer: cover evening load behind ${c.switch || c.id}`, command: { priority: 5, targets: { circuits: [c.id] }, payload: { type: 'DISCHARGE_KW', value: avg }, durationMin: 300 } });
   }
   const timeline = [...baseline, ...scenario.filter((e) => !legitOnly || e.kind !== 'command' || e.truth === 'legit')]
     .map((e, i) => ({ ...e, order: i })).sort((a, b) => a.at - b.at || (a.baseline ? 0 : 1) - (b.baseline ? 0 : 1) || a.order - b.order);
@@ -242,9 +257,9 @@ export function createSim({ guard = true, seed = 7, pack = 'sce', strictness = n
       if (c.open && t >= c.openUntil) {
         c.open = false;
         for (const i of [...S.silentCircuit]) if (homes[i].circuit === c.id) S.silentCircuit.delete(i);
-        logEntry({ t, time: fmtTime(t), kind: 'grid', id: `${c.id}-closed`, title: `Circuit ${c.id} re-energized`, rung: null });
+        logEntry({ t, time: fmtTime(t), kind: 'grid', id: `${c.id}-closed`, title: `${c.switch || 'Circuit ' + c.id} closed, the branch is re-energized`, rung: null });
       }
-      c.baseLoadMW = c.hourly[Math.floor(t / 60) % 24].maxMW;
+      c.baseLoadMW = c.hourly[Math.floor(t / 60) % 24].mw;
       if (S.policy.envelope) Object.assign(c, S.policy.envelope({ importLimitMW: c.staticImportMW, exportCapMW: c.staticExportMW }, t));
     }
     if (S.towerDown && t >= S.towerDown.until) S.towerDown = null;
@@ -388,7 +403,7 @@ export function createSim({ guard = true, seed = 7, pack = 'sce', strictness = n
         circuitOut[h.circuit] += o;
         let rev = o * dtH * price;
         S.m.touRevenue += o * dtH * price;
-        const inEvent = winner[i] && winner[i].meta.event === 'eea3-event' && o > load;
+        const inEvent = winner[i] && winner[i].meta.event === EVENT.id && o > load;
         if (inEvent) {
           S.m.eventKWh += (o - load) * dtH;
           S.m.eventRevenue += (o - load) * dtH * EVENT_PAY;
@@ -438,7 +453,7 @@ export function createSim({ guard = true, seed = 7, pack = 'sce', strictness = n
     for (const id in S.cls) silentBy[S.cls[id].cls]++;
     S.series.push({ t, time: fmtTime(t), price, fleetSocPct: r3(100 * socSum / (N * BASE_CORE.capacityKWh)), fleetMW: r3(outSum / 1000),
       circuits: cs, silent: silentBy, truthSilent: truthSilent.filter(Boolean).length,
-      eventActive: t >= FACTS.eea3StartMin && t < FACTS.eea3EndMin });
+      eventActive: t >= EVENT.startMin && t < EVENT.endMin });
     S.t += S.step;
   }
 
@@ -452,9 +467,9 @@ export function createSim({ guard = true, seed = 7, pack = 'sce', strictness = n
     }
     {
       const prev = lastNote.groups;
-      lastNote.groups = new Map([...groups].map(([k, g]) => [k, Math.round(g.n / 25)]));
+      lastNote.groups = new Map([...groups].map(([k, g]) => [k, Math.round(g.n / 10)]));
       for (const [k, g] of groups) {
-        if (k === 'unsure' || prev.get(k) === Math.round(g.n / 25)) continue;
+        if (k === 'unsure' || prev.get(k) === Math.round(g.n / 10)) continue;
         const where = g.domain === 'home' ? `Home ${g.key}` : `${g.n} homes on ${g.domain} ${g.key}`;
         logEntry({ t: S.t, time: fmtTime(S.t), kind: 'silence', id: `${g.domain}:${g.key}`, cls: g.cls, rung: g.rung,
           detail: `${where}: ${g.detail} Not counted as capacity.` });
@@ -586,13 +601,11 @@ export function runReplay(opts = {}) {
   return sim.results();
 }
 
-// Sweep a strictness knob with the same seed: revenue vs breaches.
+// Sweep the backup floor with the same seed: revenue vs broken promises. Canary thresholds stay at the pack's.
 export function toleranceMap({ seed = 7, pack = 'sce', floors = [0.1, 0.15, 0.2, 0.25, 0.3, 0.35, 0.4] } = {}) {
   return floors.map((floorPct) => {
-    const canaryHomes = Math.round(1200 - 2000 * floorPct); // stricter floor -> smaller canary threshold
-    const canaryMW = Math.max(1, 10 - 20 * floorPct);
-    const r = runReplay({ guard: true, seed, pack, strictness: { floorPct, canaryHomes, canaryMW } }).scoreboard;
-    return { floorPct, canaryHomes, canaryMW, revenue: r.revenue, eventMWh: r.eventMWh, promiseBreachHomes: r.promiseBreachHomes,
+    const r = runReplay({ guard: true, seed, pack, strictness: { floorPct } }).scoreboard;
+    return { floorPct, revenue: r.revenue, eventMWh: r.eventMWh, promiseBreachHomes: r.promiseBreachHomes,
       lowBackupHomes8pm: r.lowBackupHomes8pm, importOverMWmin: r.importOverMWmin, exportOverMWmin: r.exportOverMWmin, legitHeld: r.legitHeld };
   });
 }

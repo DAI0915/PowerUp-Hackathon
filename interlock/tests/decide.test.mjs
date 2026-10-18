@@ -57,7 +57,7 @@ test('sim: releasing the stolen-key order makes it run, still inside the floor, 
   const d = sim.decide(STOLEN, 'approve');
   assert.equal(d.ok, true);
   assert.equal(sim.openHands().some((h) => h.id === STOLEN), false);
-  // the released order's window (15:00-16:00) ends before circuit 3 opens; nobody is below the floor then
+  // the released order's window (15:00-16:00) ends before RAR8848 opens; nobody is below the floor then
   assert.equal(runTo(sim, at(17)).results().scoreboard.floorBreachHomes, 0);
   const r = runOut(sim);
   const meta = r.commands.find((c) => c.id === STOLEN);
@@ -88,12 +88,12 @@ test('sim: rejecting blocks the unknown signer, so its next order is held at the
 });
 
 test('sim: with reviewer "person" the installation pack waits for the dispatcher', () => {
-  const eea = (r) => r.commands.find((c) => c.event === 'eea3-event');
-  const waiting = runTo(createSim({ guard: true, seed: 7, pack: 'installation', reviewer: 'person' }), at(17, 25));
-  const hand = waiting.openHands().find((h) => h.id.startsWith('eea3-event@'));
+  const eea = (r) => r.commands.find((c) => c.event === 'sce-event');
+  const waiting = runTo(createSim({ guard: true, seed: 7, pack: 'installation', reviewer: 'person' }), at(18, 5));
+  const hand = waiting.openHands().find((h) => h.id.startsWith('sce-event@'));
   assert.ok(hand && hand.kind === 'second_person' && hand.autoApproveAt === null);
-  const approved = runTo(createSim({ guard: true, seed: 7, pack: 'installation', reviewer: 'person' }), at(17, 25));
-  const rejected = runTo(createSim({ guard: true, seed: 7, pack: 'installation', reviewer: 'person' }), at(17, 25));
+  const approved = runTo(createSim({ guard: true, seed: 7, pack: 'installation', reviewer: 'person' }), at(18, 5));
+  const rejected = runTo(createSim({ guard: true, seed: 7, pack: 'installation', reviewer: 'person' }), at(18, 5));
   assert.equal(approved.decide(hand.id, 'approve').ok, true);
   assert.equal(rejected.decide(hand.id, 'reject').ok, true);
   for (const s of [waiting, approved, rejected]) runTo(s, at(20, 5));

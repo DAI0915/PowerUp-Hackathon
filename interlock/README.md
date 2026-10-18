@@ -1,13 +1,13 @@
 # Interlock
 
-Home batteries now take orders from many places at once: the fleet optimizer, a market bid, a utility emergency, a vendor's cloud. Any of them can be wrong, stale, forged or simply unsafe for the wire it lands on. **Interlock sits between that software and the batteries.** Every command goes through ordered checks, and each check picks the gentlest rung that keeps the rules: *watch < ask < slow (clamp / canary ramp) < hold < hand (to a person)*. Interlock can only shrink, slow or stop a command. It never creates one, never enlarges one and never flips its sign. It also works out why a battery has gone quiet (tripped, not talking, broken or unsure), and it never counts a quiet battery as available capacity. We replay **Tuesday, September 6, 2022**, CAISO's record-peak day, on four real SCE circuits with a 2,000-home simulated Base Core fleet. With the guard off, the replay breaks the backup promise for every home and pushes export onto a de-energized line. With the guard on, it does neither of those things and still earns about 3x the revenue of the unguarded run.
+Home batteries now take orders from many places at once: the fleet optimizer, a market bid, a utility emergency, a vendor's cloud. Any of them can be wrong, stale, forged or simply unsafe for the wire it lands on. **Interlock sits between that software and the batteries.** Every command goes through ordered checks, and each check picks the gentlest rung that keeps the rules: *watch < ask < slow (clamp / canary ramp) < hold < hand (to a person)*. Interlock can only shrink, slow or stop a command. It never creates one, never enlarges one and never flips its sign. It also works out why a battery has gone quiet (tripped, not talking, broken or unsure), and it never counts a quiet battery as available capacity. We replay **Wednesday, October 14, 2026**, an ordinary trading evening on the RAR8848 pilot, the evening before SCE cut power to Cuthbert (Oct 15, about 4 PM) and the Bryson Fire started. Only the pilot branch is in it: the 456 homes behind SCE switch RAR8848 on the Cuthbert circuit (Latigo substation, Malibu), 189 of them with batteries in our fleet (our 160 free Base Core batteries plus 29 home-owned, 16 Medical Baseline homes). Loads follow Cuthbert's real October 2024 profile scaled to the branch, prices are SCE time-of-use, and the fleet, eleven failures and one SCE event are simulated. With the guard off, the replay drains all 189 homes below their backup promise the night before the shutoff, overloads the branch and pushes export onto the opened line. With the guard on, it does none of those things and still earns 1.19x the revenue of the unguarded run.
 
 ## Run it
 
 ```
 node cli.mjs                 # guard off vs guard on, three packs, tolerance map -> out/results.json
 node --test tests/*.test.mjs # or: npm test   (Node 22's --test does not accept a bare directory)
-python3 -I data/prep_circuits.py   # rebuilds data/circuits.json + data/circuits.mjs from the SCE CSV
+python3 -I data/prep_circuits.py   # rebuilds data/circuits.json + data/circuits.mjs (the RAR8848 branch) from the repo's SCE data
 python3 -m http.server             # then open http://localhost:8000/ for the demo page (index.html)
 ```
 
@@ -23,7 +23,7 @@ It needs only Node 22 (built-ins) and Python 3 for the data prep. There are no p
 | `src/sim.mjs` | `runReplay({guard, seed, pack, strictness, legitOnly})`, `createSim` (step-by-step, for a UI), `SCENARIO` (the chaos schedule in one array), `toleranceMap`. `createSim(...).openHands()` lists orders waiting for a person and `.decide(cmdId, 'approve' \| 'reject')` applies the dispatcher's decision; `reviewer: 'person'` makes two-person orders wait for it instead of auto-approving |
 | `index.html` | The demo page: guard off vs guard on side by side, chaos buttons, verdict log, quiet batteries, dispatcher decision card, pack switch, policy sweep. Loads `src/` and `data/circuits.mjs` as modules and `out/results.json` for its first frame |
 | `cli.mjs` | Prints the scoreboard and writes `out/results.json` (per-step series, verdict log, tolerance map) |
-| `data/prep_circuits.py` | Streams the 71 MB SCE CSV and picks 4 circuits |
+| `data/prep_circuits.py` | Builds the one pilot circuit: Cuthbert's October 2024 load scaled to the 456 homes behind RAR8848, the pilot's import limit and export cap, and the CAISO day-ahead value for Oct 14, 2025 |
 
 ## Command shape (OpenADR 3 event style)
 
@@ -72,104 +72,100 @@ It needs only Node 22 (built-ins) and Python 3 for the data prep. There are no p
 
 ## The replay (seed 7)
 
+Wednesday, October 14, 2026, 12:00 to 22:00 in 5-minute steps, on one circuit section: the branch behind switch RAR8848.
+
 | Time | Event (SIMULATED, modelled on real incident types) | What the guard did |
 |---|---|---|
-| 12:00 | Optimizer: midday charge, 3 kW to all | canary, then pass |
-| 14:00 | Price-feed glitch: optimizer charges all at 20 kW | canary + circuit import clamp |
-| 15:00 | Stolen key (unknown signer posing as the utility): discharge 20 kW to all | hold + hand |
-| 15:30 | Replay of a 7 AM utility test order (old epoch, valid signature) | hold |
-| 16:00 | Bad forecast: SOC_TARGET 5% to all | target raised to 20% / 50% |
-| 17:00 | Utility opens circuit 3, and the market asks it to export | dead line: hold; homes classed tripped |
-| 17:17 | **Utility emergency (EEA 3), priority 0, signed: export 8 kW per home until 20:00** | 1% → 10% → 100% canary, floors, export cap |
-| 18:00 | Cell tower c2-a drops (305 homes go quiet) | not_talking, last safe plan |
-| 18:30 | Stuck-SOC bug on most v2.3 units on circuit 4 | cohort hold (detected 18:40) |
+| 12:00 | Optimizer: midday charge, 3 kW to all 189 | import clamp to 27% (the branch has about 0.15 MW of headroom at noon) |
+| 14:00 | Price-feed glitch: optimizer charges all at 20 kW (3.8 MW on a branch that peaks under 1 MW) | import clamp to 0%: nothing runs |
+| 15:00 | Stolen key (unknown signer posing as SCE): discharge 20 kW to all | hold + hand |
+| 15:30 | Replay of a 7 AM SCE test order (old epoch, valid signature) | hold |
+| 16:00 | Optimizer: cover the evening load | floor clamp on one medical home |
+| 16:15 | Bad forecast: SOC_TARGET 5% to all by 9 PM | target raised to 20% / 50%, export cap clamp |
+| 16:30 | SCE opens RAR8848 for 45 min of switching, and a market award asks the branch to export | dead line: hold; 136 homes classed tripped |
+| 18:00 | **SCE flex event, priority 0, signed: export 3 kW per home until 20:00** (no emergency was called that evening) | runs on all 189; medical homes keep 50%; below the pack's 600-home / 5 MW canary size |
+| 18:15 | Cell tower rar8848-a drops (78 batteries go quiet) | not_talking, last safe plan |
+| 18:45 | Stuck-SOC bug on most v2.3 units | cohort hold (detected 19:00) |
 | 19:00 | One BMS faults and goes quiet | broken → hand |
-| 20:05 | Optimizer rebound: charge all at 20 kW at peak | canary + import clamp |
+| 20:05 | Optimizer rebound: charge all at 20 kW | import clamp; the held cohort and the broken unit are skipped |
 
 ### Scoreboard (`node cli.mjs`, seed 7)
 
 | | Guard off | Guard on (SCE) | Installation | Australia | Legit-only, guard off | Legit-only, guard on |
 |---|---|---|---|---|---|---|
-| Homes ever below their floor | 2,000 | 0 | 0 | 0 | 1,648 | 0 |
-| Home-minutes below floor | 331,850 | 0 | 0 | 0 | 195,130 | 0 |
-| Homes with < 8 h backup at 8 PM | 2,000 | 0 | 0 | 0 | 470 | 0 |
-| MW-min over import limit | 2,349 | 0 | 0 | 0 | 49.6 | 0 |
-| MW-min past export cap | 233.8 | 0 | 0 | 0 | 0 | 0 |
-| Battery-min exporting onto an open circuit | 18,490 | 0 | 0 | 0 | 25,040 | 0 |
-| Revenue (TOU + event) | $17,758 | $51,965 | $37,003 | $50,699 | $68,909 | $59,561 |
-| Event MWh delivered | 13.3 | 28.2 | 20.6 | 27.3 | 39.3 | 33.8 |
+| Homes ever below their floor | 189 | 0 | 0 | 0 | 0 | 0 |
+| Home-minutes below floor | 28,030 | 0 | 0 | 0 | 0 | 0 |
+| Homes with < 8 h backup at 8 PM | 189 | 0 | 0 | 0 | 0 | 0 |
+| MW-min over import limit | 306.3 | 0 | 0 | 0 | 64.8 | 0 |
+| MW-min past export cap | 247.9 | 0 | 0 | 0 | 0 | 0 |
+| Battery-min exporting onto the opened line | 2,385 | 0 | 0 | 0 | 4,545 | 0 |
+| Revenue (TOU + event) | $2,795 | $3,331 | $2,740 | $3,342 | $3,171 | $2,965 |
+| Event MWh delivered | 1.08 | 0.92 | 0.80 | 0.91 | 1.13 | 0.92 |
 | Commands held / legit held | 0 / 0 | 3 / 0 | 3 / 0 | 3 / 0 | 0 / 0 | 0 / 0 |
-| Fallback home-minutes (last safe plan) | 0 | 80,045 | 79,355 | 80,045 | 0 | 80,045 |
+| Fallback home-minutes (last safe plan) | 0 | 22,140 | 22,140 | 22,140 | 0 | 22,140 |
 
-"Legit-only" is the same day with the same grid, comms and device faults, but only the legitimate commands (the baseline optimizer and the EEA 3 event). Silence confusion with the guard on, counted in home-steps (truth → predicted): tripped → tripped 6,570; not_talking → not_talking 3,660; broken → broken 36; isolated comms blips → unsure 227. That last one is the intended outcome: ask, don't guess.
+"Legit-only" is the same evening with the same grid, comms and device faults, but only the legitimate commands (the baseline optimizer and the SCE event). Silence confusion with the guard on, counted in home-steps (truth → predicted): tripped → tripped 1,224; not_talking → not_talking 702; broken → broken 36; isolated comms blips → unsure 23. That last one is the intended outcome: ask, don't guess.
 
-**Revenue check, reported honestly.** Given the same legitimate commands, guard on earns **86.4%** of guard off ($59,561 vs $68,909). That is below the 90% we first aimed for. Disabling one check at a time shows where the gap comes from:
+**Revenue check.** Given the same legitimate commands, guard on earns **93.5%** of guard off ($2,965 vs $3,171), above the 90% target. On this evening guard off earns nothing by spending promised backup, so the fair and raw ratios are the same. The test still measures the target against what guard off earns without spending promised backup and pins the raw ratio at 85% or more.
 
-- About 6.5 points come from the backup floor. Guard off earns $5,575 by draining 1,648 homes below their promised 20% / 50% floor during the event. Leave that money out and the ratio is 94.0%.
-- About 2 points come from the 10-minute canary on the event.
-- About 3 points come from holding the lying v2.3 cohort from 18:40 onward.
+On the chaos evening itself, guard on earns $3,331 vs $2,795 with the guard off (1.19x). The guard does not block economically bad commands from a valid signer (the price glitch, the bad forecast, the rebound); it only keeps them inside the safety rules.
 
-The test now measures the 90% target against what guard off earns *without* spending promised backup (94.0%, passes), because that money is never on offer to a guard that keeps the promise. It also pins the raw ratio at 85% or more, so a check that starts costing more revenue still fails. The raw 86.4% is the honest cost of the guard and is what the tolerance map shows.
-
-On the chaos day itself, guard on earns $51,965 vs $17,758 with the guard off. The guard does not block economically bad commands from a valid signer (the price glitch, the bad forecast, the rebound); it only keeps them inside the safety rules.
-
-**Tolerance map** (guard on, same seed; floorPct sweep with the canary thresholds scaled alongside):
+**Tolerance map** (guard on, same seed; floorPct sweep, canary thresholds at the pack's):
 
 | Floor | Revenue | Event MWh | Homes below the 20%/50% promise | Homes < 8 h backup at 8 PM |
 |---|---|---|---|---|
-| 10% | $59,223 | 32.0 | 1,309 | 1,291 |
-| 15% | $55,619 | 30.1 | 1,293 | 1,291 |
-| 20% | $51,965 | 28.2 | 0 | 0 |
-| 30% | $44,711 | 24.4 | 0 | 0 |
-| 40% | $36,856 | 20.4 | 0 | 0 |
+| 10% | $3,368 | 0.92 | 0 | 0 |
+| 15% | $3,359 | 0.92 | 0 | 0 |
+| 20% | $3,331 | 0.92 | 0 | 0 |
+| 30% | $3,225 | 0.92 | 0 | 0 |
+| 40% | $3,044 | 0.89 | 0 | 0 |
+
+Behind RAR8848 the branch's small export cap, not the floor, limits what the fleet can sell, so a lower floor buys almost nothing and breaks no promise on this evening.
 
 ## Assumptions
 
 | Item | Value | Label |
 |---|---|---|
-| Date and window | Tue Sept 6, 2022, 12:00–22:00, 5-min steps | REAL date; SIMULATED steps |
-| CAISO peak | 52,061 MW record | REAL (Utility Dive) |
-| EEA 3 | Declared 5:17 PM, ended 8:00 PM; no rotating outages | REAL (Utility Dive) |
-| Circuit loads | Hourly September max/min for 4 SCE circuits | REAL (SCE open data) |
+| Date and window | Wed Oct 14, 2026, 12:00–22:00, 5-min steps; the evening before the shutoff (power off Oct 15, about 4 PM) | REAL date; SIMULATED steps |
+| Branch | The 456 homes behind SCE switch RAR8848 on Cuthbert (Latigo, 16 kV); Cuthbert has 2,407 customers | REAL (SCE PSPS records) |
+| Branch load | Cuthbert's hourly October 2024 min/max × 456 / 2,407; the ordinary evening at the midpoint of each hour's min and max | REAL shape (SCE open data); ASSUMED scaling, as in the pilot |
 | Load units | Treated as amps per phase; MW = √3 × kV × A / 1000 | INFERENCE |
-| Import limit | Circuit's highest recorded load in the year × 1.05 | ASSUMED |
-| Export cap | −1.5 MW reverse flow per circuit | ASSUMED |
+| Import limit | The branch's October peak, 0.97 MW: the cap the pilot uses at restoration | ASSUMED |
+| Export cap | −0.15 MW, 15% of the import limit (the pilot's `EXPORT_CAP_FRAC`) | ASSUMED |
 | Base Core | 39.2 kWh, 20 kW | REAL (Base Core spec) |
-| Fleet | 2,000 homes, 500 per circuit | SIMULATED |
+| Fleet | 189 battery homes: our 160 free batteries plus 29 home-owned (modelled at Base Core spec, as in the pilot app), 16 Medical Baseline homes | ASSUMED (the pilot plan); SIMULATED state |
 | Noon SOC | 60–90% seeded | SIMULATED |
-| Medical / critical-need homes | 5% | ASSUMED |
-| Comms | 3 towers per circuit (60/25/15%), 2 ISPs, firmware v2.2 70% / v2.3 30% | SIMULATED |
+| Comms | 3 towers (45/35/20%), 2 ISPs, firmware v2.2 70% / v2.3 30% | SIMULATED |
 | Comms blips | 0.03% chance per home-step, lasting 2–4 steps | SIMULATED |
-| Home load | Circuit's September hourly shape × 40 kWh/day × 0.75–1.25 per home | ASSUMED |
-| Prices | TOU-D-4-9PM summer weekday ≈ $0.58/kWh 4–9 PM, ≈ $0.30 otherwise. Please check against the current tariff. | ASSUMED |
+| Home load | The branch's October hourly shape × 32 kWh/day × 0.75–1.25 per home | REAL 32 kWh/day (SCE usage by ZIP, Malibu 90265, Oct 2025); ASSUMED spread |
+| Prices | SCE TOU-D-4-9PM, $0.60/kWh 4–9 PM, $0.30 otherwise, as in the pilot. Our 2025 CAISO data has daily values only (one Base Core on Oct 14, 2025: $0.43 at the 20% floor, REAL), not hourly prices | ASSUMED |
 | Export credit | Same as the TOU price. This is a simplification; Net Billing Tariff export values differ. | ASSUMED |
-| Event pay | $1/kWh of export during the event (ELRP-style; sources conflict between $1 and $2) | ASSUMED |
+| Event | SCE flex event 18:00–20:00, 3 kW per home; no emergency was called that evening | SIMULATED |
+| Event pay | $2/kWh of export during the event (CPUC ELRP rate) | REAL rate |
 | Round-trip losses | Ignored | ASSUMED |
 | Critical load during an outage | 0.8 kW (1.5 kW for medical homes); backup target 8 h | ASSUMED |
-| Baseline optimizer | 3 kW charge 12:00–16:00, then cover each circuit's average evening load 16:00–21:00; export only for the utility event | ASSUMED (a plain rule, not Base's real policy) |
-| Chaos schedule | 11 events, see table above | SIMULATED |
+| Baseline optimizer | 3 kW charge 12:00–16:00, then cover the branch's average evening load 16:00–21:00; export only for the utility event | ASSUMED (a plain rule, not Base's real policy) |
+| Chaos schedule | 11 events, see table above, including SCE opening RAR8848 for switching | SIMULATED |
 | Second-person reviewer | Approves every authenticated order after 10 min (worst-case reviewer) | ASSUMED |
 | Floors | 20% (50% medical), from the Base brief "they plan around a 20% floor"; medical floor is ours | REAL 20% / ASSUMED 50% |
 
 ## Data provenance
 
-- **Circuits:** `/mnt/project-files/data/powerup/sce/Circuit_Load_Profile.csv` (SCE Circuit Load Profile open data; UTF-8 BOM; `MONTH` is 0-indexed, so September = 8). `data/prep_circuits.py` keeps circuits under Victor, Corona, Apple Valley and Moreno that meet all of these: YEAR 2024 (the latest in the file), all 12 months and all 24 September hours present, at least 12 kV, and a September max between 250 and 500. Within each substation it takes the one whose September max is closest to 400 A.
+- **Branch load:** `powerup/data/malibu/malibu_circuit_load_profiles.csv` (SCE Circuit Load Profile open data for the Malibu circuits; Cuthbert, Latigo, 16 kV, 2024, hourly min and max per month). `data/prep_circuits.py` takes October, scales it by 456 / 2,407 (customers from `pilot/data.json` and `powerup/data/data.json`), and writes the branch's hourly load, its October peak as the import limit and 15% of it as the export cap.
 
-| id | Circuit | Substation | Voltage | Year | September load (MW, inferred) | Year max | Import limit (ASSUMED) | Export cap (ASSUMED) |
-|---|---|---|---|---|---|---|---|---|
-| c1 | Latimer | Victor | 12 kV | 2024 | 0.50–8.45 | 9.38 | 9.85 | −1.5 |
-| c2 | Glacier | Corona | 12 kV | 2024 | 2.03–8.63 | 8.63 | 9.06 | −1.5 |
-| c3 | Pahute | Apple Valley | 12 kV | 2024 | 0.93–7.76 | 8.61 | 9.04 | −1.5 |
-| c4 | Dill | Moreno | 12 kV | 2024 | 0.67–7.60 | 7.60 | 7.98 | −1.5 |
+| id | Section | Substation | Voltage | Year | October load, ordinary (MW, inferred) | Import limit (ASSUMED) | Export cap (ASSUMED) |
+|---|---|---|---|---|---|---|---|
+| rar8848 | Cuthbert, behind RAR8848 (456 homes) | Latigo | 16 kV | 2024 | 0.63–0.93 | 0.97 | −0.15 |
 
 - **Units:** SCE does not state units. Project notes infer amps per phase, so values are converted with √3 × kV × A. This is an inference.
-- **Grid facts:** Utility Dive, "California ISO narrowly avoids outages but warns as peak demand hits record", https://utilitydive.com/news/california-iso-narrowly-avoids-outages-but-warns-as-peak-demand-hits-record/631280
+- **Prices:** `powerup/data/prices/caiso_dlap_sce_dam_2025q4_daily_value.csv` (CAISO OASIS day-ahead LMP, DLAP_SCE-APND, Q4 2025, as the value of one Base Core per day). Hourly prices are not in the repo, so the replay prices at SCE TOU.
+- **Shutoff timeline:** `pilot/app/data.json` (NWS, City of Malibu, CAL FIRE, SCE).
 - **Base Core specs (39.2 kWh, 20 kW) and the 20% floor:** `/mnt/project-files/research/base-power-prep-brief.md`
 - No code was taken from other hackathon repos.
 
 ## Known gaps
 
-- **Raw revenue cost is 13.6%** (86.4% kept with legitimate commands only). The revenue test was redefined after it failed at 86.4%; see above for why and where the gap comes from.
+- **Raw revenue cost is 6.5%** on the pilot evening (93.5% kept with legitimate commands only). On the earlier 2,000-home record-peak replay it was 13.6%, which is why the revenue test measures against what guard off earns without spending promised backup.
 - Signatures are an FNV-1a stand-in, not cryptography, and keys sit in the pack file.
 - Physics is deliberately simple: no losses, no thermal or SOC-dependent power limits, and hourly piecewise-constant circuit load. Home load is assumed to be part of the measured circuit load.
 - Circuit check covers only the import limit and export cap at the head of the feeder. There is no voltage, phase or transformer-level modelling.
@@ -177,6 +173,6 @@ On the chaos day itself, guard on earns $51,965 vs $17,758 with the guard off. T
 - Canary "behaved" means delivered power within tolerance and no breaches. It does not watch for slower effects.
 - Cohort hold lasts for the rest of the run. There is no release or recovery logic.
 - The installation pack's reviewer is modelled as approving every authenticated order, so it shows only the delay cost of the two-person rule. The page can switch the second person to the dispatcher (`reviewer: 'person'`).
-- A home on an open circuit islands and runs on its own backup, so it can drop below its floor during the outage. The floor metric counts it once the circuit closes, while it recharges. The default runs show 0, but releasing the forged order before the circuit 3 outage shows 4 such homes with the guard on.
-- The Australia pack is illustrative. It is not a real DNSP envelope.
+- A home on an open circuit islands and runs on its own backup, so it can drop below its floor during the outage. The floor metric counts it once the circuit closes, while it recharges. The default runs show 0.
+- The Australia pack is illustrative. It is not a real DNSP envelope, and its envelope is in absolute MW sized for a larger feeder, so on the 1 MW RAR8848 branch it allows more reverse flow than the pilot's cap.
 - Tests take about 15 s because they run several full replays.

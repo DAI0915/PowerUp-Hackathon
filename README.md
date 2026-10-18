@@ -2,7 +2,7 @@
 
 **The disaster layer for a home-battery fleet.** PowerUP keeps the power on for the people who need it most when the grid is the disaster, and keeps the fleet's own software from becoming the disaster.
 
-**Live demo:** https://mrbese.github.io/PowerUp/ (GitHub Pages, from `index.html` and `heatwave.html` at the repo root) or https://claude.ai/artifact/96RzoqMWxRzLsdrAyRJFv1. The pilot page replays the October 2026 Malibu shutoff on the 456 homes behind SCE switch RAR8848, with the guard panel, the pilot business and a link to the heat-wave replay. The earlier whole-Malibu version (six circuits) is kept on branch `archive/malibu-wide-v1`.
+**Live demo:** https://mrbese.github.io/PowerUp/ (GitHub Pages, from `index.html` and `heatwave.html` at the repo root) or https://claude.ai/artifact/96RzoqMWxRzLsdrAyRJFv1. The pilot page replays the October 2026 Malibu shutoff on the 456 homes behind SCE switch RAR8848, with the guard panel, the pilot business and a link to the second page (`heatwave.html`), which replays the evening before the shutoff on the same 456 homes through Interlock alone. The earlier whole-Malibu version (six circuits) is kept on branch `archive/malibu-wide-v1`.
 
 Built for the InnovateLA Dual-Use Hackathon (USC, Oct 16 to 18, 2026), Energy & Grid Hardening lens with Base Power. We are a startup that owns and runs a fleet of Base batteries (Base Core: 39.2 kWh, 20 kW). The seat is our fleet's dispatcher.
 
@@ -54,17 +54,18 @@ With the guard on, the outcome is exactly PowerUP's plan without any failures. T
 
 **The pilot business.** SCE opened RAR8848 on its own once (Dec 2020, 18 hours), and its homes went dark 15 more times when SCE opened the whole Cuthbert circuit at the breaker: 16 shutoffs since 2019, 435 hours. The reason sits upstream: one of the two 66 kV lines feeding Latigo substation, which feeds all four Latigo circuits, runs about 650 m inside the Bryson Fire perimeter. At Malibu's real battery and solar rates, few homes behind the switch have their own battery, so the pilot deploys 160 free Base Core batteries at once with volunteer homes (Medical Baseline homes first, then solar roofs). Homes without a battery subscribe for emergency power at $9.99 a month; at an assumed 90% opt-in that is 226 homes and about $27,100 a year. In a shutoff everyone on the island pays twice SCE's top residential TOU price ($1.20/kWh, assumed $0.60 top rate), billed by SCE, which keeps an assumed $0.20 delivery; our batteries above the host's 20%, neighbors who choose to sell and every solar roof are paid the rest. The batteries carry every subscriber at the critical budget through all 16 real shutoffs at clear sky (150 is the minimum) and 15 of 16 with smoke halving the solar. The fleet costs about $2.24M after the tax credit, and pays back in about 6.6 years with every income line (25 years on trading, subscriptions and shutoff sales alone). Each battery's real trading value is about $334 a year at CAISO prices for the SCE zone, about $53,400 for the fleet; holding it full from SCE's notice costs about $28 a year, 8% of that (`node pilot/tests/pilot.test.cjs`, details in `pilot/README.md`). Real: SCE's shutoff and interconnection records, the NIFC fire perimeter, CAISO prices. Approximate or estimated: the 66 kV route (traced from the California Energy Commission's transmission map), switch positions and the homes behind each switch.
 
-## Proof 2: Tuesday, September 6, 2022, CAISO's record-peak evening
+## Proof 2: the evening before the shutoff on the RAR8848 pilot, Interlock alone
 
-Four real SCE 12 kV circuits, 2,000 simulated Base Core homes, the real EEA 3 emergency (5:17 to 8 PM) and ten injected failures (`node interlock/cli.mjs`, details in `interlock/README.md`):
+Wednesday, October 14, 2026, noon to 10 PM, replayed as an ordinary trading evening on the same branch: the 456 homes behind RAR8848, our 189 battery homes (160 ours, 29 home-owned, 16 Medical Baseline), Cuthbert's real October load shape scaled to the branch (assumed: 456 of Cuthbert's 2,407 customers), the pilot's 0.97 MW import cap and 0.15 MW reverse-flow cap (assumed), SCE time-of-use prices (assumed $0.60 on-peak), one simulated SCE flex event and eleven injected failures, among them a stolen key, a replay, a price glitch, a bad forecast and a market export while SCE has RAR8848 open (`node interlock/cli.mjs`, details in `interlock/README.md`). In the pilot itself PowerUP holds these batteries full from that morning; this page tests the guard on its own.
 
 | Same evening, same failures | Guard off | Guard on |
 |---|---|---|
-| Homes drained below their promised backup | 2,000 | 0 |
-| Battery-minutes exporting onto a de-energized line | 18,490 | 0 |
-| MW-minutes over a circuit's import limit | 2,349 | 0 |
-| Revenue (time-of-use savings plus event pay) | $17,758 | $51,965 |
-| Energy delivered to the grid emergency | 13.3 MWh | 28.2 MWh |
+| Battery homes drained below their promised backup | 189 of 189 | 0 |
+| Battery homes with under 8 hours of backup at 8 PM, the night before the shutoff | 189 | 0 |
+| Battery-minutes exporting onto the opened line | 2,385 | 0 |
+| MW-minutes over the branch's import cap | 306 | 0 |
+| MW-minutes past its reverse-flow cap | 248 | 0 |
+| Revenue (time-of-use savings plus event pay) | $2,795 | $3,331 |
 | Legitimate commands held | 0 | 0 |
 
 ## Proof 3: the island planner behind any SCE switch
@@ -77,28 +78,28 @@ For a 48-hour shutoff on a Merlin-shaped section, the underground coast section 
 
 - PowerUP prices readiness with real CAISO day-ahead prices for the SCE load zone (Q4 2025, `powerup/data/prices/`): a free battery earns its daily arbitrage value, and readiness forfeits only what holding costs, only where the risk is.
 - On an ordinary Tuesday, our own dispatch team uses Interlock as a test bench: replay a new dispatch policy through the guard, then roll it out to 1%, 10% and 100% of the fleet. The tolerance map shows what each level of strictness costs.
-- Grid emergencies like Sept 6, 2022 pay, and the guard earns about three times the unguarded fleet on that chaotic evening.
+- On the pilot's evening before the shutoff, with eleven failures injected, the guarded fleet keeps every backup promise and still earns 1.19 times the unguarded one; with only the legitimate orders it keeps 93.5% of what the unguarded fleet earns.
 
 ## Run it
 
 Node 22 and Python 3, no packages to install.
 
 ```
-npm test                         # 58 checks: Interlock (29), pilot guard (3), islands (11), pilot business (14) and the pilot smoke run
+npm test                         # 60 checks: Interlock (31), pilot guard (3), islands (11), pilot business (14) and the pilot smoke run
 node pilot/app/cli.mjs           # RAR8848 pilot: PowerUP through Interlock, guard on vs off
-node interlock/cli.mjs           # Sept 6, 2022 replay -> interlock/out/results.json
+node interlock/cli.mjs           # Oct 14, 2026 RAR8848 evening replay -> interlock/out/results.json
 node islands/scenario.cjs        # Merlin-shaped neighborhood island
 npm run build                    # rebuilds the pilot data and pages, then site.py writes index.html and heatwave.html at the root (GitHub Pages) and site/ (the Artifact)
 ```
 
-Serve the repo root or `site/` with any static server to open both pages (the heat-wave page loads ES modules, which do not load from `file://`).
+Serve the repo root or `site/` with any static server to open both pages (the Interlock evening page, `heatwave.html`, loads ES modules, which do not load from `file://`).
 
 ## Layout
 
 ```
 pilot/      the RAR8848 pilot: app/ is the PowerUP replay (engine, bridge to Interlock, page), the rest is the pilot business
 powerup/    SCE and CAISO data, spec, prior art, twists
-interlock/  the guard: engine, silence and behaviour checks, policy packs, Sept 6 2022 replay, demo page
+interlock/  the guard: engine, silence and behaviour checks, policy packs, the RAR8848 evening replay, demo page
 islands/    the neighborhood island planner and the SCE line-device shutoff records for Malibu
 submission/ Devpost story sections (devpost.md), the other form fields with the video script (devpost-extras.md) the pitch deck text (pitch-deck.md) and the 24 x 36 in poster (poster/poster.pdf, rendered by poster/render.mjs)
 site.py     builds the two-page demo at the root and in site/
@@ -108,7 +109,7 @@ site.py     builds the two-page demo at the root and in site/
 
 Every number in the apps carries one of these labels.
 
-- **Real:** SCE open data (circuit lines, customer counts, 55 past Malibu shutoffs, hourly circuit loads), the October 2026 Malibu shutoff timeline (NWS, City of Malibu, CAL FIRE), CAISO day-ahead prices for the SCE zone, CAISO's Sept 6, 2022 record and EEA 3 times, Base Core specs and Base's 20% floor.
+- **Real:** SCE open data (circuit lines, customer counts, 55 past Malibu shutoffs, hourly circuit loads), the October 2026 Malibu shutoff timeline (NWS, City of Malibu, CAL FIRE), CAISO day-ahead prices for the SCE zone, RAR8848's 456 customers and Cuthbert's 2024 hourly loads, Base Core specs and Base's 20% floor.
 - **Assumed:** battery adoption on the pilot (20%: our free batteries plus the homes' own; the real Malibu share today is about 7.1 per 100 homes) and Medical Baseline share, outage budgets, circuit limits (SCE publishes loads, not ratings), time-of-use rates, event pay, the 50% raised floor, the reverse-flow cap, that SCE's grid can open a switch and run the section behind it as an island, and that our batteries are grid-forming, not only grid-following.
 - **Simulated:** the fleet, the failures, the physics. Signatures are a deterministic stand-in, not cryptography.
 

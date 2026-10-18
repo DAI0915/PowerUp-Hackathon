@@ -1,119 +1,122 @@
-"""Pick 4 real SCE circuits under hot inland substations and write data/circuits.json (+ circuits.mjs).
+"""Write data/circuits.json (+ circuits.mjs) for the RAR8848 pilot: one circuit section, the 456 homes behind SCE
+switch RAR8848 on the Cuthbert circuit (Latigo substation, Malibu, 16 kV).
 
-Run: python3 -I data/prep_circuits.py   (from the interlock folder, or pass paths)
+Run: python3 -I interlock/data/prep_circuits.py   (from the repo root, or from anywhere)
 
-Source: SCE Circuit Load Profile (open data), /mnt/project-files/data/powerup/sce/Circuit_Load_Profile.csv
-MONTH is 0-indexed (September = 8). Units are not stated by SCE; we INFER amps per phase and
-convert with MW = sqrt(3) * kV * A / 1000. That conversion is an inference, labelled as such.
+Sources (all in the repo):
+- powerup/data/malibu/malibu_circuit_load_profiles.csv: SCE Circuit Load Profile (open data), Cuthbert, 2024, hourly
+  min and max per month. REAL. SCE states no units; we INFER amps per phase and convert with MW = sqrt(3) x kV x A / 1000
+  (27.7 kW per unit at 16 kV, the same reading the pilot uses).
+- powerup/data/data.json: Cuthbert's customer count (2,407, SCE PSPS layer). pilot/data.json: the 456 homes behind
+  RAR8848 (SCE PSPS record, Dec 2 2020). REAL.
+- powerup/data/prices/caiso_dlap_sce_dam_2025q4_daily_value.csv: CAISO day-ahead value of one Base Core per day for the
+  SCE load zone, Q4 2025. REAL (only daily values are in the repo, so the replay prices the evening at SCE TOU, ASSUMED).
+
+Branch load: Cuthbert's October 2024 profile x 456 / 2,407 (ASSUMED: every customer on Cuthbert draws alike), the same
+scaling the pilot uses (pilot/app/build_pack.py). The ordinary evening uses the midpoint of each hour's October min and
+max (ASSUMED). Import limit: the branch's October peak, the cap the pilot uses for its cold-load pickup
+(cold_load_cap_pct = 100). Export cap: 15% of that, the pilot's EXPORT_CAP_FRAC (pilot/app/src/bridge.js). Both ASSUMED.
 """
 import csv
 import json
 import math
 import os
-import sys
-from collections import defaultdict
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-SRC = sys.argv[1] if len(sys.argv) > 1 else '/mnt/project-files/data/powerup/sce/Circuit_Load_Profile.csv'
+ROOT = os.path.normpath(os.path.join(HERE, '..', '..'))
+LOADS = os.path.join(ROOT, 'powerup', 'data', 'malibu', 'malibu_circuit_load_profiles.csv')
+PRICES = os.path.join(ROOT, 'powerup', 'data', 'prices', 'caiso_dlap_sce_dam_2025q4_daily_value.csv')
 OUT_JSON = os.path.join(HERE, 'circuits.json')
 OUT_MJS = os.path.join(HERE, 'circuits.mjs')
 
-# Hot inland substations, in order of preference (one circuit each).
-PREFERRED_SUBSTATIONS = ['Victor', 'Corona', 'Apple Valley', 'Moreno']
-SEPT = 8
-TARGET_SEPT_MAX_A = 400.0      # a typical ~8 MW 12 kV feeder
-PLAUSIBLE_A = (250.0, 500.0)   # residential feeder magnitudes (inferred amps)
-IMPORT_MARGIN = 1.05           # ASSUMED: import limit = highest recorded load x 1.05
-EXPORT_CAP_MW = -1.5           # ASSUMED reverse-flow cap at the substation
+CIRCUIT, MONTH = 'CUTHBERT', 10        # October
+PRICE_DATE = '2025-10-14'              # same calendar date, one year earlier
+EXPORT_CAP_FRAC = 0.15                 # pilot/app/src/bridge.js
 
 
-def kv_of(voltage):
-    return float(voltage.upper().replace('KV', ''))
-
-
-def to_mw(amps, kv):
-    return round(math.sqrt(3) * kv * amps / 1000.0, 3)
+def to_mw(units, kv):
+    return round(math.sqrt(3) * kv * units / 1000.0, 4)
 
 
 def main():
-    rows = defaultdict(lambda: {'n': 0, 'sept': {}, 'year_max': 0.0, 'months': set()})
-    with open(SRC, encoding='utf-8-sig', newline='') as f:
-        for r in csv.DictReader(f):
-            if r['SUBSTATION'] not in PREFERRED_SUBSTATIONS:
-                continue
-            key = (r['CIRCUIT_NAME'], r['SUBSTATION'], r['VOLTAGE'], r['YEAR'])
-            e = rows[key]
-            e['n'] += 1
-            try:
-                mn, mx = float(r['MIN_LOAD']), float(r['MAX_LOAD'])
-            except ValueError:
-                continue
-            e['months'].add(int(r['MONTH']))
-            e['year_max'] = max(e['year_max'], mx)
-            if int(r['MONTH']) == SEPT:
-                e['sept'][int(r['HOUR'])] = (mn, mx)
+    pd = json.load(open(os.path.join(ROOT, 'powerup', 'data', 'data.json')))
+    circuit_customers = pd['circuits']['Cuthbert']['customers']
+    homes = len(json.load(open(os.path.join(ROOT, 'pilot', 'data.json')))['homes'])
+    scale = homes / circuit_customers
 
-    latest_year = max(int(k[3]) for k in rows)
-    picked = []
-    for sub in PREFERRED_SUBSTATIONS:
-        cands = []
-        for (name, s, volt, year), e in rows.items():
-            if s != sub or int(year) != latest_year or len(e['sept']) < 24 or len(e['months']) < 12:
+    hours, kv, year, substation = {}, None, None, None
+    with open(LOADS, encoding='utf-8-sig', newline='') as f:
+        for r in csv.DictReader(f):
+            if r['circuit'] != CIRCUIT or int(r['month']) != MONTH:
                 continue
-            if not volt.upper().endswith('KV') or kv_of(volt) < 12:
-                continue
-            sept_max = max(v[1] for v in e['sept'].values())
-            if not (PLAUSIBLE_A[0] <= sept_max <= PLAUSIBLE_A[1]):
-                continue
-            cands.append((abs(sept_max - TARGET_SEPT_MAX_A), name, s, volt, year, e))
-        if not cands:
-            continue
-        cands.sort(key=lambda c: (c[0], c[1]))
-        _, name, s, volt, year, e = cands[0]
-        kv = kv_of(volt)
-        hours = []
-        for h in range(24):
-            mn, mx = e['sept'][h]
-            hours.append({'hour': h, 'minA': mn, 'maxA': mx, 'minMW': to_mw(mn, kv), 'maxMW': to_mw(mx, kv)})
-        year_max_mw = to_mw(e['year_max'], kv)
-        picked.append({
-            'id': f'c{len(picked) + 1}',
-            'name': name,
-            'substation': s,
-            'voltage': volt,
-            'kv': kv,
-            'year': int(year),
-            'septHourly': hours,
-            'septMaxMW': max(x['maxMW'] for x in hours),
-            'septMinMW': min(x['minMW'] for x in hours),
-            'yearMaxA': e['year_max'],
-            'yearMaxMW': year_max_mw,
-            'importLimitMW': round(year_max_mw * IMPORT_MARGIN, 3),
-            'exportCapMW': EXPORT_CAP_MW,
-        })
+            kv = float(r['voltage'].upper().replace('KV', ''))
+            year, substation = int(r['year']), r['substation'].title()
+            hours[int(r['hour'])] = (float(r['min_load']), float(r['max_load']))
+    assert len(hours) == 24, 'need all 24 October hours for Cuthbert'
+
+    hourly = []
+    for h in range(24):
+        mn, mx = hours[h]
+        bmn, bmx = mn * scale, mx * scale
+        hourly.append({'hour': h, 'minA': mn, 'maxA': mx, 'minMW': to_mw(bmn, kv), 'maxMW': to_mw(bmx, kv),
+                       'mw': to_mw((bmn + bmx) / 2, kv)})
+    peak = max(x['maxMW'] for x in hourly)
+
+    price = None
+    with open(PRICES, newline='') as f:
+        for r in csv.DictReader(f):
+            if r['date'] == PRICE_DATE:
+                price = {k: float(v) for k, v in r.items() if k != 'date'}
+    assert price, f'no CAISO value for {PRICE_DATE}'
 
     out = {
-        'source': SRC,
-        'dataset': 'SCE Circuit Load Profile (open data)',
-        'selection': (f'Substations {PREFERRED_SUBSTATIONS}; YEAR = {latest_year} (latest in file); all 12 months '
-                      f'and all 24 September hours present; >= 12 kV; September max between {PLAUSIBLE_A[0]:.0f} and '
-                      f'{PLAUSIBLE_A[1]:.0f} (inferred A); closest September max to {TARGET_SEPT_MAX_A:.0f} A.'),
+        'source': 'powerup/data/malibu/malibu_circuit_load_profiles.csv',
+        'dataset': 'SCE Circuit Load Profile (open data), Cuthbert circuit, October 2024',
+        'selection': (f'The RAR8848 pilot only: the {homes} homes behind SCE switch RAR8848 on Cuthbert ({substation} '
+                      f'substation, {kv:g} kV). Cuthbert has {circuit_customers:,} customers, so its load is scaled by '
+                      f'{homes} / {circuit_customers:,} = {scale:.4f}.'),
         'labels': {
-            'loads': 'REAL (SCE open data, hourly Sept min/max per circuit)',
-            'units': 'INFERENCE: values treated as amps per phase; MW = sqrt(3) x kV x A / 1000',
-            'importLimitMW': f'ASSUMED: highest recorded load across the year x {IMPORT_MARGIN}',
-            'exportCapMW': f'ASSUMED: {EXPORT_CAP_MW} MW reverse-flow cap (full-fleet export unsafe, moderate event export safe)',
+            'loads': f'REAL shape (SCE open data, Cuthbert hourly October {year} min and max), scaled to the branch',
+            'units': 'INFERENCE: values treated as amps per phase; MW = sqrt(3) x kV x A / 1000 (27.7 kW per unit at 16 kV)',
+            'scaling': f'ASSUMED: branch load = Cuthbert x {homes} / {circuit_customers:,} (every customer draws alike), as in the pilot',
+            'ordinary': 'ASSUMED: an ordinary evening sits at the midpoint of each hour\'s October min and max',
+            'importLimitMW': f'ASSUMED: the branch\'s October peak, {peak:.2f} MW, the cap the pilot uses',
+            'exportCapMW': f'ASSUMED: reverse flow up to {int(EXPORT_CAP_FRAC * 100)}% of the import limit, as in the pilot',
         },
-        'circuits': picked,
+        'circuits': [{
+            'id': 'rar8848',
+            'name': 'Cuthbert, behind RAR8848',
+            'circuit': 'Cuthbert',
+            'switch': 'RAR8848',
+            'substation': substation,
+            'voltage': f'{kv:g}KV',
+            'kv': kv,
+            'year': year,
+            'month': MONTH,
+            'homes': homes,
+            'circuitCustomers': circuit_customers,
+            'scale': round(scale, 5),
+            'hourly': hourly,
+            'peakMW': peak,
+            'importLimitMW': peak,
+            'exportCapMW': round(-EXPORT_CAP_FRAC * peak, 4),
+        }],
+        'wholesale': {
+            'date': PRICE_DATE,
+            'valuePerBatteryDay': price,
+            'label': 'REAL: CAISO OASIS day-ahead LMP, DLAP_SCE-APND; per-day best schedule for one Base Core at each floor',
+            'source': 'powerup/data/prices/caiso_dlap_sce_dam_2025q4_daily_value.csv',
+        },
     }
     with open(OUT_JSON, 'w') as f:
         json.dump(out, f, indent=1)
     with open(OUT_MJS, 'w') as f:
-        f.write('// Generated by data/prep_circuits.py from SCE open data. Do not edit by hand.\n')
+        f.write('// Generated by data/prep_circuits.py from SCE open data and the RAR8848 pilot. Do not edit by hand.\n')
         f.write('export default ' + json.dumps(out, indent=1) + ';\n')
-    for c in picked:
-        print(f"{c['id']} {c['name']} ({c['substation']}) {c['voltage']} {c['year']}: Sept {c['septMinMW']}-{c['septMaxMW']} MW, "
-              f"year max {c['yearMaxMW']} MW, import limit {c['importLimitMW']} MW, export cap {c['exportCapMW']} MW")
+    c = out['circuits'][0]
+    print(f"{c['id']} {c['name']} ({c['substation']}) {c['voltage']} {c['year']}: {homes} of {circuit_customers} customers, "
+          f"ordinary {min(x['mw'] for x in hourly):.3f}-{max(x['mw'] for x in hourly):.3f} MW, import limit "
+          f"{c['importLimitMW']} MW, export cap {c['exportCapMW']} MW; CAISO value {PRICE_DATE}: {price}")
 
 
 if __name__ == '__main__':
