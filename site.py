@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Assemble the two demo pages: the Malibu replay (built by grace/app/build.py) and Interlock's heat-wave replay.
+"""Assemble the two demo pages: the Malibu replay (built by powerup/app/build.py) and Interlock's heat-wave replay.
 Run: python3 -I site.py
 
 - Repo root: index.html and heatwave.html, for GitHub Pages (deploy from the main branch, root folder). The heat-wave
@@ -14,7 +14,7 @@ il = os.path.join(root, 'interlock')
 if os.path.isdir(out):
     shutil.rmtree(out)
 os.makedirs(out)
-shutil.copy(os.path.join(root, 'grace', 'app', 'index.html'), os.path.join(out, 'index.html'))
+shutil.copy(os.path.join(root, 'powerup', 'app', 'index.html'), os.path.join(out, 'index.html'))
 for sub, names in (('src', ('engine.mjs', 'packs.mjs', 'silence.mjs', 'sim.mjs')), ('data', ('circuits.mjs',)), ('out', ('results.json',))):
     os.makedirs(os.path.join(out, sub))
     for n in names:
@@ -33,7 +33,7 @@ head = ('<!doctype html>\n<html lang="en">\n<head>\n<meta charset="utf-8">\n'
 open(os.path.join(out, 'heatwave.html'), 'w', encoding='utf-8').write(head + page + '\n</html>\n')
 print('wrote', out)
 
-malibu = open(os.path.join(root, 'grace', 'app', 'index.html'), encoding='utf-8').read()
+malibu = open(os.path.join(root, 'powerup', 'app', 'index.html'), encoding='utf-8').read()
 open(os.path.join(root, 'index.html'), 'w', encoding='utf-8').write(head + malibu + '\n</html>\n')
 rooted = page
 for a, b in (("from './src/", "from './interlock/src/"), ("from './data/", "from './interlock/data/"), ("fetch('./out/", "fetch('./interlock/out/")):

@@ -1,35 +1,35 @@
-/* PowerUp bridge: Grace plans, Interlock guards. Pure functions. Works in the browser (window.PowerUp) and in node (module.exports).
+/* PowerUP bridge: PowerUP plans, Interlock guards. Pure functions. Works in the browser (window.PowerUP) and in node (module.exports).
  *
- * Grace never commands a battery directly. Each Grace order becomes a signed, OpenADR-style command that passes Interlock's
- * eight checks, and the reserve Grace plans for each home (100% for Medical Baseline homes from the first wind signal, and so on
+ * PowerUP never commands a battery directly. Each PowerUP order becomes a signed, OpenADR-style command that passes Interlock's
+ * eight checks, and the reserve PowerUP plans for each home (100% for Medical Baseline homes from the first wind signal, and so on
  * down the ladder) becomes the floor Interlock enforces against every other sender: Base's daily optimizer, a market bid, the
  * utility's own emergency event, or a forged order.
  *
  * Dependencies are passed in, so the same file runs in both places:
- *   G = the Grace engine (grace/app/src/engine.js)
+ *   G = the PowerUP engine (powerup/app/src/engine.js)
  *   I = Interlock: { evaluate, signCommand, requestedKw, getPack, DEMO_KEYS } (interlock/src/engine.mjs + packs.mjs)
  */
 (function (root, factory) {
   if (typeof module === 'object' && module.exports) module.exports = factory();
-  else root.PowerUp = factory();
+  else root.PowerUP = factory();
 })(typeof self !== 'undefined' ? self : this, function () {
   'use strict';
 
-  const GRACE = { id: 'base-grace', role: 'aggregator' };
-  const GRACE_KEY = 'k-grace-6e10';        // demo stand-in key, like Interlock's DEMO_KEYS (not cryptography)
+  const POWERUP = { id: 'base-powerup', role: 'aggregator' };
+  const POWERUP_KEY = 'k-powerup-6e10';        // demo stand-in key, like Interlock's DEMO_KEYS (not cryptography)
   const EXPORT_CAP_FRAC = 0.15;            // ASSUMED: reverse flow allowed on a Malibu circuit, as a share of its cap
-  const STEP_MIN = 60;                     // Grace's replay steps hourly
+  const STEP_MIN = 60;                     // PowerUP's replay steps hourly
   const SRC = {
-    grace: GRACE,
+    powerup: POWERUP,
     optimizer: { id: 'base-optimizer', role: 'aggregator' },
     utility: { id: 'sce-drms', role: 'utility' },
     market: { id: 'caiso-market', role: 'market' },
     forged: { id: 'sce-drms-backup', role: 'utility' }   // not on the trusted list
   };
-  const EPOCH = { 'base-grace': 1, 'base-optimizer': 42, 'sce-drms': 7, 'caiso-market': 3, 'sce-drms-backup': 1 };
+  const EPOCH = { 'base-powerup': 1, 'base-optimizer': 42, 'sce-drms': 7, 'caiso-market': 3, 'sce-drms-backup': 1 };
 
   // Malibu failures, SIMULATED, each one a kind the hackathon prompt names: doing what nobody authorized, somewhere it
-  // shouldn't be, or a sender that doesn't know about the shutoff. Times are Grace replay hours (0 = Oct 7, 00:00).
+  // shouldn't be, or a sender that doesn't know about the shutoff. Times are PowerUP replay hours (0 = Oct 7, 00:00).
   const D = (day, hour) => (day - 7) * 24 + hour;
   function chaos(sim) {
     const firstRestore = Math.min.apply(null, Object.keys(sim.circuits).map(c => sim.circuits[c].restoreH));
@@ -66,11 +66,11 @@
 
   function policyFor(I, pack) {
     const p = I.getPack(pack || 'sce');
-    return Object.assign({}, p, { trustedSources: Object.assign({}, p.trustedSources, { 'base-grace': { role: 'aggregator', key: GRACE_KEY } }) });
+    return Object.assign({}, p, { trustedSources: Object.assign({}, p.trustedSources, { 'base-powerup': { role: 'aggregator', key: POWERUP_KEY } }) });
   }
-  function keyOf(I, id) { return id === 'base-grace' ? GRACE_KEY : (I.DEMO_KEYS[id] || 'k-unknown-' + id); }
+  function keyOf(I, id) { return id === 'base-powerup' ? POWERUP_KEY : (I.DEMO_KEYS[id] || 'k-unknown-' + id); }
 
-  // ---------- Grace's reserve per home: the ladder, mirrored from Grace's engine ----------
+  // ---------- PowerUP's reserve per home: the ladder, mirrored from PowerUP's engine ----------
   function reserveKWh(ctx, b, h, soc) {
     const P = ctx.P, cap = P.capacity_kwh, R = ctx.sim.rungs, named = ctx.sim.namedH[b.circuit];
     const floor = cap * P.reserve_floor_pct / 100, ask = Math.max(floor, cap * P.ask_floor_pct / 100);
@@ -93,7 +93,7 @@
     return { G, I, DATA, world, P, sim, N: sim.N, cap, homes, homeIds: Object.keys(homes), policy: policyFor(I, opts.pack) };
   }
 
-  // Interlock's view of the fleet at the start of hour h, read from a Grace run
+  // Interlock's view of the fleet at the start of hour h, read from a PowerUP run
   function stateAt(ctx, h) {
     const { G, sim, world, P, N, cap, homes } = ctx;
     const hour = h % 24, prof = world.prof, KW = G.KW_PER_UNIT, C = sim.C, S = sim.S;
@@ -121,7 +121,7 @@
   }
 
   // ---------- the orders ----------
-  function graceOrders(ctx, decisions) {
+  function powerupOrders(ctx, decisions) {
     const { sim, world, P, G } = ctx, R = sim.rungs, named = sim.namedH, bat = world.batteries;
     const ids = f => bat.filter(f).map(b => 'b' + b.bi);
     const untilHold = h => (R.hold - h) * 60;
@@ -136,17 +136,17 @@
         title: `Base optimizer, Oct ${7 + d}: cover evening load from batteries (ordinary-day arbitrage)`,
         command: { priority: 5, targets: { all: true }, payload: { type: 'DISCHARGE_KW', value: Math.round(load / bat.length * 10) / 10 }, durationMin: 300 } });
     }
-    out.push({ h: R.watch, id: 'grace-watch', who: 'grace', truth: 'legit', tag: 'Watch', rung: 'watch',
+    out.push({ h: R.watch, id: 'powerup-watch', who: 'powerup', truth: 'legit', tag: 'Watch', rung: 'watch',
       title: 'PowerUP Watch: fill Medical Baseline homes to 100% and hold them',
       command: { priority: 4, targets: { homes: ids(b => b.tier === 1) }, payload: { type: 'SOC_TARGET', value: 100 }, durationMin: untilHold(R.watch) } });
-    out.push({ h: R.ask, id: 'grace-ask', who: 'grace', truth: 'legit', tag: 'Ask', rung: 'ask',
+    out.push({ h: R.ask, id: 'powerup-ask', who: 'powerup', truth: 'legit', tag: 'Ask', rung: 'ask',
       title: `PowerUP Ask: fill registered critical-need homes on ${askC.join(', ')}; everyone else there keeps 50% and is asked to pre-fill`,
       command: { priority: 4, targets: { homes: ids(b => b.tier === 2 && askC.includes(b.circuit)) }, payload: { type: 'SOC_TARGET', value: 100 }, durationMin: untilHold(R.ask) } });
-    out.push({ h: R.fill, id: 'grace-fill', who: 'grace', truth: 'legit', tag: 'Fill', rung: 'fill',
+    out.push({ h: R.fill, id: 'powerup-fill', who: 'powerup', truth: 'legit', tag: 'Fill', rung: 'fill',
       title: 'PowerUP Fill: every battery whose owner said yes goes to 100% under each circuit\'s headroom',
       command: { priority: 4, targets: { homes: ids(b => (b.tier === 3 && Number.isFinite(b.consentDelay)) || (b.tier === 2 && fillC.includes(b.circuit))) },
         payload: { type: 'SOC_TARGET', value: 100 }, durationMin: untilHold(R.fill) } });
-    out.push({ h: R.hold, id: 'grace-hold', who: 'grace', truth: 'legit', tag: 'Hold', rung: 'hold',
+    out.push({ h: R.hold, id: 'powerup-hold', who: 'powerup', truth: 'legit', tag: 'Hold', rung: 'hold',
       title: 'PowerUP Hold: every battery islands, never exports, and runs its home on the outage budget',
       command: { priority: 4, targets: { all: true }, payload: { type: 'IDLE', value: 0 }, durationMin: P.planned_outage_h * 60 } });
     for (const p of sim.proposals.restore || []) {
@@ -155,7 +155,7 @@
       if (h >= sim.HOURS || !(cc.chargeKW[h] > 0)) continue;
       const room = cc.members.filter(bi => sim.soc[(h - 1) * ctx.N + bi] < ctx.cap - 1);
       if (!room.length) continue;
-      out.push({ h, id: `grace-recharge-${p.circuit}`, who: 'grace', truth: 'legit', tag: 'Hand', rung: 'hand',
+      out.push({ h, id: `powerup-recharge-${p.circuit}`, who: 'powerup', truth: 'legit', tag: 'Hand', rung: 'hand',
         title: `PowerUP recharge on ${p.circuit}, approved by SCE's shutoff officer, after the cold-load pickup`,
         command: { priority: 4, targets: { homes: room.map(bi => 'b' + bi) }, payload: { type: 'CHARGE_KW', value: Math.floor(cc.chargeKW[h] / room.length * 10) / 10 }, durationMin: 60 } });
     }
@@ -177,13 +177,13 @@
     const ledger = { seen: {}, epochs: Object.assign({}, EPOCH), admitted: {}, approved: {}, personApproved: {}, blocked: {} };
     delete ledger.epochs['sce-drms-backup'];
     const active = [], canary = {}, signedById = {}, log = [];
-    const sorted = orders.slice().sort((a, b) => a.h - b.h || (a.who === 'grace' ? 0 : 1) - (b.who === 'grace' ? 0 : 1));
+    const sorted = orders.slice().sort((a, b) => a.h - b.h || (a.who === 'powerup' ? 0 : 1) - (b.who === 'powerup' ? 0 : 1));
     for (const o of sorted) {
       const cmd = sign(ctx, o, signedById);
       if (!o.replayOf) signedById[o.id] = cmd;
       const st = stateAt(ctx, o.h);
       Object.assign(st, { ledger, canary, active: active.filter(a => a.issuedAt + a.durationMin > o.h * 60) });
-      // Grace's own charging this hour is already in the circuit's load; when the order being checked IS that charging,
+      // PowerUP's own charging this hour is already in the circuit's load; when the order being checked IS that charging,
       // count it once
       if (o.plan && o.command && o.command.payload.type === 'CHARGE_KW') for (const c in st.circuits) st.circuits[c].otherFleetKw = 0;
       let r = I.evaluate(cmd, st, policy);
@@ -209,8 +209,8 @@
   }
 
   // ---------- what each order does to the batteries, with and without the guard ----------
-  // Energy pushed out of a battery beyond its own home's use (the home's use is already in Grace's plan). Applied at the
-  // start of the hour after the order's window ends, so Grace then reacts to whatever is left.
+  // Energy pushed out of a battery beyond its own home's use (the home's use is already in PowerUP's plan). Applied at the
+  // start of the hour after the order's window ends, so PowerUP then reacts to whatever is left.
   function effects(ctx, entry, guarded) {
     const { cmd, state } = entry, P = ctx.P, I = ctx.I;
     const durH = cmd.durationMin / 60, endH = Math.min(ctx.sim.HOURS - 1, entry.order.h + Math.ceil(durH));
@@ -290,21 +290,21 @@
    * run({G, I, DATA, world, P, decisions, chaos: true|false, variants: ['on','off'], base?})
    * Returns { log, base, sims: {on, off}, metrics: {base, on, off}, exposure: {on, off} }.
    *  log: one entry per order in time order, with Interlock's verdict, rung and plain-English reasons, plus `on`/`off` effects.
-   *  sims.on / sims.off: Grace re-run with what each order actually did to the batteries with the guard on / off.
+   *  sims.on / sims.off: PowerUP re-run with what each order actually did to the batteries with the guard on / off.
    */
   function run(opts) {
     const { G, I, DATA, world, P } = opts;
     const decisions = opts.decisions || { restore: {}, ev: {} };
     const base = opts.base || G.simulate(DATA, world, P, decisions);
     const ctx = context(G, I, DATA, world, P, base, opts);
-    const orders = graceOrders(ctx, decisions).concat(opts.chaos === false ? [] : chaos(base));
+    const orders = powerupOrders(ctx, decisions).concat(opts.chaos === false ? [] : chaos(base));
     const log = guard(ctx, orders);
     const out = { log, base, sims: {}, metrics: { base: outcomes(base, world, P) }, exposure: {} };
     for (const variant of opts.variants || ['on', 'off']) {
       const ext = {}, ex = { deadLineBatteryH: 0, worstOverMW: 0, worstOverCircuit: null, homesDrained: 0, mbDrained: 0, eventMWh: 0 };
       const drained = new Set(), mbDrained = new Set();
       for (const e of log) {
-        if (e.order.plan) continue; // Grace's own orders and the daily optimizer are already in Grace's plan
+        if (e.order.plan) continue; // PowerUP's own orders and the daily optimizer are already in PowerUP's plan
         const f = effects(ctx, e, variant === 'on');
         e[variant] = f;
         for (const bi in f.ext) { (ext[f.endH] = ext[f.endH] || {})[bi] = f.ext[bi]; }
@@ -323,12 +323,12 @@
     return out;
   }
 
-  // a short scoreboard of the Grace orders themselves: did the guard ever stop Grace?
-  function graceSummary(log) {
-    const g = log.filter(e => e.order.who === 'grace');
+  // a short scoreboard of the PowerUP orders themselves: did the guard ever stop PowerUP?
+  function powerupSummary(log) {
+    const g = log.filter(e => e.order.who === 'powerup');
     return { orders: g.length, held: g.filter(e => !e.ran).length, clamped: g.filter(e => e.verdict === 'clamp').length,
       canaried: g.filter(e => e.canaried).length, passed: g.filter(e => e.ran && e.verdict !== 'clamp').length };
   }
 
-  return { run, chaos, graceOrders, reserveKWh, stateAt, context, outcomes, graceSummary, policyFor, GRACE, GRACE_KEY, EXPORT_CAP_FRAC };
+  return { run, chaos, powerupOrders, reserveKWh, stateAt, context, outcomes, powerupSummary, policyFor, POWERUP, POWERUP_KEY, EXPORT_CAP_FRAC };
 });

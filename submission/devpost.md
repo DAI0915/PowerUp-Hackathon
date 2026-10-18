@@ -23,7 +23,7 @@ The hackathon prompt asks for automation that knows when to watch, ask, slow, ho
 
 PowerUP has three parts that share one ladder.
 
-**PowerUP plans (days).** The planner starts from SCE's own shutoff circuit list. Watch: Medical Baseline homes fill to 100% at the first wind signal. Ask: owners on named circuits are asked to pre-fill, and everyone else gets a raised 50% floor. Fill, then Hold: every battery islands its home on a per-home outage budget (critical 8, essential 16, normal 32 kWh a day) sized to the planned outage. Hand: SCE's shutoff officer approves a staggered recharge, one circuit at a time, so restoration doesn't overload the circuit.
+**PowerUP plans (days).** PowerUP starts from SCE's own shutoff circuit list. Watch: Medical Baseline homes fill to 100% at the first wind signal. Ask: owners on named circuits are asked to pre-fill, and everyone else gets a raised 50% floor. Fill, then Hold: every battery islands its home on a per-home outage budget (critical 8, essential 16, normal 32 kWh a day) sized to the planned outage. Hand: SCE's shutoff officer approves a staggered recharge, one circuit at a time, so restoration doesn't overload the circuit.
 
 **Interlock guards (seconds).** Every order to the fleet, from any sender, passes eight checks: shape, signature, freshness, precedence, each home's backup floor, inverter limit, circuit headroom (including no export onto a de-energized line) and ramp. Each check answers on the gentlest rung that keeps homes and the circuit safe: run, clamp, canary (1%, 10%, everyone), hold, or hand to a person. It can only shrink, slow or stop an order, never create one.
 
@@ -73,7 +73,7 @@ The same battery earns its keep on ordinary days. PowerUP prices readiness with 
 
 ## How we built it
 
-- **Planner** (`grace/`): a deterministic hourly engine in plain JavaScript (282 hours from Oct 7), running SCE open data: circuit lines, customer counts, 55 past Malibu shutoffs and hourly circuit loads. CAISO day-ahead prices for the SCE zone price readiness.
+- **PowerUP** (`powerup/`): a deterministic hourly engine in plain JavaScript (282 hours from Oct 7), running SCE open data: circuit lines, customer counts, 55 past Malibu shutoffs and hourly circuit loads. CAISO day-ahead prices for the SCE zone price readiness.
 - **Interlock:** ES modules with no dependencies; orders shaped like OpenADR 3 events; a 5-minute replay simulator; three policy packs (SCE homes, a military installation, Australia).
 - **Bridge:** turns each PowerUP decision into a signed order, runs every sender's orders through Interlock, and re-runs PowerUP with what each order actually did to the batteries. Wiring it also hardened Interlock: a validly signed order admitted days earlier could be re-sent and pass the freshness check, and it is now treated as a replay once its window has closed.
 - **Islands:** pure functions that classify segments, find islands under three hard rules (never re-energize overhead line in a fire area, a switch to every dead neighbor, one grid-forming source), plan donors and receivers, and settle the money.
@@ -84,7 +84,7 @@ Every number in the apps is labelled real, assumed or simulated.
 
 ## Challenges we ran into
 
-- **Two engines, one truth.** The planner thinks in hours and Interlock in 5-minute steps. The bridge advances canaries in substeps and counts PowerUP's own recharge once, not twice, so the planner's orders pass 10 of 10.
+- **Two engines, one truth.** PowerUP thinks in hours and Interlock in 5-minute steps. The bridge advances canaries in substeps and counts PowerUP's own recharge once, not twice, so PowerUP's orders pass 10 of 10.
 - **The sell-down.** Our first guarded run still let 90 homes go dark: the market bid drained owners who had declined pre-fill. The fix is a rule we now think is right: once the shutoff is definite, nothing is sold out of any battery in the zone.
 - **Data SCE doesn't publish.** Circuit ratings, switch positions, transformer locations and Medical Baseline counts aren't public. Those inputs are assumed or estimated and labelled that way, and the pilot's first ask to SCE is the segment and device map.
 

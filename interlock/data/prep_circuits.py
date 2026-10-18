@@ -2,7 +2,7 @@
 
 Run: python3 -I data/prep_circuits.py   (from the interlock folder, or pass paths)
 
-Source: SCE Circuit Load Profile (open data), /mnt/project-files/data/grace/sce/Circuit_Load_Profile.csv
+Source: SCE Circuit Load Profile (open data), /mnt/project-files/data/powerup/sce/Circuit_Load_Profile.csv
 MONTH is 0-indexed (September = 8). Units are not stated by SCE; we INFER amps per phase and
 convert with MW = sqrt(3) * kV * A / 1000. That conversion is an inference, labelled as such.
 """
@@ -14,7 +14,7 @@ import sys
 from collections import defaultdict
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-SRC = sys.argv[1] if len(sys.argv) > 1 else '/mnt/project-files/data/grace/sce/Circuit_Load_Profile.csv'
+SRC = sys.argv[1] if len(sys.argv) > 1 else '/mnt/project-files/data/powerup/sce/Circuit_Load_Profile.csv'
 OUT_JSON = os.path.join(HERE, 'circuits.json')
 OUT_MJS = os.path.join(HERE, 'circuits.mjs')
 

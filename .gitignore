@@ -1,4 +1,4 @@
-grace/app/shots*/
+powerup/app/shots*/
 **/*.wrapped.html
 node_modules/
 __pycache__/

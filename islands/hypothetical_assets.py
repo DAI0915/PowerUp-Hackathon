@@ -1,6 +1,6 @@
 """Hypothetical switch and transformer layer for the five Malibu circuits SCE publishes line shapes for.
 
-Real: SCE's circuit lines (data/grace/malibu_circuits.geojson), each line device's name and how many customers it cut
+Real: SCE's circuit lines (data/powerup/malibu_circuits.geojson), each line device's name and how many customers it cut
 (malibu_device_shutoffs.csv). Not public, so estimated here: where each device sits, and where the service
 transformers are. Run: python3 -I hypothetical_assets.py  -> malibu_hypothetical_assets.geojson
 - Substation: Latigo is placed where the Cuthbert, Galahad, Maguire and Merlin lines come closest together; Serra (Crater
@@ -11,7 +11,7 @@ transformers are. Run: python3 -I hypothetical_assets.py  -> malibu_hypothetical
 """
 import csv, heapq, json, math, os
 HERE = os.path.dirname(os.path.abspath(__file__))
-GRACE = os.path.join(HERE, '..', 'grace', 'data', 'malibu')
+POWERUP = os.path.join(HERE, '..', 'powerup', 'data', 'malibu')
 HOMES_PER_XFMR = 8
 
 def dist(a, b):
@@ -87,7 +87,7 @@ def tree(adj, root):
     return d, par, down
 
 def main():
-    g = json.load(open(os.path.join(GRACE, 'malibu_circuits.geojson')))
+    g = json.load(open(os.path.join(POWERUP, 'malibu_circuits.geojson')))
     circ = {f['properties']['circuit']: f for f in g['features']}
     adjs = {c: graph(f['geometry']['coordinates']) for c, f in circ.items()}
     lat = ['CUTHBERT', 'GALAHAD', 'MAGUIRE', 'MERLIN']

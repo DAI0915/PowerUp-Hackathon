@@ -6,13 +6,11 @@
 
 Built for the InnovateLA Dual-Use Hackathon (USC, Oct 16 to 18, 2026), Energy & Grid Hardening lens with Base Power. The seat is the dispatcher of a fleet of Base Core home batteries (39.2 kWh, 20 kW).
 
-The planner was called Grace while we built it, and its code still lives in `grace/`.
-
 PowerUP has three parts that share one ladder, the one the hackathon prompt asks for: *watch, ask, slow, hold, hand to a person*.
 
 | Part | The disaster | What it does | Ladder |
 |---|---|---|---|
-| **Planner** (`grace/`) | One that comes with warning: a wildfire power shutoff (PSPS) | Fills batteries by risk, Medical Baseline homes first; budgets each home's hours through the outage; staggers the recharge so restoring a circuit does not overload it; the utility's shutoff officer approves | Over days: Watch, Ask, Fill, Hold, Hand |
+| **PowerUP** (`powerup/`) | One that comes with warning: a wildfire power shutoff (PSPS) | Fills batteries by risk, Medical Baseline homes first; budgets each home's hours through the outage; staggers the recharge so restoring a circuit does not overload it; the utility's shutoff officer approves | Over days: Watch, Ask, Fill, Hold, Hand |
 | **Interlock** (`interlock/`) | One that comes without warning: an order that is forged, stale, unsafe or simply wrong, and batteries that go quiet | Every order passes eight checks and gets the gentlest rung that keeps each home's backup and the local circuit safe. It can only shrink, slow or stop an order, never create one | In seconds: watch, ask, slow, hold, hand |
 | **Islands** (`islands/`) | A shutoff that cuts a whole circuit when only part of it is risky | Finds the homes that are dark only because their feed runs through a risky stretch, and plans an opt-in neighborhood island behind SCE's existing switches, with donors, receivers and settlement | Ask (opt in), hand (SCE opens the switch) |
 
@@ -78,7 +76,7 @@ For a 48-hour shutoff the underground coast section (313 customers) can island a
 
 ## Every day: how the same battery earns its keep
 
-- PowerUP prices readiness with real CAISO day-ahead prices for the SCE load zone (Q4 2025, `grace/data/prices/`): a free battery earns its daily arbitrage value, and readiness forfeits only what holding costs, only where the risk is.
+- PowerUP prices readiness with real CAISO day-ahead prices for the SCE load zone (Q4 2025, `powerup/data/prices/`): a free battery earns its daily arbitrage value, and readiness forfeits only what holding costs, only where the risk is.
 - On an ordinary Tuesday, Base's own team is Interlock's customer: replay a new dispatch policy through the guard, then roll it out to 1%, 10% and 100% of the fleet. The tolerance map shows what each level of strictness costs.
 - Grid emergencies like Sept 6, 2022 pay, and the guard earns about three times the unguarded fleet on that chaotic evening.
 
@@ -87,20 +85,20 @@ For a 48-hour shutoff the underground coast section (313 customers) can island a
 Node 22 and Python 3, no packages to install.
 
 ```
-npm test                         # planner engine (22), Interlock (28), islands (11) and bridge (10) tests
+npm test                         # PowerUP engine (22), Interlock (28), islands (11) and bridge (10) tests
 node bridge/cli.mjs              # Malibu: PowerUP through Interlock, guard on vs off -> bridge/out/malibu-guard.json
 node interlock/cli.mjs           # Sept 6, 2022 replay -> interlock/out/results.json
 node islands/scenario.cjs        # Merlin-shaped neighborhood island
-python3 -I grace/app/build.py    # rebuilds the single-file Malibu app, grace/app/index.html
+python3 -I powerup/app/build.py  # rebuilds the single-file Malibu app, powerup/app/index.html
 python3 -I site.py               # writes index.html and heatwave.html at the root (GitHub Pages) and site/ (the Artifact)
 ```
 
-Browser checks (Playwright, Chromium): `cd grace/app && NODE_PATH=$(npm root -g) node tests/interact.cjs` (126) and `node tests/guard.cjs` (34). Serve `site/` with any static server to open both pages (the heat-wave page loads ES modules, which do not load from `file://`).
+Browser checks (Playwright, Chromium): `cd powerup/app && NODE_PATH=$(npm root -g) node tests/interact.cjs` (126) and `node tests/guard.cjs` (34). Serve `site/` with any static server to open both pages (the heat-wave page loads ES modules, which do not load from `file://`).
 
 ## Layout
 
 ```
-grace/      the Malibu shutoff planner: engine, single-file app, SCE and CAISO data, spec, prior art, twists
+powerup/    the Malibu shutoff planner: engine, single-file app, SCE and CAISO data, spec, prior art, twists
 interlock/  the guard: engine, silence and behaviour checks, policy packs, Sept 6 2022 replay, demo page
 islands/    the neighborhood island planner and the SCE line-device shutoff records for Malibu
 bridge/     PowerUP's orders through Interlock on the Malibu replay, and its tests
@@ -118,7 +116,7 @@ Every number in the apps carries one of these labels.
 
 ## Credit what exists
 
-Tesla Storm Watch pre-charges on weather warnings; Base keeps a 20% backup floor and arbitrages daily; SCE gives Medical Baseline customers portable batteries; IEEE 1547 governs anti-islanding and reconnection; IEEE 2030.5 defines the default control a battery runs when it loses contact; OpenADR 3 shapes the orders; SDG&E's Borrego Springs runs a community microgrid. PowerUP adds the utility's own shutoff list as the trigger, medical priority, per-home outage budgets, a staggered fleet recharge, a guard that every sender's order must pass, and opt-in neighborhood islands behind existing switches. See `grace/docs/PRIOR_ART.md`.
+Tesla Storm Watch pre-charges on weather warnings; Base keeps a 20% backup floor and arbitrages daily; SCE gives Medical Baseline customers portable batteries; IEEE 1547 governs anti-islanding and reconnection; IEEE 2030.5 defines the default control a battery runs when it loses contact; OpenADR 3 shapes the orders; SDG&E's Borrego Springs runs a community microgrid. PowerUP adds the utility's own shutoff list as the trigger, medical priority, per-home outage budgets, a staggered fleet recharge, a guard that every sender's order must pass, and opt-in neighborhood islands behind existing switches. See `powerup/docs/PRIOR_ART.md`.
 
 ## Responsible use
 

@@ -1,10 +1,10 @@
-# Grace neighborhood islands
+# PowerUP neighborhood islands
 
-Design and working planner for letting a neighborhood that already has some home batteries keep its lights on during a wildfire shutoff, by islanding it from SCE's grid and sharing those batteries. Opt in or opt out per home. Built Oct 17 2026 for Omer's Grace entry; the Grace replay thread decides whether and how to fold it into the app.
+Design and working planner for letting a neighborhood that already has some home batteries keep its lights on during a wildfire shutoff, by islanding it from SCE's grid and sharing those batteries. Opt in or opt out per home. Built Oct 17 2026 for Omer's PowerUP entry; the PowerUP replay thread decides whether and how to fold it into the app.
 
 Files here:
 
-- `island.js`: the planner, pure functions, same browser/node pattern as Grace's `engine.js` (`window.GraceIsland`).
+- `island.js`: the planner, pure functions, same browser/node pattern as PowerUP's `engine.js` (`window.PowerUPIsland`).
 - `scenario.cjs`: a Merlin-shaped example (`node scenario.cjs`).
 - `island.test.cjs`: 11 tests (`node island.test.cjs`), all passing.
 - `malibu_device_shutoffs.csv`: the 13 Malibu shutoffs SCE made at a line device instead of the substation breaker.
@@ -13,7 +13,7 @@ Files here:
 
 Omer's "vertical" shutoff is in SCE's own records. A shutoff can be opened at the substation breaker (whole circuit, tag `CB`) or at a switch out on the line: a recloser (`RAR`), a remote-controlled switch (`RCS`), or another sectionalizing device (`PS`, `RSR`).
 
-- Statewide, 2019 to 2023: 469 of SCE's 901 circuit shutoff operations were opened at a line device, not the breaker (`data/grace/sce/PSPS_Circuit.csv`, tag parsed from the event id).
+- Statewide, 2019 to 2023: 469 of SCE's 901 circuit shutoff operations were opened at a line device, not the breaker (`data/powerup/sce/PSPS_Circuit.csv`, tag parsed from the event id).
 - Malibu, 2019 to 2025: 13 of the 55 shutoffs on our six circuits were line-device cuts (`malibu_device_shutoffs.csv`). Merlin's recloser RAR0775 was opened four times, always cutting the same 222 to 223 customers (a quarter of Merlin), and in January 2025 those customers stayed off for 213.5 hours while the rest of Merlin was restored in between. Cuthbert has three separate cut points (RAR8848, RAR8623, RCS0036).
 
 So the switch boundaries already exist and SCE already uses them. What nobody does is the opposite case: a section that is not risky itself, often underground, that goes dark only because its feed runs through a risky overhead stretch. The planner calls those customers **collateral**. They are the island candidates.
@@ -37,7 +37,7 @@ Two technical issues stay with SCE's engineers, not the software: protection (in
    - **Receiver**: no battery; gets a share of the pool. A solar home without a battery also joins here and offers its panels, which go dark in an ordinary outage but can run again inside a formed island.
    - **Self**: keeps its battery to itself, as today.
    - **Out**: disconnected at the smart meter's service switch so it draws nothing.
-   Medical Baseline receivers are covered at critical first, or the island does not form. Then all receivers rise together to the richest budget the pool carries (critical 8, essential 16, normal 32 kWh per day, Grace's numbers). It also checks the grid-forming source and inverter power against the island's peak, and reports the extra storage needed to carry everyone.
+   Medical Baseline receivers are covered at critical first, or the island does not form. Then all receivers rise together to the richest budget the pool carries (critical 8, essential 16, normal 32 kWh per day, PowerUP's numbers). It also checks the grid-forming source and inverter power against the island's peak, and reports the extra storage needed to carry everyone.
 4. `settle(plan)`: donors are paid per kWh shared, receivers pay per kWh plus a small subscription, and the utility pays per customer-hour kept on. The platform keeps a share, and the rest pays for the switch and community battery.
 5. `transformerIsland(...)`: the smallest island, one service transformer's 240 V secondary behind a new low-voltage switch. Nothing at distribution voltage is energized, so it can run even inside a risky segment when the secondary is underground.
 6. `switchValue(segments, risky)`: for each spot without a switch, how many customers a new one would keep on. This is how the pilot picks where to install.
@@ -57,31 +57,31 @@ The shutoff covers the canyon trunk and a fused ridge tap (320 customers at risk
 
 ## 5. Pilot: neighborhood isolation switches in three steps
 
-1. **Software only, on SCE's existing switches.** Grace ingests SCE's per-event device list (the `RAR`/`RCS`/`PS` cut points) and a segment map, runs `classify` and `switchValue`, and gives SCE and the city a ranked list: "these N customers were dark only because of an upstream overhead stretch; here are the switches that bound them." No hardware, and useful to SCE's PSPS planners on day one.
+1. **Software only, on SCE's existing switches.** PowerUP ingests SCE's per-event device list (the `RAR`/`RCS`/`PS` cut points) and a segment map, runs `classify` and `switchValue`, and gives SCE and the city a ranked list: "these N customers were dark only because of an upstream overhead stretch; here are the switches that bound them." No hardware, and useful to SCE's PSPS planners on day one.
 2. **Transformer islands.** 1 to 3 service transformers on underground secondary in a frequent-shutoff Malibu block (10 to 30 homes): a low-voltage isolation switch plus one grid-forming battery each. This is the smallest real island, and it never backfeeds distribution voltage, so it is the easiest for SCE to approve. It is a fit for the Microgrid Incentive Program's community projects.
-3. **Segment island** behind an existing recloser like RAR0775, on underground line, with a community battery at the recloser and Grace coordinating donors, receivers and opt-outs. SCE opens and closes it, and Grace requests it and runs what's inside.
+3. **Segment island** behind an existing recloser like RAR0775, on underground line, with a community battery at the recloser and PowerUP coordinating donors, receivers and opt-outs. SCE opens and closes it, and PowerUP requests it and runs what's inside.
 
 ## 6. Revenue
 
 - **Utility or program payment** per customer-hour kept on, or a capital grant for the switch and battery. The CPUC's Microgrid Incentive Program funds community microgrids in shutoff-prone areas through SCE, PG&E and SDG&E. The alternative SCE and PG&E pay for today is diesel: PG&E's temporary PSPS microgrids are diesel-fed.
 - **Energy margin**: receivers pay more per kWh than donors receive (assumed $1.00 vs $0.75), and the platform takes a share.
 - **Resilience subscription**: homes without batteries pay a few dollars a month to be eligible (assumed $5).
-- **Every day (the dual use)**: the community battery and the donor fleet bid as one aggregated resource on ordinary days (CAISO arbitrage, and resource adequacy under SB 913). Grace's own readiness math already uses real CAISO SCE-zone prices, so the same table applies.
+- **Every day (the dual use)**: the community battery and the donor fleet bid as one aggregated resource on ordinary days (CAISO arbitrage, and resource adequacy under SB 913). PowerUP's own readiness math already uses real CAISO SCE-zone prices, so the same table applies.
 - **Siting service** to SCE: the step 1 ranked switch list.
 
 Every rate here is a placeholder to tune with SCE and the program. None comes from a tariff.
 
-## 7. How it plugs into Grace
+## 7. How it plugs into PowerUP
 
-- **Trigger**: Grace already starts from SCE's shutoff circuit list. This adds the segment and device level: which device SCE will open and which segments are collateral.
+- **Trigger**: PowerUP already starts from SCE's shutoff circuit list. This adds the segment and device level: which device SCE will open and which segments are collateral.
 - **Ask rung**: the same Ask message offers three choices, share, receive or keep mine, and opt-out homes are noted for the meter switch.
-- **Fill rung**: donors and the community battery fill to full, as Grace already does.
-- **Hand rung**: Grace sends SCE an island request (segments, head switch, grid-former ready, Medical Baseline count). SCE opens the head switch and confirms. The community battery forms the island, and donors and solar join after the IEEE 1547 300-second enter-service delay. Opt-outs are switched off at the meter.
-- **During the outage**: budgets re-plan as the outage stretches, as Grace's engine already does, and Medical Baseline stays first.
-- **Restore**: SCE closes the head switch only through a sync check. Then Grace's staggered recharge plan runs as today.
+- **Fill rung**: donors and the community battery fill to full, as PowerUP already does.
+- **Hand rung**: PowerUP sends SCE an island request (segments, head switch, grid-former ready, Medical Baseline count). SCE opens the head switch and confirms. The community battery forms the island, and donors and solar join after the IEEE 1547 300-second enter-service delay. Opt-outs are switched off at the meter.
+- **During the outage**: budgets re-plan as the outage stretches, as PowerUP's engine already does, and Medical Baseline stays first.
+- **Restore**: SCE closes the head switch only through a sync check. Then PowerUP's staggered recharge plan runs as today.
 - **App view (suggestion)**: color segments risk / collateral / on, outline allowed islands, and show the island's pool, mode, hours and money next to the existing per-home view.
 
-Prior art to credit: SDG&E's Borrego Springs microgrid, PG&E's Community Microgrid Enablement Program and temporary diesel microgrids, and SCE's sectionalizing switches (which SCE chose over PSPS microgrids in 2020). What looks new is pooling home batteries plus one grid-forming community battery behind SCE's existing switches, with per-home opt-in and settlement (already listed as defensible ground in Grace's prior-art note).
+Prior art to credit: SDG&E's Borrego Springs microgrid, PG&E's Community Microgrid Enablement Program and temporary diesel microgrids, and SCE's sectionalizing switches (which SCE chose over PSPS microgrids in 2020). What looks new is pooling home batteries plus one grid-forming community battery behind SCE's existing switches, with per-home opt-in and settlement (already listed as defensible ground in PowerUP's prior-art note).
 
 ## 8. Existing pilots (checked Oct 17 2026)
 

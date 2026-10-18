@@ -1,15 +1,15 @@
-/* Grace neighborhood islands: pure functions. Works in the browser (window.GraceIsland) and in node (module.exports).
+/* PowerUP neighborhood islands: pure functions. Works in the browser (window.PowerUPIsland) and in node (module.exports).
    Given a feeder drawn as segments between switching devices, the segments the utility calls high risk, and the homes
    with their opt-in choices, it finds which de-energized pieces can safely run as a neighborhood island, plans how the
    shared battery energy is split, and settles who pays whom. Numbers marked "assumed" are placeholders for a pilot. */
 (function (root, factory) {
   if (typeof module === 'object' && module.exports) module.exports = factory();
-  else root.GraceIsland = factory();
+  else root.PowerUPIsland = factory();
 })(typeof self !== 'undefined' ? self : this, function () {
   'use strict';
 
   const MODES = ['critical', 'essential', 'normal'];
-  const BUDGET_KWH_DAY = { critical: 8, essential: 16, normal: 32 };   // same per-home budgets as the Grace replay
+  const BUDGET_KWH_DAY = { critical: 8, essential: 16, normal: 32 };   // same per-home budgets as the PowerUP replay
   const DEFAULTS = {
     capacity_kwh: 39.2,          // Base Core
     reserve_floor_pct: 20,       // Base's backup floor; never shared

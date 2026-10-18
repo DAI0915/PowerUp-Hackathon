@@ -65,7 +65,7 @@ export function fmtTime(min) {
 
 export function floorKWh(home, policy) {
   const cap = home.capacityKWh ?? BASE_CORE.capacityKWh;
-  // reserveKWh: a per-home reserve set by the fleet's planner (Grace raises it ahead of a shutoff); never lowers the policy floor
+  // reserveKWh: a per-home reserve set by the fleet's planner (PowerUP raises it ahead of a shutoff); never lowers the policy floor
   return Math.max(policy.floorPct * cap, home.medical ? policy.medicalFloorPct * cap : 0, home.reserveKWh || 0);
 }
 
@@ -200,7 +200,7 @@ export function evaluate(command, state, policy) {
 
   // (3) freshness: age, epoch, replay (skipped for a command already admitted with this exact signature)
   // A continuing order skips freshness only while its own window is open (plus one step, since an order that arrives
-  // between steps runs from the next step): the same signed order re-sent after that is a replay. Found when Grace's
+  // between steps runs from the next step): the same signed order re-sent after that is a replay. Found when PowerUP's
   // multi-day Malibu replay re-sent an order admitted days earlier.
   const continuing = ledger.admitted?.[cmd.id] === cmd.sig && nowMin < toMinutes(cmd.issuedAt) + cmd.durationMin + stepMin;
   if (!continuing) {

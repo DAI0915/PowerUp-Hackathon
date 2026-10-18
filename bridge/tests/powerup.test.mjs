@@ -1,4 +1,4 @@
-// PowerUp bridge tests: Grace's Malibu replay with every order run through Interlock. Run: node --test bridge/tests/
+// PowerUP bridge tests: PowerUP's Malibu replay with every order run through Interlock. Run: node --test bridge/tests/
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { createRequire } from 'node:module';
@@ -6,20 +6,20 @@ import * as engine from '../../interlock/src/engine.mjs';
 import * as packs from '../../interlock/src/packs.mjs';
 
 const require = createRequire(import.meta.url);
-const G = require('../../grace/app/src/engine.js');
-const DATA = require('../../grace/data/data.json');
-const PowerUp = require('../powerup.js');
+const G = require('../../powerup/app/src/engine.js');
+const DATA = require('../../powerup/data/data.json');
+const PowerUP = require('../powerup.js');
 const I = { ...engine, ...packs };
 
 const P = G.defaultParams(DATA);
 const world = G.buildHomes(DATA, P);
 const approved = { restore: Object.fromEntries(G.NAMED.map((c) => [c, 'approved'])), ev: {} };
-const res = PowerUp.run({ G, I, DATA, world, P, decisions: approved });
+const res = PowerUP.run({ G, I, DATA, world, P, decisions: approved });
 const byId = (id) => res.log.find((e) => e.order.id === id);
 
-test('the guard never stops Grace: every Grace order runs, none held or clamped', () => {
-  const s = PowerUp.graceSummary(res.log);
-  assert.ok(s.orders >= 10, `expected at least 10 Grace orders, got ${s.orders}`);
+test('the guard never stops PowerUP: every PowerUP order runs, none held or clamped', () => {
+  const s = PowerUP.powerupSummary(res.log);
+  assert.ok(s.orders >= 10, `expected at least 10 PowerUP orders, got ${s.orders}`);
   assert.equal(s.held, 0);
   assert.equal(s.clamped, 0);
 });
@@ -34,14 +34,14 @@ test('every malicious or unsafe order is held or clamped, and every malicious on
   assert.ok(byId('dead-line').reasons.some((r) => r.code === 'DEAD_LINE'));
 });
 
-test("Grace's reserve is Interlock's floor: the utility's own top-priority event takes nothing from a Medical Baseline home Grace is holding", () => {
+test("PowerUP's reserve is Interlock's floor: the utility's own top-priority event takes nothing from a Medical Baseline home PowerUP is holding", () => {
   const e = byId('sce-event');
   assert.equal(e.ran, true);
   for (const b of world.batteries.filter((b) => b.tier === 1)) assert.ok((e.perHome['b' + b.bi] || 0) <= 1e-6, `MB home b${b.bi} exported`);
   assert.ok(e.on.energyKWh > 0.7 * e.off.energyKWh, 'the safe part of the event still runs');
 });
 
-test('guard on keeps the plan: no home goes dark that Grace kept lit; guard off darkens Medical Baseline homes', () => {
+test('guard on keeps the plan: no home goes dark that PowerUP kept lit; guard off darkens Medical Baseline homes', () => {
   assert.equal(res.metrics.on.darkHomes, res.metrics.base.darkHomes);
   assert.equal(res.metrics.on.mbDarkHomeHours, res.metrics.base.mbDarkHomeHours);
   assert.ok(res.metrics.off.mbDarkHomes > 0);
@@ -68,7 +68,7 @@ test('Interlock only shrinks: no home moves more, or the other way, than its ord
 });
 
 test('deterministic: the same inputs give the same log and outcomes', () => {
-  const again = PowerUp.run({ G, I, DATA, world, P, decisions: approved });
+  const again = PowerUP.run({ G, I, DATA, world, P, decisions: approved });
   assert.deepEqual(again.log.map((e) => [e.order.id, e.verdict, e.rung]), res.log.map((e) => [e.order.id, e.verdict, e.rung]));
   assert.deepEqual(again.metrics, res.metrics);
 });
@@ -84,20 +84,20 @@ test('a replay of an order admitted days earlier is caught once its window has c
   assert.ok(r.reasons.some((x) => x.code === 'REPLAY'));
 });
 
-test('without a restoration approval Grace sends no recharge order', () => {
-  const r = PowerUp.run({ G, I, DATA, world, P, decisions: { restore: {}, ev: {} }, variants: [] });
-  assert.equal(r.log.filter((e) => e.order.id.startsWith('grace-recharge')).length, 0);
+test('without a restoration approval PowerUP sends no recharge order', () => {
+  const r = PowerUP.run({ G, I, DATA, world, P, decisions: { restore: {}, ev: {} }, variants: [] });
+  assert.equal(r.log.filter((e) => e.order.id.startsWith('powerup-recharge')).length, 0);
 });
 
 test("at Malibu's real battery share (about 7.1 per 100 homes) the guard still keeps every battery home lit", () => {
   const P2 = { ...G.defaultParams(DATA), adoption_pct: 7.1 };
   const w2 = G.buildHomes(DATA, P2);
-  const r2 = PowerUp.run({ G, I, DATA, world: w2, P: P2, decisions: approved });
+  const r2 = PowerUP.run({ G, I, DATA, world: w2, P: P2, decisions: approved });
   assert.ok(w2.homes.filter((h) => h.battery).length < world.homes.filter((h) => h.battery).length);
   assert.equal(r2.metrics.on.darkHomes, 0);
   assert.equal(r2.metrics.on.mbDarkHomes, 0);
   assert.ok(r2.metrics.off.darkHomes > 0 && r2.metrics.off.mbDarkHomes > 0);
   assert.equal(r2.exposure.on.deadLineBatteryH, 0);
   assert.equal(r2.exposure.on.worstOverMW, 0);
-  assert.equal(PowerUp.graceSummary(r2.log).held, 0);
+  assert.equal(PowerUP.powerupSummary(r2.log).held, 0);
 });
