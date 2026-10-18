@@ -34,5 +34,5 @@ JavaScript, Node.js, Python, HTML Canvas, Playwright, SCE open data (PSPS record
 3. **0:50 to 1:30, the failures.** In the guard panel, scroll the log: the sell-down three hours before power-off is held, the stolen key is handed to a person, the export onto Tuna is held, SCE's own event stops at each home's reserve.
 4. **1:30 to 1:55, guard off.** Switch to guard off. The map goes dark: 1,028 homes and every Medical Baseline home. Switch back.
 5. **1:55 to 2:15, restoration.** Jump to Oct 18. The rebound is slowed so Galahad stays under its cap; the officer approves the staggered recharge.
-6. **2:15 to 2:40, islands.** Scroll to Islands, tap RAR0775 to find it on the map, toggle the community battery to show the island forming.
+6. **2:15 to 2:40, islands.** Scroll to Islands, tap RAR8848, the pilot switch, to find it on the map, then toggle the community battery to show an island forming.
 7. **2:40 to 3:00, close.** Open the heat-wave replay for one second of the scoreboard. "PowerUP plans, Interlock guards. Base can run it on its fleet."
