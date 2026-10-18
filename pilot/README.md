@@ -21,10 +21,11 @@ When SCE opens the switch, the homes behind it run as one island on the batterie
    medical first, hold at 80%), times SCE's real false-alarm ratio (3.3 customers notified per one cut).
 3. **Homes kept on:** each rule replayed on Cuthbert's 16 real shutoffs that cut these homes (2019 to Jan 2025, 435 h).
 
-Default results (56 free batteries, solar homes first, hold from SCE notice):
+Default results (160 free batteries deployed at once, Medical Baseline homes first, then solar roofs; hold from SCE notice):
 - Free batteries go to Medical Baseline homes first, then to solar roofs.
-- All 16 real shutoffs carried in full at clear-sky solar; 39 batteries is the minimum.
-- With smoke (solar at half), 56 carries 14 of 16. Carrying all 16 takes 170.
+- All 16 real shutoffs carried in full at clear-sky solar (39 batteries would be the minimum).
+- With smoke (solar at half), 160 carries 15 of 16 when held from notice, and 0 of 16 if never held. Carrying all 16 takes 170.
+- Fleet: $2.24M after the tax credit (assumed $20k installed), about $300k a year with every income line.
 - Readiness costs about $28 per battery per year, 8% of trading income. Holding from the first forecast costs $61, and 24 h before costs $9.
 - Payback: about 7.5 years with every income line, 46 years on trading alone. The capacity and event income is assumed, and it decides the business.
 

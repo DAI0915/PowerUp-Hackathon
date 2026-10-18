@@ -575,7 +575,7 @@ canvas.chart { display: block; width: 100%; }
       <div>
         <div class="lab">Fleet</div>
         <div class="pl-ctl">
-          <label for="plFree">Free Base batteries we place <b id="plFreeOut" class="num">56</b><input type="range" id="plFree" min="0" max="160" step="1" value="56"></label>
+          <div>Free Base batteries we place, all at once: <b class="num">160</b></div>
           <label class="switch" for="plSolar"><input type="checkbox" id="plSolar" checked> Offer them to solar homes first (a battery on a solar roof refills every day)</label>
           <label class="switch" for="plSmoke"><input type="checkbox" id="plSmoke"> Smoky days: solar at half</label>
         </div>
@@ -2030,13 +2030,12 @@ const fmtUsd = v => (v < 0 ? '-$' : '$') + Math.abs(Math.round(v)).toLocaleStrin
 const fmtUsdK = v => Math.abs(v) >= 1e6 ? fmtUsd(v / 1e4 / 100).replace(/(\.\d\d)?$/, '') + 'M' : fmtUsd(v);
 function plOpts() {
   const n = id => +$(id).value || 0;
-  return { free: n('plFree'), solarFirst: $('plSolar').checked, solarKwhDay: $('plSmoke').checked ? PL.SOLAR_KWH_DAY / 2 : PL.SOLAR_KWH_DAY,
+  return { free: PL.DEFAULTS.free, solarFirst: $('plSolar').checked, solarKwhDay: $('plSmoke').checked ? PL.SOLAR_KWH_DAY / 2 : PL.SOLAR_KWH_DAY,
            capex: n('plCapex'), itc: n('plItc'), capacityPerKwMonth: n('plCap'), capacityKw: n('plCapKw'), elrpEventsPerYear: n('plElrp') };
 }
 function renderIslands() {
   if (!PL) return;
   const o = plOpts();
-  $('plFreeOut').textContent = o.free;
   const R = PL.evaluate(PLDATA, o), rule = R.rules.find(r => r.id === plRule), c = R.counts, m = rule.money;
   const key = [o.solarFirst, o.solarKwhDay, plRule].join();
   if (key !== plNeedKey) { plNeedKey = key; plNeed = PL.fleetFor(PLDATA, plRule, o); }
@@ -2044,7 +2043,7 @@ function renderIslands() {
   $('plFleet').innerHTML = `<dl class="pl-facts">${[
     ['Our free batteries', c.startup], ['Homes with their own battery', c.own], ['Roofs with solar', roofs], ['Medical Baseline homes', c.medical],
     ['Homes receiving from neighbors', c.receivers], ['Homes not taking part', c.out], ['Money we put in, after tax credit', fmtUsd(c.startup * o.capex * (1 - o.itc))],
-    ['Batteries that carry all 16 real shutoffs', plNeed == null ? 'more than 300' : plNeed]
+    ['Smallest fleet that would carry all 16 real shutoffs', plNeed == null ? 'more than 300' : plNeed]
   ].map(([a, b]) => `<dt>${a}</dt><dd>${b}</dd>`).join('')}</dl>`;
   const rows = [['Trading day-ahead prices', m.arbitrage, 'var(--h-islanded)', 'real'], ['Capacity payments', m.capacity, 'var(--h-watch)', 'assumed'],
     ['Emergency events', m.elrp, 'var(--warn)', '$2/kWh real, count assumed'], ['Readiness holds', -m.readiness, 'var(--bad)', 'real prices']];
@@ -2071,7 +2070,7 @@ function renderIslands() {
     sws.map(sw => `<tr class="pick${sw.device === islFocus ? ' cur' : ''}" data-dev="${sw.device}"><td><button class="lk" data-dev="${sw.device}" title="${sw.type}, position estimated">${sw.device}</button></td><td>${sw.device === 'RAR8848' ? 'opens to form the island' : 'upstream'}</td><td class="n">${fmtInt(sw.customers_cut)}</td><td class="n">${sw.times_opened}</td></tr>`).join('') + `</tbody></table>`;
   $('islSwitches').querySelectorAll('button.lk').forEach(b => b.addEventListener('click', () => focusSwitch(b.dataset.dev)));
 }
-['plFree', 'plSolar', 'plSmoke', 'plCapex', 'plItc', 'plCap', 'plCapKw', 'plElrp'].forEach(id => $(id).addEventListener('input', renderIslands));
+['plSolar', 'plSmoke', 'plCapex', 'plItc', 'plCap', 'plCapKw', 'plElrp'].forEach(id => $(id).addEventListener('input', renderIslands));
 function focusSwitch(dev) {
   const s = switchesKm.find(o => o.sw.device === dev); if (!s) return;
   islFocus = dev;

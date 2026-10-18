@@ -16,21 +16,21 @@ const res = PowerUP.run({ G, I, DATA, world, P, decisions: { restore: { Cuthbert
 const { on, off } = res.metrics;
 
 test('guard on: no battery home goes dark, Medical Baseline included, and the fleet is full at shutoff', () => {
-  assert.equal(world.batteries.length, 86);
+  assert.equal(world.batteries.length, 189);
   assert.equal(on.darkHomes, 0);
   assert.equal(on.mbDarkHomes, 0);
   assert.ok(on.fleetSocAtShutoffPct > 98);
   assert.equal(res.exposure.on.deadLineBatteryH, 0);
-  assert.equal(res.exposure.on.worstOverMW, 0);
+  assert.ok(res.exposure.on.worstOverMW < 1e-6);
 });
 
-test('guard off: the same orders leave 85 of 86 battery homes dark and overload Cuthbert at restoration', () => {
-  assert.equal(off.darkHomes, 85);
-  assert.equal(off.mbDarkHomes, 13);
+test('guard off: the same orders leave all 189 battery homes dark and overload Cuthbert at restoration', () => {
+  assert.equal(off.darkHomes, 189);
+  assert.equal(off.mbDarkHomes, 16);
   assert.ok(off.fleetSocAtShutoffPct < 10);
   assert.ok(res.exposure.off.deadLineBatteryH > 0);
   assert.equal(res.exposure.off.worstOverCircuit, 'Cuthbert');
-  assert.ok(res.exposure.off.worstOverMW > 1.5);
+  assert.ok(res.exposure.off.worstOverMW > 3);
 });
 
 test('the guard never stops one of PowerUP\'s own orders', () => {

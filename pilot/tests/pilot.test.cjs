@@ -45,6 +45,12 @@ t('outcome: 56 batteries held from notice carry all 16 shutoffs; half solar does
   assert.strictEqual(P.evaluate(D, { free: 56 }).rules.find(x => x.id === 'notice').eventsFull, 16);
   assert.ok(P.evaluate(D, { free: 56, solarKwhDay: 13.5 }).rules.find(x => x.id === 'notice').eventsFull < 16);
 });
+t('outcome: the default pilot fleet is 160 and carries all 16; on smoky days holding is what keeps homes on', () => {
+  assert.strictEqual(P.DEFAULTS.free, 160);
+  assert.strictEqual(P.evaluate(D, {}).rules.find(x => x.id === 'notice').eventsFull, 16);
+  const smoke = id => P.evaluate(D, { solarKwhDay: 13.5 }).rules.find(x => x.id === id).eventsFull;
+  assert.ok(smoke('notice') > smoke('never'));
+});
 t('outcome: more batteries never carry fewer shutoffs', () => {
   let last = -1;
   for (const free of [0, 10, 20, 40, 80, 160]) {

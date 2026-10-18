@@ -110,8 +110,7 @@ button.z { font: 600 14px var(--mono); width: 30px; height: 30px; border: 1px so
     </div>
     <div class="panel ctl">
       <h2>Fleet</h2>
-      <label for="free"><span class="row">Free Base batteries we place <output id="freeOut" class="num">56</output></span>
-        <input type="range" id="free" min="0" max="160" step="1" value="56"></label>
+      <div class="row" style="font-weight:600">Free Base batteries we place, all at once <span class="num" style="font:600 22px var(--display)">160</span></div>
       <label class="toggle" for="solarFirst"><input type="checkbox" id="solarFirst" checked><span>Offer them to solar homes first <small>A battery on a solar roof refills every day.</small></span></label>
       <label class="toggle" for="smoke"><input type="checkbox" id="smoke"><span>Smoky days: solar at half <small>Smoke from a fire can cut solar output by half or more.</small></span></label>
       <dl class="facts" id="fleetFacts"></dl>
@@ -183,7 +182,7 @@ let ruleId = 'notice';
 
 function opts() {
   return {
-    free: +$('free').value, solarFirst: $('solarFirst').checked, solarKwhDay: $('smoke').checked ? P.SOLAR_KWH_DAY / 2 : P.SOLAR_KWH_DAY,
+    free: P.DEFAULTS.free, solarFirst: $('solarFirst').checked, solarKwhDay: $('smoke').checked ? P.SOLAR_KWH_DAY / 2 : P.SOLAR_KWH_DAY,
     capex: +$('capex').value || 0, itc: +$('itc').value || 0, capacityPerKwMonth: +$('cap').value || 0,
     capacityKw: +$('capkw').value || 0, elrpEventsPerYear: +$('elrp').value || 0
   };
@@ -258,7 +257,6 @@ function paintHomes(homes) {
 let lastNeedKey = '';
 function render() {
   const o = opts();
-  $('freeOut').textContent = o.free;
   const R = P.evaluate(DATA, o);
   const rule = R.rules.find(r => r.id === ruleId);
   const c = R.counts, fleet = c.startup;
@@ -281,7 +279,7 @@ function render() {
   if (needKey !== lastNeedKey) {
     lastNeedKey = needKey;
     const n = P.fleetFor(DATA, ruleId, o);
-    $('fleetNeed').textContent = n ? `With the selected rule, ${n} batteries carry all ${DATA.events.length} real shutoffs in full, including the 80-hour one in January 2025.` : `No fleet up to 300 batteries carries every real shutoff under this rule.`;
+    $('fleetNeed').textContent = n ? `With the selected rule, the smallest fleet that carries all ${DATA.events.length} real shutoffs in full is ${n} batteries.` : `No fleet up to 300 batteries carries every real shutoff under this rule.`;
   }
 
   const m = rule.money;
@@ -321,6 +319,6 @@ function render() {
     return `<div class="ev"><span>${label}<br><span class="sub">${e.cut_at === 'breaker' ? 'whole circuit' : 'RAR8848 alone'}</span></span><div class="t"><div class="on" style="width:${on.toFixed(1)}%${off < .1 ? ';border-radius:3px' : ''}"></div><div class="off" style="left:${on.toFixed(1)}%;width:${off.toFixed(1)}%"></div></div><span class="r">${Math.round(e.carried)} of ${e.hours.toFixed(1)} h</span></div>`;
   }).join('');
 }
-['free', 'solarFirst', 'smoke', 'capex', 'itc', 'cap', 'capkw', 'elrp'].forEach(id => $(id).addEventListener('input', render));
+['solarFirst', 'smoke', 'capex', 'itc', 'cap', 'capkw', 'elrp'].forEach(id => $(id).addEventListener('input', render));
 setVb(); render();
 </script>

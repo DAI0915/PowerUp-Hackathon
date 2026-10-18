@@ -18,7 +18,7 @@
   const FALSE_ALARM = 509245 / 152393;                        // real: SCE notified 3.3 customers per one cut (Jan 20 2025)
 
   const DEFAULTS = {
-    free: 56,                 // startup batteries placed free in volunteer homes
+    free: 160,                // startup batteries placed free in volunteer homes, all at once for the pilot
     solarFirst: true,         // offer them to homes with solar and no battery first (they refill every day)
     solarKwhDay: SOLAR_KWH_DAY, // per roof; smoke can halve it
     ownerShares: 0.6,         // assumed: homes with their own battery that opt in to share

@@ -27,31 +27,31 @@ Wiring the two together also hardened Interlock. PowerUP's multi-day replay show
 
 ## Proof 1: the real October 2026 Malibu shutoff on the RAR8848 pilot, PowerUP through Interlock
 
-RAR8848 is the last switch on one Cuthbert branch (breaker, then RCS0036, then RAR8848): 456 homes on the coastal flats, 9 km from the Bryson burn. The pilot has 86 battery homes (assumed: our 56 free batteries plus the homes' own; Malibu's real share is about 7.1 per 100), 13 of them Medical Baseline, since free batteries go to Medical Baseline homes first. PowerUP's five orders run through Interlock along with Base's ordinary-day optimizer, and six simulated failures are injected around the real timeline (`node pilot/app/cli.mjs`):
+RAR8848 is the last switch on one Cuthbert branch (breaker, then RCS0036, then RAR8848): 456 homes on the coastal flats, 9 km from the Bryson burn. The pilot has 189 battery homes (assumed: our 160 free batteries plus the homes' own; Malibu's real share is about 7.1 per 100), 16 of them Medical Baseline, since free batteries go to Medical Baseline homes first. PowerUP's five orders run through Interlock along with Base's ordinary-day optimizer, and six simulated failures are injected around the real timeline (`node pilot/app/cli.mjs`):
 
 | Time (2026) | Order | Interlock |
 |---|---|---|
-| Oct 13, 5 PM | SCE emergency event: export 5 kW per home for 2 h (legitimate, top priority) | Runs, but stops at each home's planned reserve: Medical Baseline homes give nothing, 77% of the energy is still delivered |
+| Oct 13, 5 PM | SCE emergency event: export 5 kW per home for 2 h (legitimate, top priority) | Runs, but stops at each home's planned reserve: Medical Baseline homes give nothing, 82% of the energy is still delivered |
 | Oct 14, 5 PM | Replay of a captured Oct 8 discharge order | Held: stale and already seen |
 | Oct 15, 1 PM | Market bid: sell every battery to 10% by 4 PM, three hours before the power goes off | PowerUP's fill orders outrank it, and every battery keeps its reserve; nothing is sold |
 | Oct 15, 8 PM | Stolen key posing as SCE: discharge every battery at 20 kW | Held, handed to a person |
 | Oct 16, noon | Market export onto the de-energized Cuthbert line | Held: dead line |
-| Oct 18, 6 AM | Optimizer rebound: recharge everything at 20 kW as Cuthbert comes back | Slowed to 7% so Cuthbert stays under its cap during cold-load pickup |
+| Oct 18, 6 AM | Optimizer rebound: recharge everything at 20 kW as Cuthbert comes back | Slowed to 11% so Cuthbert stays under its cap during cold-load pickup |
 
 Then PowerUP replays the shutoff with what each order actually did to the batteries:
 
 | Same shutoff, same orders | Guard off | Guard on |
 |---|---|---|
 | PowerUP's own orders held or clamped | n/a | 0 of 5 |
-| Battery homes that go dark during the shutoff | 85 of 86 | 0 |
-| Medical Baseline homes that go dark | 13 of 13 (579 home-hours) | 0 |
+| Battery homes that go dark during the shutoff | 189 of 189 | 0 |
+| Medical Baseline homes that go dark | 16 of 16 (669 home-hours) | 0 |
 | Fleet charge when the power goes off | 9% | 99% |
-| Battery-hours pushing power onto a de-energized line | 258 | 0 |
-| Worst circuit overload at restoration | 1.6 MW over Cuthbert's cap | none |
+| Battery-hours pushing power onto a de-energized line | 567 | 0 |
+| Worst circuit overload at restoration | 3.4 MW over Cuthbert's cap | none |
 
 With the guard on, the outcome is exactly PowerUP's plan without any failures. The guard-off numbers count every order as run exactly as sent; in reality IEEE 1547 anti-islanding should trip a battery on a dead line, so Interlock is a second layer, not a replacement. The same run on all six Malibu circuits (1,032 battery homes) gave 1,028 dark with the guard off and 0 with it on; that version is on `archive/malibu-wide-v1`.
 
-**The pilot business.** SCE opened RAR8848 on its own once (Dec 2020, 18 hours), and its homes went dark 15 more times when SCE opened the whole Cuthbert circuit at the breaker: 16 shutoffs since 2019, 435 hours. The reason sits upstream: one of the two 66 kV lines feeding Latigo substation, which feeds all four Latigo circuits, runs about 650 m inside the Bryson Fire perimeter. At Malibu's real battery and solar rates (about 35 home-owned batteries behind the switch), the pilot deploys 160 free Base Core batteries at once with volunteer homes (Medical Baseline homes first, then solar roofs). They carry every neighbor at the critical budget through all 16 real shutoffs at clear-sky solar (39 is the bare minimum), and 15 of the 16 if smoke halves the solar. Each battery's real trading value is about $334 a year at CAISO prices for the SCE zone, about $53,400 for the fleet; holding it full from SCE's notice costs about $28 a year, 8% of that (`node pilot/tests/pilot.test.cjs`, details in `pilot/README.md`). Real: SCE's shutoff and interconnection records, the NIFC fire perimeter, CAISO prices. Approximate or estimated: the 66 kV route (traced from the California Energy Commission's transmission map), switch positions and the homes behind each switch.
+**The pilot business.** SCE opened RAR8848 on its own once (Dec 2020, 18 hours), and its homes went dark 15 more times when SCE opened the whole Cuthbert circuit at the breaker: 16 shutoffs since 2019, 435 hours. The reason sits upstream: one of the two 66 kV lines feeding Latigo substation, which feeds all four Latigo circuits, runs about 650 m inside the Bryson Fire perimeter. At Malibu's real battery and solar rates (about 35 home-owned batteries behind the switch), the pilot deploys 160 free Base Core batteries at once with volunteer homes (Medical Baseline homes first, then solar roofs). They carry every neighbor at the critical budget through all 16 real shutoffs at clear-sky solar (39 is the bare minimum), and 15 of the 16 if smoke halves the solar. The fleet costs about $2.24M after the tax credit. Each battery's real trading value is about $334 a year at CAISO prices for the SCE zone, about $53,400 for the fleet; holding it full from SCE's notice costs about $28 a year, 8% of that (`node pilot/tests/pilot.test.cjs`, details in `pilot/README.md`). Real: SCE's shutoff and interconnection records, the NIFC fire perimeter, CAISO prices. Approximate or estimated: the 66 kV route (traced from the California Energy Commission's transmission map), switch positions and the homes behind each switch.
 
 ## Proof 2: Tuesday, September 6, 2022, CAISO's record-peak evening
 
