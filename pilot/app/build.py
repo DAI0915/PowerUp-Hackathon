@@ -45,7 +45,7 @@ def classic(path):
     return '(function () {\n' + body + '\nreturn { ' + ', '.join(names) + ' };\n})()'
 
 il = os.path.join(root, 'interlock', 'src')
-interlock = ('/* Interlock (interlock/src/engine.mjs + packs.mjs), bundled by powerup/app/build.py */\n'
+interlock = ('/* Interlock (interlock/src/engine.mjs + packs.mjs), bundled by pilot/app/build.py */\n'
              'window.Interlock = Object.assign({}, ' + classic(os.path.join(il, 'engine.mjs')) + ', ' + classic(os.path.join(il, 'packs.mjs')) + ');')
 bridge = open(os.path.join(here, 'src', 'bridge.js')).read()
 # islands/island.js is UMD (window.PowerUPIsland); scenario.cjs is CommonJS, so it gets a stand-in require and module

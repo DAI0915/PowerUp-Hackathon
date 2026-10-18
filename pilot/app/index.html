@@ -418,7 +418,7 @@ canvas.chart { display: block; width: 100%; }
     <div class="hdr-r">
       <div class="clock" id="clock" aria-live="off">Thu Oct 15, 4:00 PM</div>
       <span class="chip rung" id="rungChip" data-rung="hold">Hold</span>
-      <nav class="pnav" aria-label="PowerUP pages"><a class="btn sm" href="#islands">Pilot business</a></nav>
+      <nav class="pnav" aria-label="PowerUP pages"><a class="btn sm" href="heatwave.html" title="Interlock on CAISO's record-peak evening, Sept 6 2022">Heat-wave replay</a><a class="btn sm" href="#islands">Pilot business</a></nav>
       <button class="btn sm" id="themeBtn" title="Theme: follows system">Theme: auto</button>
     </div>
   </header>
@@ -1349,7 +1349,7 @@ const DATA = {"meta":{"built":"2026-10-17","bbox":[-119.1,33.98,-118.52,34.2],"c
 
 </script>
 <script>
-/* Interlock (interlock/src/engine.mjs + packs.mjs), bundled by powerup/app/build.py */
+/* Interlock (interlock/src/engine.mjs + packs.mjs), bundled by pilot/app/build.py */
 window.Interlock = Object.assign({}, (function () {
 // Interlock engine: every command passes ordered checks; each check picks the gentlest rung that keeps the rules.
 // Invariant: Interlock can only shrink, slow or stop a command. It never creates, enlarges or sign-flips one.
@@ -1860,7 +1860,7 @@ return { DEMO_KEYS, PACKS, getPack };
  * utility's own emergency event, or a forged order.
  *
  * Dependencies are passed in, so the same file runs in both places:
- *   G = the PowerUP engine (powerup/app/src/engine.js)
+ *   G = the PowerUP engine (pilot/app/src/engine.js)
  *   I = Interlock: { evaluate, signCommand, requestedKw, getPack, DEMO_KEYS } (interlock/src/engine.mjs + packs.mjs)
  */
 (function (root, factory) {

@@ -6,7 +6,7 @@
  * utility's own emergency event, or a forged order.
  *
  * Dependencies are passed in, so the same file runs in both places:
- *   G = the PowerUP engine (powerup/app/src/engine.js)
+ *   G = the PowerUP engine (pilot/app/src/engine.js)
  *   I = Interlock: { evaluate, signCommand, requestedKw, getPack, DEMO_KEYS } (interlock/src/engine.mjs + packs.mjs)
  */
 (function (root, factory) {
