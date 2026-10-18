@@ -22,7 +22,8 @@
     solarFirst: true,         // offer them to homes with solar and no battery first (they refill every day)
     solarKwhDay: SOLAR_KWH_DAY, // per roof; smoke can halve it
     ownerShares: 0.6,         // assumed: homes with their own battery that opt in to share
-    receiverJoins: 0.5,       // assumed: homes without a battery that join as receivers (medical homes always join)
+    receiverJoins: 0.9,       // assumed: homes without a battery that subscribe for emergency power (medical homes always join)
+    subscriptionPerMonth: 9.99, // what a subscribing home pays; Medical Baseline homes and battery hosts pay nothing
     capex: 20000,             // assumed: installed cost of one Base Core; Base publishes none
     itc: 0.30,                // federal investment tax credit for business-owned storage (assumed to still apply)
     capacityPerKwMonth: 8,    // assumed: resource adequacy price (SB 913 lets aggregated home batteries count)
@@ -104,8 +105,8 @@
     if (level >= 1) return stats.day20;
     return stats.day20 - stats.day80;                         // 80% is the only partial level the price file has
   }
-  // per battery per year
-  function yearMoney(stats, rule, opts, earlyShare) {
+  // per battery per year; subShare is this battery's share of the subscription income
+  function yearMoney(stats, rule, opts, earlyShare, subShare) {
     const P = Object.assign({}, DEFAULTS, opts || {});
     const arbitrage = 365 * stats.day20;
     const capacity = 12 * P.capacityPerKwMonth * P.capacityKw;
@@ -113,10 +114,13 @@
     const holds = P.eventsPerYear * FALSE_ALARM;               // every notice is a hold, cut or not
     let readiness = holds * rule.lead * holdCostPerDay(stats, rule.level);
     if (rule.medicalLead) readiness += holds * (rule.medicalLead - rule.lead) * holdCostPerDay(stats, 1) * (earlyShare || 0);
-    const net = arbitrage + capacity + elrp - readiness;
+    const subscription = subShare || 0;
+    const net = arbitrage + capacity + elrp + subscription - readiness;
     const cost = P.capex * (1 - P.itc);
-    return { arbitrage, capacity, elrp, readiness, net, cost, payback: net > 0 ? cost / net : Infinity,
-             arbitrageOnlyPayback: arbitrage - readiness > 0 ? cost / (arbitrage - readiness) : Infinity, holds };
+    const own = arbitrage + subscription - readiness;            // without any assumed capacity or ELRP program
+    return { arbitrage, capacity, elrp, subscription, readiness, net, cost, payback: net > 0 ? cost / net : Infinity,
+             arbitrageOnlyPayback: arbitrage - readiness > 0 ? cost / (arbitrage - readiness) : Infinity,
+             ownPayback: own > 0 ? cost / own : Infinity, holds };
   }
 
   // ---------- everything for one setting ----------
@@ -125,17 +129,20 @@
     const homes = assign(data.homes, P);
     const stats = priceStats(data.prices);
     const fleet = homes.filter(h => h.owner === 'startup').length;
+    const subscribers = homes.filter(h => h.choice === 'receiver' && !h.medical).length;
+    const subscriptionYear = subscribers * P.subscriptionPerMonth * 12;
     const rules = RULES.map(rule => {
       const hs = socAtShutoff(homes, rule);
       const early = rule.medicalLead ? medicalHold(homes, 72) : 0;
       const events = data.events.map(e => Object.assign({ start: e.start, cut_at: e.cut_at }, runEvent(hs, e.hours)));
-      const money = yearMoney(stats, rule, P, fleet ? early / fleet : 0);
+      const money = yearMoney(stats, rule, P, fleet ? early / fleet : 0, fleet ? subscriptionYear / fleet : 0);
       return {
         id: rule.id, label: rule.label, note: rule.note || '', lead: rule.lead, level: rule.level, early,
         eventsFull: events.filter(e => e.full).length, events,
         receiverHoursDark: events.reduce((a, e) => a + e.receiverHoursDark, 0),
         medicalEventsDark: events.filter(e => e.medicalDark).length,
-        money, fleetMoney: { net: money.net * fleet, readiness: money.readiness * fleet, arbitrage: money.arbitrage * fleet }
+        money, fleetMoney: { net: money.net * fleet, readiness: money.readiness * fleet, arbitrage: money.arbitrage * fleet,
+                             subscription: subscriptionYear }
       };
     });
     const c = homes.reduce((a, h) => {
@@ -144,7 +151,8 @@
       if (h.choice === 'receiver') a.receivers++; if (h.choice === 'out') a.out++;
       return a;
     }, { startup: 0, own: 0, solarOnly: 0, medical: 0, receivers: 0, out: 0 });
-    return { homes, counts: c, stats, rules, opts: P };
+    c.subscribers = subscribers;
+    return { homes, counts: c, stats, rules, subscriptionYear, opts: P };
   }
 
   // smallest fleet that carries every real shutoff in full under a rule

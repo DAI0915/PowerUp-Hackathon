@@ -41,15 +41,29 @@ t('rules: never holding leaves receiving homes dark in every real shutoff', () =
   const r = P.evaluate(D, { free: 56 }).rules.find(x => x.id === 'never');
   assert.strictEqual(r.eventsFull, 0); assert.ok(r.receiverHoursDark > 0);
 });
-t('outcome: 56 batteries held from notice carry all 16 shutoffs; half solar does not', () => {
-  assert.strictEqual(P.evaluate(D, { free: 56 }).rules.find(x => x.id === 'notice').eventsFull, 16);
-  assert.ok(P.evaluate(D, { free: 56, solarKwhDay: 13.5 }).rules.find(x => x.id === 'notice').eventsFull < 16);
+t('outcome: with half the other homes joining, 56 batteries held from notice carry all 16 shutoffs; half solar does not', () => {
+  assert.strictEqual(P.evaluate(D, { free: 56, receiverJoins: 0.5 }).rules.find(x => x.id === 'notice').eventsFull, 16);
+  assert.ok(P.evaluate(D, { free: 56, receiverJoins: 0.5, solarKwhDay: 13.5 }).rules.find(x => x.id === 'notice').eventsFull < 16);
 });
-t('outcome: the default pilot fleet is 160 and carries all 16; on smoky days holding is what keeps homes on', () => {
-  assert.strictEqual(P.DEFAULTS.free, 160);
-  assert.strictEqual(P.evaluate(D, {}).rules.find(x => x.id === 'notice').eventsFull, 16);
-  const smoke = id => P.evaluate(D, { solarKwhDay: 13.5 }).rules.find(x => x.id === id).eventsFull;
-  assert.ok(smoke('notice') > smoke('never'));
+t('outcome: 160 batteries with 90% subscribing carry 15 of 16; only the 80 h January 2025 shutoff runs short', () => {
+  assert.strictEqual(P.DEFAULTS.free, 160); assert.strictEqual(P.DEFAULTS.receiverJoins, 0.9);
+  const r = P.evaluate(D, {}).rules.find(x => x.id === 'notice');
+  assert.strictEqual(r.eventsFull, 15);
+  const short = r.events.filter(e => !e.full);
+  assert.strictEqual(short.length, 1); assert.ok(short[0].hours > 79 && short[0].carried >= 72);
+  assert.strictEqual(P.evaluate(D, { free: 183 }).rules.find(x => x.id === 'notice').eventsFull, 16);
+  const never = P.evaluate(D, {}).rules.find(x => x.id === 'never');
+  assert.strictEqual(never.eventsFull, 0);
+});
+t('money: subscriptions are $9.99 a month from homes without a battery; medical homes and hosts pay nothing', () => {
+  const R = P.evaluate(D, {});
+  const payers = R.homes.filter(h => h.choice === 'receiver' && !h.medical);
+  assert.strictEqual(R.counts.subscribers, payers.length);
+  assert.ok(payers.every(h => !h.battery_kwh));
+  assert.ok(Math.abs(R.subscriptionYear - payers.length * 9.99 * 12) < 1e-6);
+  const m = R.rules.find(x => x.id === 'notice').money;
+  assert.ok(Math.abs(m.subscription * R.counts.startup - R.subscriptionYear) < 1e-6);
+  assert.ok(m.ownPayback < m.arbitrageOnlyPayback && m.payback < m.ownPayback);
 });
 t('outcome: more batteries never carry fewer shutoffs', () => {
   let last = -1;

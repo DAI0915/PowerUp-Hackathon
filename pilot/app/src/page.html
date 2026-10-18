@@ -570,7 +570,7 @@ canvas.chart { display: block; width: 100%; }
 
   <section class="band" id="islands">
     <h2>The pilot business: free Base batteries behind RAR8848</h2>
-    <p class="isl-lede">Our company buys Base Core batteries and places them free in homes that volunteer to share with neighbors. On ordinary days the fleet trades; before a shutoff it holds full under PowerUP's ladder above; when SCE opens RAR8848, the 456 homes behind it run as one island on the batteries and rooftop solar, with one battery certified to form the grid. The stretch is last in its series (breaker, then RCS0036, then RAR8848), sits on the coastal flats 9 km from the Bryson burn, and was opened alone only once while the Cuthbert breaker cut the whole circuit 15 times, so these homes are mostly collateral.</p>
+    <p class="isl-lede">Our company buys Base Core batteries and places them free in homes that volunteer to share with neighbors. On ordinary days the fleet trades; before a shutoff it holds full under PowerUP's ladder above; when SCE opens RAR8848, the 456 homes behind it run as one island on the batteries and rooftop solar, with one battery certified to form the grid. Homes without a battery subscribe for emergency power at $9.99 a month (Medical Baseline homes are covered free). The stretch is last in its series (breaker, then RCS0036, then RAR8848), sits on the coastal flats 9 km from the Bryson burn, and was opened alone only once while the Cuthbert breaker cut the whole circuit 15 times, so these homes are mostly collateral.</p>
     <div class="two">
       <div>
         <div class="lab">Fleet</div>
@@ -589,6 +589,8 @@ canvas.chart { display: block; width: 100%; }
             <label for="plCap">Capacity price ($/kW-month)<input type="number" id="plCap" value="8" step="0.5" min="0"></label>
             <label for="plCapKw">kW counted per battery<input type="number" id="plCapKw" value="9.8" step="0.1" min="0"></label>
             <label for="plElrp">Emergency events a year<input type="number" id="plElrp" value="10" step="1" min="0"></label>
+            <label for="plSub">Subscription ($ a month)<input type="number" id="plSub" value="9.99" step="0.5" min="0"></label>
+            <label for="plJoin">Homes without a battery that subscribe (share)<input type="number" id="plJoin" value="0.9" step="0.05" min="0" max="1"></label>
           </div>
         </details>
       </div>
@@ -600,7 +602,7 @@ canvas.chart { display: block; width: 100%; }
         <div id="plEvents"></div>
         <div class="lab" style="margin-top:12px">SCE line switches on this stretch (tap one to find it on the map)</div>
         <div id="islSwitches"></div>
-        <p class="note">Real: RAR8848's 456 customers, Cuthbert's shutoff history 2019 to Jan 2025, Malibu's 7.1 home batteries (median 20 kWh) and 8.4 solar-only roofs per 100 homes, Medical Baseline 2.6% (SCE's Dec 2024 report on Maguire). Estimated: switch positions and where each home sits. Assumed: who joins (60% of battery owners, half of other homes, every medical home), 27 kWh a day per roof, 8 kWh a day of critical load per receiving home, the installed cost, capacity price and event count.</p>
+        <p class="note">Real: RAR8848's 456 customers, Cuthbert's shutoff history 2019 to Jan 2025, Malibu's 7.1 home batteries (median 20 kWh) and 8.4 solar-only roofs per 100 homes, Medical Baseline 2.6% (SCE's Dec 2024 report on Maguire). Estimated: switch positions and where each home sits. Assumed: who joins (60% of battery owners, 90% of homes without a battery as $9.99 subscribers, every medical home), 27 kWh a day per roof, 8 kWh a day of critical load per receiving home, the installed cost, capacity price and event count.</p>
       </div>
     </div>
   </section>
@@ -2031,26 +2033,28 @@ const fmtUsdK = v => Math.abs(v) >= 1e6 ? fmtUsd(v / 1e4 / 100).replace(/(\.\d\d
 function plOpts() {
   const n = id => +$(id).value || 0;
   return { free: PL.DEFAULTS.free, solarFirst: $('plSolar').checked, solarKwhDay: $('plSmoke').checked ? PL.SOLAR_KWH_DAY / 2 : PL.SOLAR_KWH_DAY,
-           capex: n('plCapex'), itc: n('plItc'), capacityPerKwMonth: n('plCap'), capacityKw: n('plCapKw'), elrpEventsPerYear: n('plElrp') };
+           capex: n('plCapex'), itc: n('plItc'), capacityPerKwMonth: n('plCap'), capacityKw: n('plCapKw'), elrpEventsPerYear: n('plElrp'),
+           subscriptionPerMonth: n('plSub'), receiverJoins: Math.min(1, n('plJoin')) };
 }
 function renderIslands() {
   if (!PL) return;
   const o = plOpts();
   const R = PL.evaluate(PLDATA, o), rule = R.rules.find(r => r.id === plRule), c = R.counts, m = rule.money;
-  const key = [o.solarFirst, o.solarKwhDay, plRule].join();
+  const key = [o.solarFirst, o.solarKwhDay, o.receiverJoins, plRule].join();
   if (key !== plNeedKey) { plNeedKey = key; plNeed = PL.fleetFor(PLDATA, plRule, o); }
   const roofs = R.homes.filter(h => h.solar_kwh_day > 0).length;
   $('plFleet').innerHTML = `<dl class="pl-facts">${[
     ['Our free batteries', c.startup], ['Homes with their own battery', c.own], ['Roofs with solar', roofs], ['Medical Baseline homes', c.medical],
-    ['Homes receiving from neighbors', c.receivers], ['Homes not taking part', c.out], ['Money we put in, after tax credit', fmtUsd(c.startup * o.capex * (1 - o.itc))],
+    ['Homes subscribing (no battery)', c.subscribers], ['Subscription income a year', fmtUsd(R.subscriptionYear)], ['Homes not taking part', c.out], ['Money we put in, after tax credit', fmtUsd(c.startup * o.capex * (1 - o.itc))],
     ['Smallest fleet that would carry all 16 real shutoffs', plNeed == null ? 'more than 300' : plNeed]
   ].map(([a, b]) => `<dt>${a}</dt><dd>${b}</dd>`).join('')}</dl>`;
   const rows = [['Trading day-ahead prices', m.arbitrage, 'var(--h-islanded)', 'real'], ['Capacity payments', m.capacity, 'var(--h-watch)', 'assumed'],
-    ['Emergency events', m.elrp, 'var(--warn)', '$2/kWh real, count assumed'], ['Readiness holds', -m.readiness, 'var(--bad)', 'real prices']];
+    ['Emergency events', m.elrp, 'var(--warn)', '$2/kWh real, count assumed'], ['Subscriptions, our share per battery', m.subscription, 'var(--h-held)', 'price ours, opt-in assumed'],
+    ['Readiness holds', -m.readiness, 'var(--bad)', 'real prices']];
   const mx = Math.max(...rows.map(r => Math.abs(r[1])));
   $('plMoney').innerHTML = rows.map(([t, v, col, tag]) => `<div class="pl-bar"><span>${t}<br><span class="pl-tag${tag.startsWith('real') ? ' real' : ''}">${tag}</span></span><div class="t"><div class="f" style="width:${(Math.abs(v) / mx * 100).toFixed(1)}%;background:${col}"></div></div><span class="v">${fmtUsd(v)}</span></div>`).join('')
     + `<div class="pl-net"><span>Net per battery ${fmtUsd(m.net)}; fleet ${fmtUsd(rule.fleetMoney.net)} a year</span><span>payback ${isFinite(m.payback) ? m.payback.toFixed(1) + ' yr' : 'never'}</span></div>`
-    + `<p class="note">On trading alone the payback is ${isFinite(m.arbitrageOnlyPayback) ? Math.round(m.arbitrageOnlyPayback) + ' years' : 'never'}: the business stands on the capacity and emergency-event income, which are assumptions here. Readiness costs ${(m.readiness / m.arbitrage * 100).toFixed(0)}% of trading under this rule.</p>`;
+    + `<p class="note">On trading and subscriptions alone the payback is ${isFinite(m.ownPayback) ? Math.round(m.ownPayback) + ' years' : 'never'} (trading alone ${isFinite(m.arbitrageOnlyPayback) ? Math.round(m.arbitrageOnlyPayback) + ' years' : 'never'}): the business still stands on the capacity and emergency-event income, which are assumptions here. More subscribers also means more homes to carry: each one draws 8 kWh a day of critical load from the island. Readiness costs ${(m.readiness / m.arbitrage * 100).toFixed(0)}% of trading under this rule.</p>`;
   $('plRules').innerHTML = `<table class="itab"><thead><tr><th>Rule</th><th class="n">Days held</th><th class="n">$/battery/yr</th><th class="n">Carried</th><th class="n hide-s">Home-hours dark</th></tr></thead><tbody>` +
     R.rules.map(r => {
       const cls = r.eventsFull === PLDATA.events.length ? 'good' : r.eventsFull >= 12 ? 'warn' : 'bad';
@@ -2070,7 +2074,7 @@ function renderIslands() {
     sws.map(sw => `<tr class="pick${sw.device === islFocus ? ' cur' : ''}" data-dev="${sw.device}"><td><button class="lk" data-dev="${sw.device}" title="${sw.type}, position estimated">${sw.device}</button></td><td>${sw.device === 'RAR8848' ? 'opens to form the island' : 'upstream'}</td><td class="n">${fmtInt(sw.customers_cut)}</td><td class="n">${sw.times_opened}</td></tr>`).join('') + `</tbody></table>`;
   $('islSwitches').querySelectorAll('button.lk').forEach(b => b.addEventListener('click', () => focusSwitch(b.dataset.dev)));
 }
-['plSolar', 'plSmoke', 'plCapex', 'plItc', 'plCap', 'plCapKw', 'plElrp'].forEach(id => $(id).addEventListener('input', renderIslands));
+['plSolar', 'plSmoke', 'plCapex', 'plItc', 'plCap', 'plCapKw', 'plElrp', 'plSub', 'plJoin'].forEach(id => $(id).addEventListener('input', renderIslands));
 function focusSwitch(dev) {
   const s = switchesKm.find(o => o.sw.device === dev); if (!s) return;
   islFocus = dev;
