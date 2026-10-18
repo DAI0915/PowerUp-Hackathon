@@ -48,7 +48,7 @@ Editable copy (Claude Doc): https://claude.ai/code/artifact/3dedb88f-58ac-4ee2-8
 
 - Many senders give orders to the batteries: our daily optimizer, the market, SCE. A thief can try too.
 - Interlock checks every order in eight steps before it gets to a battery.
-- It checks the signature, the age, the priority, the backup of each home, the inverter, the circuit and the speed.
+- It checks the message format (schema validation), the sender (authentication), replays (replay protection), the priority (primacy), the backup reserve of each home, the rated power of the inverter, the hosting capacity of the circuit and a staged rollout.
 - It gives each order the gentlest answer that keeps the home and the circuit safe: run, slow, test on 1% first, hold, or hand to a person.
 - Interlock can only make an order smaller, slower or stop it. It cannot make a new order.
 - PowerUP's own orders go through Interlock too. The reserve that PowerUP plans for each home becomes the floor that Interlock keeps against every sender.

@@ -38,14 +38,16 @@ It needs only Node 22 (built-ins) and Python 3 for the data prep. There are no p
 
 | # | Check | What it catches | Response | Rung |
 |---|---|---|---|---|
-| 1 | Shape | Missing fields; unknown homes or circuits; a sender role not allowed by the pack; priority 0–2 from a non-utility. Semantic-OpenADR / SHACL idea: the sender must be a known top node and the target a valid end node. | Reject | hold |
-| 2 | Auth | An unknown signer, a role mismatch, or a bad signature | Reject, person reviews | **hand** |
-| 3 | Freshness | Older than `maxAgeMin` (15), from the future, a stale epoch for that sender, or a replayed id | Reject | hold |
-| 4 | Precedence | A higher-priority active command (for example the utility emergency) or a newer one from the same sender covers the home. Silent or held homes are skipped and not counted. | Home skipped | watch |
-| 5 | Backup floor | Discharge that would take the home below floor = max(floorPct × 39.2, medical ? medicalFloorPct × 39.2 : 0) over the command's window. SOC targets below the floor are raised to it. | Clamp | slow |
-| 6 | Inverter | More than 20 kW, or more than the battery can move this step | Clamp | slow |
-| 7 | Circuit | **Open circuit:** any export or charge there is held, and homes island. **Energized circuit:** net load after the fleet acts must stay in [exportCapMW, importLimitMW]; otherwise clamp pro-rata. Homes Interlock can't vouch for are counted pessimistically. | Hold / clamp | hold / slow |
-| 8 | Size and ramp | More than `canaryHomes` homes or `canaryMW` MW rolls out as a canary: 1%, then 10%, then 100%, one step each, advancing only if the previous step delivered on target. A misbehaving canary stops the rollout and goes to a person. `twoPersonFleetWide` sends fleet-wide orders to a second person. | Canary / escalate | slow / hand |
+| 1 | Schema validation | Missing fields; unknown homes or circuits; a sender role not allowed by the pack; priority 0–2 from a non-utility. Semantic-OpenADR / SHACL idea: the sender must be a known top node and the target a valid end node. | Reject | hold |
+| 2 | Authentication | An unknown signer, a role mismatch, or a bad signature | Reject, person reviews | **hand** |
+| 3 | Replay protection | Older than `maxAgeMin` (15), from the future, a stale epoch for that sender, or a replayed id | Reject | hold |
+| 4 | Primacy | A higher-priority active command (for example the utility emergency) or a newer one from the same sender covers the home. Silent or held homes are skipped and not counted. | Home skipped | watch |
+| 5 | Backup reserve | Discharge that would take the home below floor = max(floorPct × 39.2, medical ? medicalFloorPct × 39.2 : 0) over the command's window. SOC targets below the floor are raised to it. | Clamp | slow |
+| 6 | Rated power | More than 20 kW, or more than the battery can move this step | Clamp | slow |
+| 7 | Hosting capacity (no backfeed) | **Open circuit:** any export or charge there is held, and homes island. **Energized circuit:** net load after the fleet acts must stay in [exportCapMW, importLimitMW]; otherwise clamp pro-rata. Homes Interlock can't vouch for are counted pessimistically. | Hold / clamp | hold / slow |
+| 8 | Staged rollout | More than `canaryHomes` homes or `canaryMW` MW rolls out as a canary: 1%, then 10%, then 100%, one step each, advancing only if the previous step delivered on target. A misbehaving canary stops the rollout and goes to a person. `twoPersonFleetWide` sends fleet-wide orders to a second person. | Canary / escalate | slow / hand |
+
+The names follow common industry terms (IEEE 2030.5 *primacy*, *hosting capacity*, *backfeed*). In the code the check ids stay `shape`, `auth`, `freshness`, `precedence`, `floor`, `inverter`, `circuit`, `ramp`.
 
 `evaluate` returns `{verdict: pass|clamp|canary|hold|escalate, rung, reasons: [{check, code, detail}], perHome, stats}`. The final rung is the highest rung any check fired, and every `detail` is a plain-English sentence a dispatcher can read.
 
