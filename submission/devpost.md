@@ -16,6 +16,8 @@ PowerUP is the disaster layer for a home-battery fleet like Base Power's. It has
 
 **Interlock guards (in seconds).** Every order to the fleet, from any sender, passes eight checks: shape, signature, freshness, precedence, each home's backup floor, inverter limit, circuit headroom (no export onto a de-energized line) and ramp. Each check answers on the gentlest rung that keeps homes and the circuit safe: run, clamp, canary (1%, then 10%, then everyone), hold, or hand to a person. It can only shrink, slow or stop an order, never create one. The plan never talks to a battery directly: its orders go through Interlock like anyone else's, and the reserve it plans for each home becomes the floor Interlock enforces against every sender, Base's own optimizer and SCE's emergency event included.
 
+**Silent batteries.** When a battery stops talking, Interlock tells broken, tripped and not talking apart by what went quiet with it. A whole open circuit means tripped. A whole cell tower or internet provider means not talking, and one firmware version going quiet together is held. One home alone with a fault code is broken and goes to a person. Before the towers fail, PowerUP sends each battery its full plan, so a silent battery keeps following it on its own, and homes report over mesh radio to a Starlink dish.
+
 **Islands (for the homes that are dark only because of where their wire runs).** SCE already opens partial circuits: 13 of the 55 shutoffs on these six circuits since 2019 were opened at a switch on the line. The island planner finds the homes that go dark only because their feed runs through a risky stretch, checks three hard rules (never re-energize overhead line in a fire area, a switch to every dead neighbor, one grid-forming source), and plans an opt-in neighborhood island behind the existing switch, with SCE opening and closing it.
 
 **Proof 1, the real October 2026 Malibu shutoff on our pilot.** The pilot is the 456 homes behind RAR8848, the last SCE switch on one Cuthbert branch, on the coastal flats 9 km from the Bryson burn. 189 of them have a battery (our 160 free batteries plus 29 of the homes' own), 16 of them Medical Baseline. PowerUP's five orders run alongside Base's ordinary daily optimizer, and six failures are injected on the real timeline.
@@ -28,6 +30,7 @@ PowerUP is the disaster layer for a home-battery fleet like Base Power's. It has
 | Fleet charge when the power goes off | 9% | 99% |
 | Battery-hours pushing power onto a de-energized line | 567 | 0 |
 | Worst circuit overload at restoration | 3.4 MW over Cuthbert's cap | none |
+| Home-hours kept powered by batteries | 945 | 11,596 |
 
 The same run on all six Malibu circuits (1,032 battery homes) gave the same answer: 1,028 dark with the guard off, none with it on. It also held at Malibu's real battery share today, 7.1 per 100 homes (SCE interconnection records): 483 of 484 dark with the guard off, none with it on.
 
@@ -45,7 +48,7 @@ The same run on all six Malibu circuits (1,032 battery homes) gave the same answ
 - **Islands** (`islands/`, `pilot/`): pure functions that classify line segments, find islands under the three hard rules, plan donors and receivers, size the free batteries and settle the money. SCE's line switches sit on the map at estimated positions; transformers are hypothetical, one per 8 homes.
 - **App:** one page that runs all of it live in the browser on the RAR8848 pilot: the map with the Bryson perimeter and the 66 kV feed, the guard panel with guard on and off, and the pilot business with SCE's switches. We first built it for all six Malibu circuits, then narrowed it to one neighborhood on a mentor's advice. A second page replays the heat wave. Both are static files served from the repo with GitHub Pages.
 - **Data:** SCE PSPS records, circuit lines and load profiles, SCE interconnection records for real solar and battery counts by ZIP, the NIFC fire perimeter, the California Energy Commission's transmission map, and CAISO day-ahead prices.
-- **Tests:** 53 node tests, including the guard-on and guard-off results on the pilot.
+- **Tests:** 58 node checks (`npm test`), including the guard-on and guard-off results on the pilot.
 
 Every number in the apps is labelled real, assumed or simulated.
 
@@ -93,3 +96,9 @@ The disaster that comes with warning and the one that doesn't need the same ladd
 - **South Africa:** scheduled load shedding is a planned outage, announced ahead and repeated several times a day. That is PowerUP's ladder running daily, with hospitals and clinics in the Medical Baseline role.
 
 **What changed in the build:** region policy packs swap the risk signal, the priority register, the limits and the update rate without changing the engine, and a switch reruns the replay on any pack.
+
+## Twist 3
+
+**The poster.** One 24 × 36 inch page, built from the live app: the RAR8848 pilot map with the guard off and on, the five-step ladder on the real October 2026 dates, Interlock's eight checks and its silent-battery classes, the six guard-on and guard-off results, the pilot business with every income line labelled real or assumed, and a QR code to the live demo.
+
+**What changed in the build:** the poster is generated, not drawn: `submission/poster/maps.cjs` screenshots the app's own map with the guard off and on, and `render.mjs` renders `poster.html` to `poster.pdf`; its numbers are the ones `node pilot/app/cli.mjs` prints.

@@ -1,0 +1,186 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>PowerUP poster</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Oswald:wght@400..700&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<style>
+/* 24 x 36 in portrait at 96 px/in. Bands stack top to bottom. Same palette as the Interlock poster. */
+:root {
+  --ink: #13202A; --night: #1E3140; --paper: #F2F4F1; --panel: #E3E9E6;
+  --ember: #E8913F; --ember-deep: #B35A14; --mist: #AFC0C8; --slate: #4A5A63;
+  --watch: #DCE4E8; --ask: #C5D3DB; --fill: #F2C79A; --teal: #1A9FB3; --red: #D1352A;
+  --display: 'Oswald', 'Arial Narrow', Arial, sans-serif;
+  --body: 'IBM Plex Sans', Arial, sans-serif;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { width: 2304px; height: 3456px; overflow: hidden; }
+body { background: var(--paper); color: var(--ink); font-family: var(--body); font-size: 30px; line-height: 1.33; display: flex; flex-direction: column; }
+.band { padding: 28px 110px; display: flex; flex-direction: column; gap: 20px; }
+.dark { background: var(--ink); color: var(--paper); }
+.ember { background: var(--ember); color: var(--ink); }
+.eyebrow { font-size: 34px; font-weight: 600; letter-spacing: 4px; text-transform: uppercase; color: var(--ember-deep); }
+.dark .eyebrow { color: var(--ember); }
+.ember .eyebrow { color: var(--ink); }
+h1 { font-family: var(--display); font-size: 156px; font-weight: 600; line-height: 0.95; letter-spacing: 6px; text-transform: uppercase; }
+h2 { font-family: var(--display); font-size: 68px; font-weight: 600; line-height: 1.05; text-wrap: balance; }
+h3 { font-family: var(--display); font-size: 50px; font-weight: 600; line-height: 1.1; text-transform: uppercase; }
+.lede { font-size: 42px; line-height: 1.25; max-width: 2064px; }
+.muted { color: var(--slate); }
+.dark .muted { color: var(--mist); }
+.num { font-family: var(--display); font-weight: 600; font-variant-numeric: tabular-nums; line-height: 1; }
+.row { display: grid; gap: 64px; }
+.two { grid-template-columns: 1fr 1fr; }
+.three { grid-template-columns: 1fr 1fr 1fr; }
+.pills { display: flex; gap: 20px; flex-wrap: wrap; }
+.pill { font-size: 36px; font-weight: 600; letter-spacing: 3px; text-transform: uppercase; color: var(--ink); padding: 14px 36px; border-radius: 999px; }
+.card { background: var(--panel); border-radius: 16px; padding: 32px; display: flex; flex-direction: column; gap: 10px; }
+.dark .card { background: var(--night); }
+.tag { font-size: 28px; font-weight: 600; letter-spacing: 3px; text-transform: uppercase; color: var(--ember-deep); }
+.dark .tag { color: var(--ember); }
+.quote { font-family: var(--display); font-size: 48px; font-weight: 500; line-height: 1.15; border-left: 10px solid var(--ember); padding-left: 36px; }
+.stats { display: flex; gap: 80px; align-items: flex-end; }
+.stats .num { font-size: 100px; }
+.stats .cap { font-size: 32px; color: var(--slate); margin-top: 8px; max-width: 520px; line-height: 1.3; }
+.ladder { display: grid; grid-template-columns: repeat(5, 1fr); gap: 20px; align-items: end; }
+.rung { border-radius: 16px; padding: 22px 24px; display: flex; flex-direction: column; gap: 8px; font-size: 30px; line-height: 1.35; }
+.rung h3 { font-size: 46px; }
+.rung .when { font-size: 26px; font-weight: 600; letter-spacing: 2px; text-transform: uppercase; opacity: 0.8; }
+.maps { display: grid; grid-template-columns: 1fr 1fr; gap: 32px; }
+.maps figure { background: var(--paper); border-radius: 16px; overflow: hidden; display: flex; flex-direction: column; }
+.maps img { width: 100%; height: 250px; object-fit: cover; object-position: 50% 40%; display: block; }
+.maps figcaption { padding: 12px 24px; font-size: 32px; font-weight: 600; display: flex; align-items: center; gap: 16px; }
+.dot { width: 30px; height: 30px; border-radius: 50%; display: inline-block; flex: none; }
+.results { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 18px 56px; }
+.res { border-top: 4px solid var(--ink); padding-top: 14px; }
+.res .label { font-size: 29px; line-height: 1.25; }
+.res .num { font-size: 72px; margin-top: 8px; white-space: nowrap; }
+.res .num small { font-size: 56px; }
+.arrow { font-weight: 400; padding: 0 10px; }
+table { border-collapse: collapse; width: 100%; font-size: 34px; font-variant-numeric: tabular-nums; }
+th, td { text-align: left; padding: 9px 10px; border-bottom: 2px solid var(--mist); }
+th { font-size: 26px; letter-spacing: 3px; text-transform: uppercase; color: var(--slate); }
+td.r, th.r { text-align: right; }
+tr.total td { font-weight: 600; border-bottom: none; }
+.classes { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+.classes .card { gap: 2px; font-size: 27px; padding: 16px 22px; line-height: 1.3; }
+.classes h3 { font-size: 36px; }
+.stat { font-weight: 600; color: var(--ember-deep); }
+.dark .stat { color: var(--ember); }
+.small { font-size: 28px; line-height: 1.35; }
+.fill { flex: 1; }
+.foot { display: grid; grid-template-columns: 250px 1fr 1fr; gap: 56px; align-items: center; }
+.qr { width: 250px; height: 250px; background: var(--paper); border-radius: 16px; padding: 22px; }
+.qr svg { width: 100%; height: 100%; }
+.link { font-family: var(--display); font-size: 60px; font-weight: 600; color: var(--ember); line-height: 1.1; word-break: break-all; }
+</style>
+</head>
+<body>
+
+<section class="band dark" style="padding-top:40px; padding-bottom:36px">
+  <div class="eyebrow">Energy &amp; Grid Hardening · InnovateLA Dual-Use Hackathon · USC, October 2026</div>
+  <h1>PowerUP</h1>
+  <p class="lede">The disaster layer for a home-battery fleet: <b>PowerUP plans</b> each home's backup before a wildfire shutoff, <b>Interlock guards</b> every order, and neighbors share one <b>island</b> behind SCE's switch.</p>
+</section>
+
+<section class="band">
+  <div class="row two" style="align-items:start">
+    <div class="stats">
+      <div><div class="num">6,874</div><div class="cap">customers on six SCE circuits lose power, Oct 9 to 18, 2026 (real)</div></div>
+      <div><div class="num">Oct 15</div><div class="cap">the Bryson Fire starts during the shutoff (real)</div></div>
+    </div>
+    <div style="display:flex; flex-direction:column; gap:14px">
+      <div class="quote">The pilot: 456 homes behind SCE switch RAR8848 on the Cuthbert circuit, 9 km from the burn.</div>
+      <p><span class="stat">16 shutoffs since 2019, 435 hours dark</span> (real SCE records): once at RAR8848, 15 times the whole circuit. Upstream, a 66 kV line into Latigo runs about 650 m inside the Bryson perimeter.</p>
+    </div>
+  </div>
+  <h2>PowerUP plans, over days</h2>
+  <div class="ladder">
+    <div class="rung" style="background:var(--watch); min-height:125px"><div class="when">Oct 9, 3 AM</div><h3>Watch</h3>First wind warning. Medical Baseline homes fill to 100%.</div>
+    <div class="rung" style="background:var(--ask); min-height:144px"><div class="when">Oct 12</div><h3>Ask</h3>SCE names Cuthbert. Owners are asked to pre-fill; a 50% floor for the rest.</div>
+    <div class="rung" style="background:var(--fill); min-height:162px"><div class="when">Oct 14</div><h3>Fill</h3>The shutoff is sure. Every battery that said yes fills, and nothing is sold.</div>
+    <div class="rung" style="background:var(--ember); min-height:180px"><div class="when">Oct 15, 4 PM</div><h3>Hold</h3>Power off. Each home runs on a budget: 8, 16 or 32 kWh a day.</div>
+    <div class="rung dark" style="background:var(--ink); min-height:199px"><div class="when" style="color:var(--ember)">Oct 17, 10 PM</div><h3 style="color:var(--ember)">Hand</h3>Winds stop. PowerUP proposes the restart; SCE's shutoff officer approves.</div>
+  </div>
+</section>
+
+<section class="band dark">
+  <div class="row two" style="align-items:start">
+    <div style="display:flex; flex-direction:column; gap:18px">
+      <h2 style="color:var(--paper)">Interlock guards, in seconds</h2>
+      <p>Every order, from any sender, passes eight checks (signature, freshness, each home's backup floor, circuit headroom and more) and gets the gentlest safe rung: run, clamp, canary at 1% then 10%, hold, or hand to a person.</p>
+      <p><span class="stat">It can only shrink, slow or stop an order, never create one.</span> PowerUP's own orders pass through it too, and the reserve PowerUP plans for each home becomes the floor Interlock keeps against every sender.</p>
+    </div>
+    <div style="display:flex; flex-direction:column; gap:18px">
+      <div class="tag">A silent battery is never counted as power</div>
+      <div class="classes">
+        <div class="card"><h3>Tripped</h3>Its whole circuit went quiet together.</div>
+        <div class="card"><h3>Not talking</h3>Its cell tower or internet went quiet. It follows its plan alone, over mesh to Starlink.</div>
+        <div class="card"><h3>Broken</h3>Quiet alone, after a fault code: to a person.</div>
+        <div class="card"><h3>Unsure</h3>Anything else: ask the owner first.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="band ember">
+  <h2>Same shutoff, six failures: guard off vs guard on</h2>
+  <div class="maps">
+    <figure><img src="map-off.png" alt="Pilot map with the guard off: battery homes empty"><figcaption><span class="dot" style="background:var(--red)"></span>Guard off, a day into the shutoff: batteries empty</figcaption></figure>
+    <figure><img src="map-on.png" alt="Pilot map with the guard on: battery homes islanded"><figcaption><span class="dot" style="background:var(--teal)"></span>Guard on, same hour: every battery home has power</figcaption></figure>
+  </div>
+  <div class="results">
+    <div class="res"><div class="label">Battery homes that go dark</div><div class="num">189<span class="arrow">→</span>0</div></div>
+    <div class="res"><div class="label">Medical Baseline homes that go dark</div><div class="num">16<span class="arrow">→</span>0</div></div>
+    <div class="res"><div class="label">Fleet charge when the power goes off</div><div class="num">9%<span class="arrow">→</span>99%</div></div>
+    <div class="res"><div class="label">Battery-hours onto a dead line</div><div class="num">567<span class="arrow">→</span>0</div></div>
+    <div class="res"><div class="label">Overload at the restart, Cuthbert</div><div class="num">3.4<small> MW</small><span class="arrow">→</span>0</div></div>
+    <div class="res"><div class="label">Home-hours kept powered</div><div class="num">945<span class="arrow">→</span>11,596</div></div>
+  </div>
+  <p class="small">Simulated failures on the real timeline: a stolen key, a replayed order, a sell-down three hours before the shutoff, export onto the dead line, a recharge rush and SCE's own emergency event. 189 battery homes (160 free + 29 their own, assumed share). PowerUP's own orders held: 0 of 5. Reproduce: <b>node pilot/app/cli.mjs</b>.</p>
+</section>
+
+<section class="band">
+  <div class="row two" style="align-items:start">
+    <div style="display:flex; flex-direction:column; gap:18px">
+      <div class="eyebrow">The pilot business</div>
+      <p><span class="stat">160 free Base Core batteries</span> in volunteer homes, Medical Baseline first, then solar roofs. When SCE opens RAR8848, the 456 homes run as one island on them and the solar. They carry all 16 real shutoffs (15 of 16 with smoke).</p>
+      <p><span class="stat">$9.99 a month</span> buys emergency power for a home with no battery (226 homes, assumed 90% opt-in). <span class="stat">$1.20 per kWh</span> in a shutoff for everyone on the island, twice SCE's top rate (assumed), billed by SCE; sellers get $1.00.</p>
+      <p class="small"><span class="tag">Funding</span> DOE SBIR (Office of Electricity, CESER) first, DOE GRIP with SCE to scale, FEMA HMGP after a disaster. Built: an installation pack for Naval Base Ventura County.</p>
+      <p class="small"><span class="tag">Global</span> Australia's bushfire shutoffs and life-support register; South Africa's load shedding, with clinics in the medical role. Built: region policy packs.</p>
+    </div>
+    <div style="display:flex; flex-direction:column; gap:14px">
+      <div class="eyebrow">Every day: income per battery, per year</div>
+      <table>
+        <tr><th>Line</th><th>Label</th><th class="r">$ / year</th></tr>
+        <tr><td>Trading, CAISO prices for SCE</td><td>real prices</td><td class="r">334</td></tr>
+        <tr><td>Capacity payments</td><td>assumed</td><td class="r">941</td></tr>
+        <tr><td>Emergency grid events</td><td>assumed count</td><td class="r">627</td></tr>
+        <tr><td>Subscriptions</td><td>assumed opt-in</td><td class="r">169</td></tr>
+        <tr><td>Shutoff power sales</td><td>assumed rates</td><td class="r">90</td></tr>
+        <tr><td>Holding full from SCE's notice</td><td>real prices</td><td class="r">−28</td></tr>
+      </table>
+      <p class="small muted">Fleet about $2.24M after the 30% tax credit (installed cost assumed), about $341,000 a year. Payback 6.6 years with all income, 25 without capacity and event pay, 46 on trading alone.</p>
+    </div>
+  </div>
+</section>
+
+<div class="fill"></div>
+
+<section class="band dark" style="padding-top:30px; padding-bottom:32px">
+  <div class="foot">
+    <div class="qr" id="qr"></div>
+    <div style="display:flex; flex-direction:column; gap:14px">
+      <div class="eyebrow">Run the replay yourself</div>
+      <div class="link" id="link">mrbese.github.io/PowerUp</div>
+      <div class="small muted">Code: github.com/mrbese/PowerUp · Every number labelled real, assumed or simulated.</div>
+    </div>
+    <div style="display:flex; flex-direction:column; gap:12px">
+      <div class="eyebrow">Responsible use</div>
+      <p class="small">Misuse: locking owners out of their batteries, a single point of attack, or pricing power up mid-crisis. Limits: Interlock never goes below a home's own backup, PowerUP sees a priority tier not a medical record, a person approves every restart and island, and the price is fixed in advance.</p>
+    </div>
+  </div>
+</section>
+
+</body>
+</html>

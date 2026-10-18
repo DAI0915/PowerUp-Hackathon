@@ -48,6 +48,7 @@ Then PowerUP replays the shutoff with what each order actually did to the batter
 | Fleet charge when the power goes off | 9% | 99% |
 | Battery-hours pushing power onto a de-energized line | 567 | 0 |
 | Worst circuit overload at restoration | 3.4 MW over Cuthbert's cap | none |
+| Home-hours kept powered by batteries | 945 | 11,596 |
 
 With the guard on, the outcome is exactly PowerUP's plan without any failures. The guard-off numbers count every order as run exactly as sent; in reality IEEE 1547 anti-islanding should trip a battery on a dead line, so Interlock is a second layer, not a replacement. The same run on all six Malibu circuits (1,032 battery homes) gave 1,028 dark with the guard off and 0 with it on; that version is on `archive/malibu-wide-v1`.
 
@@ -83,7 +84,7 @@ For a 48-hour shutoff on a Merlin-shaped section, the underground coast section 
 Node 22 and Python 3, no packages to install.
 
 ```
-npm test                         # Interlock (29), pilot guard (3), islands (11), pilot business (10) and pilot smoke tests
+npm test                         # 58 checks: Interlock (29), pilot guard (3), islands (11), pilot business (14) and the pilot smoke run
 node pilot/app/cli.mjs           # RAR8848 pilot: PowerUP through Interlock, guard on vs off
 node interlock/cli.mjs           # Sept 6, 2022 replay -> interlock/out/results.json
 node islands/scenario.cjs        # Merlin-shaped neighborhood island
@@ -99,7 +100,7 @@ pilot/      the RAR8848 pilot: app/ is the PowerUP replay (engine, bridge to Int
 powerup/    SCE and CAISO data, spec, prior art, twists
 interlock/  the guard: engine, silence and behaviour checks, policy packs, Sept 6 2022 replay, demo page
 islands/    the neighborhood island planner and the SCE line-device shutoff records for Malibu
-submission/ Devpost story sections (devpost.md), the other form fields with the video script (devpost-extras.md) and the pitch deck text (pitch-deck.md)
+submission/ Devpost story sections (devpost.md), the other form fields with the video script (devpost-extras.md) the pitch deck text (pitch-deck.md) and the 24 x 36 in poster (poster/poster.pdf, rendered by poster/render.mjs)
 site.py     builds the two-page demo at the root and in site/
 ```
 

@@ -15,7 +15,8 @@ The story sections are in `devpost.md`. These are the rest of the form.
 
 ## Responsible-use note
 
-PowerUP could be used to throttle or lock owners out of their own batteries, or become a single point of attack. It sees a priority tier per home, never a medical record. Interlock can only shrink or stop an order, never below a home's own backup. Each battery falls back to a signed local plan if PowerUP fails, and every hold is logged where the owner can see it. A person approves every restoration recharge, EV trip and island, and the utility keeps control of every switch. Shutoff power could be priced up mid-crisis, so the price is fixed in advance at twice SCE's top residential rate, billed by SCE, and Medical Baseline homes always host a free battery.
+Misuse: PowerUP could lock owners out of their own batteries, become a single point of attack, or price power up mid-crisis.
+Limits: Interlock can only shrink or stop an order, never below a home's own backup; PowerUP sees a priority tier, never a medical record; a person approves every recharge and island, SCE keeps every switch, and the shutoff price is fixed in advance and billed by SCE.
 
 ## Built with
 
@@ -25,7 +26,6 @@ JavaScript, Node.js, Python, HTML Canvas, Playwright, SCE open data (PSPS record
 
 - Claude (Anthropic), through Claude Code: research, the engines, tests, the apps and these drafts.
 - NotebookLM: research mind maps.
-- [Add any other tools the team used.]
 
 ## Demo video script (under 3 minutes)
 
