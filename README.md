@@ -102,7 +102,7 @@ powerup/    the Malibu shutoff planner: engine, single-file app, SCE and CAISO d
 interlock/  the guard: engine, silence and behaviour checks, policy packs, Sept 6 2022 replay, demo page
 islands/    the neighborhood island planner and the SCE line-device shutoff records for Malibu
 bridge/     PowerUP's orders through Interlock on the Malibu replay, and its tests
-submission/ Devpost text and demo video script
+submission/ Devpost story sections (devpost.md) and the other form fields with the video script (devpost-extras.md)
 site.py     builds the two-page demo in site/
 ```
 
