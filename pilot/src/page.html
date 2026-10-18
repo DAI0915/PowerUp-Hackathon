@@ -137,6 +137,9 @@ button.z { font: 600 14px var(--mono); width: 30px; height: 30px; border: 1px so
         <label for="capkw">kW counted per battery<input type="number" id="capkw" value="9.8" step="0.1" min="0"></label>
         <label for="elrp">Emergency events a year<input type="number" id="elrp" value="10" step="1" min="0"></label>
         <label for="sub">Subscription ($ a month)<input type="number" id="sub" value="9.99" step="0.5" min="0"></label>
+        <label for="tou">Top TOU price ($/kWh)<input type="number" id="tou" value="0.60" step="0.05" min="0"></label>
+        <label for="mult">Shutoff price, times top TOU<input type="number" id="mult" value="2" step="0.5" min="0"></label>
+        <label for="del">SCE delivery ($/kWh)<input type="number" id="del" value="0.20" step="0.05" min="0"></label>
         <label for="join">Homes without a battery that subscribe (share)<input type="number" id="join" value="0.9" step="0.05" min="0" max="1"></label>
       </div>
     </details>
@@ -165,7 +168,7 @@ button.z { font: 600 14px var(--mono); width: 30px; height: 30px; border: 1px so
         <li><b>Real:</b> what a Base Core (39.2 kWh, 20 kW, 20% floor) earns trading CAISO day-ahead prices for SCE, Oct to Dec 2025, with perfect foresight: $0.91 a day. Yearly figures repeat this quarter; summer spreads are usually wider.</li>
         <li><b>Real:</b> Malibu has 7.1 home batteries (median 20 kWh) and 8.4 solar-only roofs per 100 homes (SCE interconnection records). Medical Baseline is 2.6% of homes (SCE's Dec 2024 report on Maguire to the CPUC). SCE notified 509,245 customers and cut 152,393 in its Jan 20 2025 event. The Emergency Load Reduction Program pays $2 per kWh.</li>
         <li><b>Real:</b> lead times are from the Bryson Fire, Oct 2026. The first Santa Ana signal came 6.5 days before the shutoff, and SCE named Cuthbert 3 days before.</li>
-        <li><b>Estimated:</b> where RAR8848 sits, and where each home is (spread evenly along the line). Each home's battery, solar, medical need and choice is drawn at the real rates, so a dot is a stand-in, not an address. 60% of battery owners join; 90% of homes without a battery subscribe for emergency power at $9.99 a month; medical homes always join, free. Every home that receives keeps critical loads on (8 kWh a day). A roof makes 27 kWh a day.</li>
+        <li><b>Estimated:</b> where RAR8848 sits, and where each home is (spread evenly along the line). Each home's battery, solar, medical need and choice is drawn at the real rates, so a dot is a stand-in, not an address. 60% of battery owners join; 90% of homes without a battery subscribe for emergency power at $9.99 a month; medical homes always join, free. In a shutoff everyone on the island pays 2x SCE's top TOU price ($0.60 assumed) per kWh; sellers get that less SCE's $0.20 delivery (assumed); solar roofs sell all they make. Every home that receives keeps critical loads on (8 kWh a day). A roof makes 27 kWh a day.</li>
         <li><b>Not modeled yet:</b> SCE approval to island its line, Base firmware for sharing, battery wear, and what volunteers pay. The island also needs one battery certified to form the grid.</li>
       </ul>
     </details>
@@ -187,7 +190,8 @@ function opts() {
     free: P.DEFAULTS.free, solarFirst: $('solarFirst').checked, solarKwhDay: $('smoke').checked ? P.SOLAR_KWH_DAY / 2 : P.SOLAR_KWH_DAY,
     capex: +$('capex').value || 0, itc: +$('itc').value || 0, capacityPerKwMonth: +$('cap').value || 0,
     capacityKw: +$('capkw').value || 0, elrpEventsPerYear: +$('elrp').value || 0,
-    subscriptionPerMonth: +$('sub').value || 0, receiverJoins: Math.min(1, +$('join').value || 0)
+    subscriptionPerMonth: +$('sub').value || 0, receiverJoins: Math.min(1, +$('join').value || 0),
+    touTopPerKwh: +$('tou').value || 0, shutoffMultiplier: +$('mult').value || 0, sceDeliveryPerKwh: +$('del').value || 0
   };
 }
 
@@ -289,6 +293,7 @@ function render() {
   const rows = [
     ['Trading day-ahead prices', m.arbitrage, 'var(--sea)', 'real'], ['Capacity payments', m.capacity, 'var(--own)', 'assumed'],
     ['Emergency events', m.elrp, 'var(--sun)', '$2/kWh real, count assumed'], ['Subscriptions, share per battery', m.subscription, 'var(--ink)', 'price ours, opt-in assumed'],
+    ['Shutoff power we sell', m.shutoffSales, 'var(--own)', '2x TOU, real shutoff hours'],
     ['Readiness holds', -m.readiness, 'var(--bad)', 'real prices']
   ];
   const max = Math.max(...rows.map(r => Math.abs(r[1])));
@@ -297,7 +302,11 @@ function render() {
   $('fleetNet').textContent = fmt$(rule.fleetMoney.net);
   $('moneyFacts').innerHTML = [
     ['Payback, all income', isFinite(m.payback) ? m.payback.toFixed(1) + ' years' : 'never'],
-    ['Payback, trading and subscriptions', isFinite(m.ownPayback) ? Math.round(m.ownPayback) + ' years' : 'never'],
+    ['Shutoff price, everyone pays', '$' + rule.shutoff.price.toFixed(2) + ' per kWh'],
+    ['Shutoff power a year: subscribers pay', fmtK(rule.shutoff.paidByReceivers)],
+    ['Neighbors and roofs earn', fmtK(rule.shutoff.toNeighbors + rule.shutoff.toRoofs)],
+    ['SCE delivery', fmtK(rule.shutoff.sce)],
+    ['Payback, trading, subscriptions, shutoff sales', isFinite(m.ownPayback) ? Math.round(m.ownPayback) + ' years' : 'never'],
     ['Payback, trading only', isFinite(m.arbitrageOnlyPayback) ? Math.round(m.arbitrageOnlyPayback) + ' years' : 'never'],
     ['Readiness cost, share of trading', (m.readiness / m.arbitrage * 100).toFixed(0) + '%'],
     ['Holds a year (incl. false alarms)', m.holds.toFixed(1)]
@@ -324,6 +333,6 @@ function render() {
     return `<div class="ev"><span>${label}<br><span class="sub">${e.cut_at === 'breaker' ? 'whole circuit' : 'RAR8848 alone'}</span></span><div class="t"><div class="on" style="width:${on.toFixed(1)}%${off < .1 ? ';border-radius:3px' : ''}"></div><div class="off" style="left:${on.toFixed(1)}%;width:${off.toFixed(1)}%"></div></div><span class="r">${Math.round(e.carried)} of ${e.hours.toFixed(1)} h</span></div>`;
   }).join('');
 }
-['solarFirst', 'smoke', 'capex', 'itc', 'cap', 'capkw', 'elrp', 'sub', 'join'].forEach(id => $(id).addEventListener('input', render));
+['solarFirst', 'smoke', 'capex', 'itc', 'cap', 'capkw', 'elrp', 'sub', 'join', 'tou', 'mult', 'del'].forEach(id => $(id).addEventListener('input', render));
 setVb(); render();
 </script>

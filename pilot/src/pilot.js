@@ -10,7 +10,7 @@
 })(typeof self !== 'undefined' ? self : this, function (Island) {
   'use strict';
 
-  const BASE = { kwh: 39.2, kw: 20, floor: 0.2 };             // Base Core; the 20% floor is never shared or sold
+  const BASE = { kwh: 39.2, kw: 20, floor: 0.2 };             // Base Core; the bottom 20% is the host's, never sold to the island
   const OWN = { kwh: 20, kw: 10 };                            // real Malibu median home battery (SCE records)
   const SOLAR_KWH_DAY = 27;                                   // assumed: 8.2 kW median roof x 3.3 kWh/kW/day
   const LEAD_DAYS = { forecast: 6.5, notice: 3, dayBefore: 1 };  // real, Bryson Fire 2026: first Santa Ana signal Oct 9,
@@ -24,6 +24,9 @@
     ownerShares: 0.6,         // assumed: homes with their own battery that opt in to share
     receiverJoins: 0.9,       // assumed: homes without a battery that subscribe for emergency power (medical homes always join)
     subscriptionPerMonth: 9.99, // what a subscribing home pays; Medical Baseline homes and battery hosts pay nothing
+    touTopPerKwh: 0.60,       // assumed: SCE's highest residential TOU price (TOU-D-4-9PM on-peak, about $0.60 in 2025)
+    shutoffMultiplier: 2,     // homes without a battery pay this many times the top TOU price for every kWh in a shutoff
+    sceDeliveryPerKwh: 0.20,  // assumed: SCE bills the shared power over its wires and keeps this; the rest goes to whoever gave it
     capex: 20000,             // assumed: installed cost of one Base Core; Base publishes none
     itc: 0.30,                // federal investment tax credit for business-owned storage (assumed to still apply)
     capacityPerKwMonth: 8,    // assumed: resource adequacy price (SB 913 lets aggregated home batteries count)
@@ -81,8 +84,17 @@
 
   // ---------- one shutoff ----------
   const ISLAND = { id: 'RAR8848', segments: ['A'], allowed: true, blockers: [] };
+  // the bottom 20% of one of our batteries is its host's: the host runs on it first (and pays for it like everyone else);
+  // everything above it is ours to sell to the island
+  function hostFloorKwh(h, hours) {
+    return h.owner === 'startup' && h.choice === 'donor'
+      ? Math.min(Island.BUDGET_KWH_DAY.critical * h.size * hours / 24, h.battery_kwh * Math.min(BASE.floor, h.soc)) : 0;
+  }
   function runEvent(homes, hours) {
-    const p = Island.planIsland(ISLAND, homes, hours, { donor_keeps: 'critical', reserve_floor_pct: BASE.floor * 100 });
+    // the planner keeps every battery's floor out of the pool and takes each donor's own need from the pool; giving the
+    // host's floor use back as charge above the floor nets that out
+    const hs = homes.map(h => { const f = hostFloorKwh(h, hours); return f ? Object.assign({}, h, { soc: h.soc + f / h.battery_kwh }) : h; });
+    const p = Island.planIsland(ISLAND, hs, hours, { donor_keeps: 'critical', reserve_floor_pct: BASE.floor * 100 });
     const carried = p.receiver_mode ? hours : Math.min(hours, p.receiver_hours);
     const receivers = p.counts.receivers;
     const medRecv = homes.filter(h => h.medical && h.choice === 'receiver').length;
@@ -105,8 +117,8 @@
     if (level >= 1) return stats.day20;
     return stats.day20 - stats.day80;                         // 80% is the only partial level the price file has
   }
-  // per battery per year; subShare is this battery's share of the subscription income
-  function yearMoney(stats, rule, opts, earlyShare, subShare) {
+  // per battery per year; extra carries this battery's share of the subscription income and of shutoff power sales
+  function yearMoney(stats, rule, opts, earlyShare, extra) {
     const P = Object.assign({}, DEFAULTS, opts || {});
     const arbitrage = 365 * stats.day20;
     const capacity = 12 * P.capacityPerKwMonth * P.capacityKw;
@@ -114,13 +126,47 @@
     const holds = P.eventsPerYear * FALSE_ALARM;               // every notice is a hold, cut or not
     let readiness = holds * rule.lead * holdCostPerDay(stats, rule.level);
     if (rule.medicalLead) readiness += holds * (rule.medicalLead - rule.lead) * holdCostPerDay(stats, 1) * (earlyShare || 0);
-    const subscription = subShare || 0;
-    const net = arbitrage + capacity + elrp + subscription - readiness;
+    const subscription = (extra && extra.subscription) || 0, shutoffSales = (extra && extra.shutoff) || 0;
+    const net = arbitrage + capacity + elrp + subscription + shutoffSales - readiness;
     const cost = P.capex * (1 - P.itc);
-    const own = arbitrage + subscription - readiness;            // without any assumed capacity or ELRP program
-    return { arbitrage, capacity, elrp, subscription, readiness, net, cost, payback: net > 0 ? cost / net : Infinity,
+    const own = arbitrage + subscription + shutoffSales - readiness;  // without any assumed capacity or ELRP program
+    return { arbitrage, capacity, elrp, subscription, shutoffSales, readiness, net, cost, payback: net > 0 ? cost / net : Infinity,
              arbitrageOnlyPayback: arbitrage - readiness > 0 ? cost / (arbitrage - readiness) : Infinity,
              ownPayback: own > 0 ? cost / own : Infinity, holds };
+  }
+
+  // ---------- shutoff power, billed by SCE ----------
+  // Everyone on the island pays the same flat price for every kWh it uses in a shutoff: a multiple of SCE's top
+  // residential TOU price. Everything the island runs on is sold into it at that price less SCE's delivery: our batteries'
+  // stored energy, the stored energy of neighbors who chose to sell, and every solar roof's output (solar is used first).
+  // A host's use of its own 20% floor stays behind its meter: no delivery, the whole price is ours.
+  // Battery owners who keep their battery for themselves stay outside the island and neither pay nor earn.
+  function shutoffSettle(homes, events, P, years) {
+    const price = P.touTopPerKwh * P.shutoffMultiplier, toSeller = Math.max(0, price - P.sceDeliveryPerKwh);
+    const donors = homes.filter(h => h.choice === 'donor' && h.battery_kwh > 0);
+    const t = { kwh: 0, floorKwh: 0, paidByReceivers: 0, paidByHosts: 0, paidByNeighbors: 0, sce: 0, toFleet: 0, toNeighbors: 0, toRoofs: 0 };
+    events.forEach(e => {
+      const days = e.hours / 24, used = e.plan.used_kwh || 0;
+      let own = { startup: 0, home: 0 }, stored = { startup: 0, home: 0 }, solar = { startup: 0, home: 0 }, floor = 0;
+      donors.forEach(h => {
+        const st = Math.max(0, h.battery_kwh * h.soc - h.battery_kwh * BASE.floor), sol = (h.solar_kwh_day || 0) * days;
+        const f = hostFloorKwh(h, e.hours);
+        own[h.owner] += f + Math.min(st + sol, Island.BUDGET_KWH_DAY.critical * h.size * days - f);
+        floor += f; stored[h.owner] += st; solar[h.owner] += sol;
+      });
+      const kwh = used + own.startup + own.home;                  // everything consumed on the island in this shutoff
+      const wire = kwh - floor;                                   // what crosses SCE's wires
+      const sol = solar.startup + solar.home, solUsed = Math.min(wire, sol), fromBatt = wire - solUsed;
+      const batt = stored.startup + stored.home || 1;
+      t.kwh += kwh; t.floorKwh += floor; t.sce += wire * P.sceDeliveryPerKwh;
+      t.paidByReceivers += used * price; t.paidByHosts += own.startup * price; t.paidByNeighbors += own.home * price;
+      t.toFleet += fromBatt * stored.startup / batt * toSeller + floor * price;
+      t.toNeighbors += (fromBatt * stored.home / batt + (sol ? solUsed * solar.home / sol : 0)) * toSeller;
+      t.toRoofs += (sol ? solUsed * solar.startup / sol : 0) * toSeller;  // host homes' own solar, sold through our battery
+    });
+    for (const k in t) t[k] /= years;
+    t.price = price; t.toSeller = toSeller;
+    return t;                                                   // per year
   }
 
   // ---------- everything for one setting ----------
@@ -135,9 +181,11 @@
       const hs = socAtShutoff(homes, rule);
       const early = rule.medicalLead ? medicalHold(homes, 72) : 0;
       const events = data.events.map(e => Object.assign({ start: e.start, cut_at: e.cut_at }, runEvent(hs, e.hours)));
-      const money = yearMoney(stats, rule, P, fleet ? early / fleet : 0, fleet ? subscriptionYear / fleet : 0);
+      const shutoff = shutoffSettle(hs, events, P, data.events.length / P.eventsPerYear);
+      const money = yearMoney(stats, rule, P, fleet ? early / fleet : 0,
+                              { subscription: fleet ? subscriptionYear / fleet : 0, shutoff: fleet ? shutoff.toFleet / fleet : 0 });
       return {
-        id: rule.id, label: rule.label, note: rule.note || '', lead: rule.lead, level: rule.level, early,
+        id: rule.id, label: rule.label, note: rule.note || '', lead: rule.lead, level: rule.level, early, shutoff,
         eventsFull: events.filter(e => e.full).length, events,
         receiverHoursDark: events.reduce((a, e) => a + e.receiverHoursDark, 0),
         medicalEventsDark: events.filter(e => e.medicalDark).length,
@@ -165,5 +213,5 @@
   }
 
   return { BASE, OWN, SOLAR_KWH_DAY, LEAD_DAYS, FALSE_ALARM, DEFAULTS, RULES, assign, medicalHold, socAtShutoff,
-           runEvent, priceStats, holdCostPerDay, yearMoney, evaluate, fleetFor };
+           runEvent, hostFloorKwh, priceStats, holdCostPerDay, yearMoney, shutoffSettle, evaluate, fleetFor };
 });

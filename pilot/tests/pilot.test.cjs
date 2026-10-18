@@ -45,17 +45,28 @@ t('outcome: with half the other homes joining, 56 batteries held from notice car
   assert.strictEqual(P.evaluate(D, { free: 56, receiverJoins: 0.5 }).rules.find(x => x.id === 'notice').eventsFull, 16);
   assert.ok(P.evaluate(D, { free: 56, receiverJoins: 0.5, solarKwhDay: 13.5 }).rules.find(x => x.id === 'notice').eventsFull < 16);
 });
-t('outcome: 160 batteries with 90% subscribing carry 15 of 16; only the 80 h January 2025 shutoff runs short', () => {
+t('outcome: 160 batteries with 90% subscribing carry all 16 at clear sky, 15 with smoke; 150 is the minimum', () => {
   assert.strictEqual(P.DEFAULTS.free, 160); assert.strictEqual(P.DEFAULTS.receiverJoins, 0.9);
-  const r = P.evaluate(D, {}).rules.find(x => x.id === 'notice');
-  assert.strictEqual(r.eventsFull, 15);
-  const short = r.events.filter(e => !e.full);
-  assert.strictEqual(short.length, 1); assert.ok(short[0].hours > 79 && short[0].carried >= 72);
-  assert.strictEqual(P.evaluate(D, { free: 183 }).rules.find(x => x.id === 'notice').eventsFull, 16);
-  const never = P.evaluate(D, {}).rules.find(x => x.id === 'never');
-  assert.strictEqual(never.eventsFull, 0);
+  assert.strictEqual(P.evaluate(D, {}).rules.find(x => x.id === 'notice').eventsFull, 16);
+  assert.strictEqual(P.evaluate(D, { solarKwhDay: 13.5 }).rules.find(x => x.id === 'notice').eventsFull, 15);
+  assert.strictEqual(P.fleetFor(D, 'notice'), 150);
+  assert.strictEqual(P.evaluate(D, {}).rules.find(x => x.id === 'never').eventsFull, 0);
 });
-t('money: subscriptions are $9.99 a month from homes without a battery; medical homes and hosts pay nothing', () => {
+t('shutoff power: everyone pays 2x the top TOU price, and every dollar paid in goes to a seller or to SCE', () => {
+  const sh = P.evaluate(D, {}).rules.find(x => x.id === 'notice').shutoff;
+  assert.ok(Math.abs(sh.price - 1.2) < 1e-9 && Math.abs(sh.toSeller - 1.0) < 1e-9);
+  const paid = sh.paidByReceivers + sh.paidByHosts + sh.paidByNeighbors, got = sh.sce + sh.toFleet + sh.toNeighbors + sh.toRoofs;
+  assert.ok(Math.abs(paid - got) < 1e-6);
+  assert.ok(Math.abs(sh.paidByReceivers + sh.paidByHosts + sh.paidByNeighbors - sh.kwh * sh.price) < 1e-6);
+  assert.ok(Math.abs(sh.sce - (sh.kwh - sh.floorKwh) * 0.2) < 1e-6, 'a host using its own floor pays no delivery');
+});
+t('shutoff power: a host runs on the bottom 20% of our battery first; the rest is ours to sell', () => {
+  const h = { owner: 'startup', choice: 'donor', size: 1, battery_kwh: 39.2, soc: 1 };
+  assert.ok(Math.abs(P.hostFloorKwh(h, 12) - 4) < 1e-9);          // 12 h of critical load fits in the floor
+  assert.ok(Math.abs(P.hostFloorKwh(h, 72) - 7.84) < 1e-9);       // a long shutoff uses the whole 20%
+  assert.strictEqual(P.hostFloorKwh(Object.assign({}, h, { owner: 'home' }), 12), 0);
+});
+t('money: subscriptions are $9.99 a month from homes without a battery; medical homes and hosts pay no subscription', () => {
   const R = P.evaluate(D, {});
   const payers = R.homes.filter(h => h.choice === 'receiver' && !h.medical);
   assert.strictEqual(R.counts.subscribers, payers.length);
