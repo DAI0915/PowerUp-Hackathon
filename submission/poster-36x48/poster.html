@@ -1,0 +1,351 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>PowerUP poster, 36 x 48</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Oswald:wght@400..700&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<style>
+/* 36 x 48 in portrait at 96 px/in (3456 x 4608); the body is laid out at 5486 x 7314 and zoomed to fit. Bands stack top to bottom. Same palette as the 24 x 36 poster. */
+:root {
+  --ink: #13202A; --night: #1E3140; --paper: #F2F4F1; --panel: #E3E9E6;
+  --ember: #E8913F; --ember-deep: #B35A14; --mist: #AFC0C8; --slate: #4A5A63;
+  --watch: #DCE4E8; --ask: #C5D3DB; --fill: #F2C79A; --teal: #1A9FB3; --red: #D1352A;
+  --display: 'Oswald', 'Arial Narrow', Arial, sans-serif;
+  --body: 'IBM Plex Sans', Arial, sans-serif;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html { width: 3456px; height: 4608px; overflow: hidden; }
+body { width: 5486px; height: 7314px; zoom: 0.63; overflow: hidden; }
+body { background: var(--paper); color: var(--ink); font-family: var(--body); font-size: 40px; line-height: 1.34; display: flex; flex-direction: column; }
+.band { padding: 36px 150px; display: flex; flex-direction: column; gap: 26px; }
+.dark { background: var(--ink); color: var(--paper); }
+.ember { background: var(--ember); color: var(--ink); }
+.eyebrow { font-size: 42px; font-weight: 600; letter-spacing: 5px; text-transform: uppercase; color: var(--ember-deep); }
+.dark .eyebrow { color: var(--ember); }
+.ember .eyebrow { color: var(--ink); }
+h1 { font-family: var(--display); font-size: 250px; font-weight: 600; line-height: 0.9; letter-spacing: 10px; text-transform: uppercase; }
+h2 { font-family: var(--display); font-size: 92px; font-weight: 600; line-height: 1.05; text-wrap: balance; }
+h3 { font-family: var(--display); font-size: 62px; font-weight: 600; line-height: 1.1; text-transform: uppercase; }
+.lede { font-size: 60px; line-height: 1.22; }
+.muted { color: var(--slate); }
+.dark .muted { color: var(--mist); }
+.num { font-family: var(--display); font-weight: 600; font-variant-numeric: tabular-nums; line-height: 1; }
+.row { display: grid; gap: 90px; }
+.col { display: flex; flex-direction: column; gap: 24px; }
+.card { background: var(--panel); border-radius: 22px; padding: 34px 40px; display: flex; flex-direction: column; gap: 10px; }
+.dark .card { background: var(--night); }
+.tag { font-size: 34px; font-weight: 600; letter-spacing: 4px; text-transform: uppercase; color: var(--ember-deep); }
+.dark .tag { color: var(--ember); }
+.quote { font-family: var(--display); font-size: 64px; font-weight: 500; line-height: 1.15; border-left: 14px solid var(--ember); padding-left: 48px; }
+.stats { display: grid; grid-template-columns: 1fr 1fr; gap: 40px 60px; }
+.stats .num { font-size: 120px; }
+.stats .cap { font-size: 38px; color: var(--slate); margin-top: 10px; line-height: 1.3; }
+.ladder { display: grid; grid-template-columns: repeat(5, 1fr); gap: 28px; align-items: end; }
+.rung { border-radius: 22px; padding: 28px 34px; display: flex; flex-direction: column; gap: 10px; font-size: 38px; line-height: 1.32; }
+.rung h3 { font-size: 64px; }
+.rung .when { font-size: 34px; font-weight: 600; letter-spacing: 3px; text-transform: uppercase; opacity: 0.8; }
+.maps { display: grid; grid-template-columns: 1fr 1fr 1.25fr; gap: 48px; align-items: stretch; }
+.maps figure { background: var(--paper); border-radius: 22px; overflow: hidden; display: flex; flex-direction: column; }
+.maps img { width: 100%; height: 760px; object-fit: cover; object-position: 50% 40%; display: block; }
+.maps figcaption { padding: 18px 34px; font-size: 44px; font-weight: 600; display: flex; align-items: center; gap: 22px; }
+.dot { width: 42px; height: 42px; border-radius: 50%; display: inline-block; flex: none; }
+.results { display: grid; grid-template-columns: 1fr 1fr; gap: 24px 48px; align-content: space-between; }
+.res { border-top: 6px solid var(--ink); padding-top: 18px; }
+.res .label { font-size: 36px; line-height: 1.25; }
+.res .num { font-size: 92px; margin-top: 10px; white-space: nowrap; }
+.res .num small { font-size: 64px; }
+.arrow { font-weight: 400; padding: 0 12px; }
+table { border-collapse: collapse; width: 100%; font-size: 40px; font-variant-numeric: tabular-nums; }
+th, td { text-align: left; padding: 12px 14px; border-bottom: 3px solid var(--mist); vertical-align: top; }
+th { font-size: 32px; letter-spacing: 4px; text-transform: uppercase; color: var(--slate); }
+.ember th { color: var(--ink); opacity: 0.75; }
+.ember td, .ember th { border-bottom-color: rgba(19,32,42,0.25); }
+td.r, th.r { text-align: right; white-space: nowrap; }
+.verdict { font-weight: 600; text-transform: uppercase; letter-spacing: 3px; font-size: 34px; white-space: nowrap; }
+.checks { display: grid; grid-template-columns: repeat(4, 1fr); gap: 24px; }
+.checks .card { gap: 6px; font-size: 35px; line-height: 1.3; padding: 26px 30px; }
+.checks .n { font-family: var(--display); font-size: 40px; font-weight: 600; color: var(--ember); }
+.checks h3 { font-size: 48px; }
+.rungs5 { display: grid; grid-template-columns: repeat(5, 1fr); gap: 18px; }
+.rungs5 div { border-radius: 18px; padding: 18px 22px; font-size: 32px; line-height: 1.28; color: var(--ink); }
+.rungs5 b { font-family: var(--display); font-size: 48px; font-weight: 600; text-transform: uppercase; display: block; }
+.classes { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+.classes .card { gap: 4px; font-size: 35px; padding: 24px 30px; line-height: 1.3; }
+.classes h3 { font-size: 48px; }
+.stat { font-weight: 600; color: var(--ember-deep); }
+.dark .stat { color: var(--ember); }
+.small { font-size: 35px; line-height: 1.36; }
+.fill { flex: 1; }
+.foot { display: grid; grid-template-columns: 380px 1.05fr 1fr 1fr; gap: 80px; align-items: center; }
+.qr { width: 380px; height: 380px; background: var(--paper); border-radius: 22px; padding: 32px; }
+.qr svg { width: 100%; height: 100%; }
+.link { font-family: var(--display); font-size: 84px; font-weight: 600; color: var(--ember); line-height: 1.1; word-break: break-all; }
+svg text { font-family: var(--body); }
+.legend { display: flex; gap: 48px; font-size: 36px; font-weight: 600; align-items: center; flex-wrap: wrap; }
+.legend span { display: inline-flex; align-items: center; gap: 14px; }
+.sw { width: 60px; height: 12px; border-radius: 6px; display: inline-block; }
+.rules { display: flex; flex-direction: column; gap: 14px; }
+.rules div { font-size: 37px; line-height: 1.3; padding-left: 70px; position: relative; }
+.rules div b.k { position: absolute; left: 0; top: -6px; font-family: var(--display); font-size: 56px; color: var(--ember-deep); }
+</style>
+</head>
+<body>
+
+<!-- 1. Title -->
+<section class="band dark" style="padding-top:40px; padding-bottom:40px">
+  <div class="eyebrow">Energy &amp; Grid Hardening · InnovateLA Dual-Use Hackathon · USC, October 2026</div>
+  <div class="row" style="grid-template-columns: 1.5fr 1fr; align-items:end">
+    <div class="col" style="gap:30px">
+      <h1>PowerUP</h1>
+      <p class="lede">A startup that owns a fleet of Base batteries, with a disaster layer for it: <b>PowerUP plans</b> each home's backup days before a wildfire shutoff, <b>Interlock guards</b> every order in seconds, and neighbors share one <b>island</b> behind SCE's switch.</p>
+    </div>
+    <div class="col" style="gap:20px">
+      <div class="quote" style="color:var(--paper)">Automation that knows when to watch, ask, slow, hold and hand to a person. We built that ladder twice: over days, and in seconds.</div>
+      <p class="small muted" style="padding-left:62px">Every number on this poster is labelled real, assumed or simulated. Reproduce the results with <b>node pilot/app/cli.mjs</b>.</p>
+    </div>
+  </div>
+</section>
+
+<!-- 2. The real shutoff and the pilot -->
+<section class="band" style="padding-top:40px">
+  <div class="row" style="grid-template-columns: 1fr 1.25fr; align-items:start">
+    <div class="col" style="gap:34px">
+      <div class="eyebrow">The real shutoff, Malibu, October 2026</div>
+      <div class="stats">
+        <div><div class="num">6,874</div><div class="cap">customers on six SCE circuits lose power to prevent fire, Oct 9 to 18 (real)</div></div>
+        <div><div class="num">Oct 15</div><div class="cap">the Bryson Fire starts at 4:41 PM, during the shutoff (real)</div></div>
+        <div><div class="num">6.5 days</div><div class="cap">from the first Santa Ana wind signal (Oct 9, 2:14 AM) to the power going off (real)</div></div>
+        <div><div class="num">69,746</div><div class="cap">SCE customers out at 7 AM on Oct 16 (real)</div></div>
+      </div>
+      <p><span class="stat">A battery fleet fails in two ways.</span> It is not ready: half empty when the power goes off, with Medical Baseline homes treated like everyone else. Or its own software is the disaster: a sell-down three hours before the shutoff, a stolen key, a replayed order, export onto a line crews think is dead, or a recharge rush that overloads the circuit when it comes back.</p>
+    </div>
+    <div class="col" style="gap:26px">
+      <div class="quote">The pilot: 456 homes behind SCE switch RAR8848 on the Cuthbert circuit, Latigo substation, 9 km from the Bryson burn.</div>
+      <p>189 of them have a battery: our <span class="stat">160 free Base Cores</span> (39.2 kWh, 20 kW) plus 29 of the homes' own. 16 are Medical Baseline homes (assumed share). Upstream, a 66 kV line into Latigo runs about 650 m inside the Bryson perimeter (real, route approximate).</p>
+      <div class="tag">Every shutoff that cut these 456 homes, 2019 to 2025 (real SCE records): 16 times, 435 hours</div>
+      <svg id="history" viewBox="0 0 2700 470" width="100%" height="470"></svg>
+      <div class="legend"><span><i class="sw" style="background:var(--slate)"></i>Whole circuit opened at the breaker (15)</span><span><i class="sw" style="background:var(--ember)"></i>SCE opened RAR8848 alone (1)</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- 3. The ladder over days -->
+<section class="band" style="background:var(--panel); padding-top:40px; padding-bottom:40px">
+  <div class="row" style="grid-template-columns: 1fr auto; align-items:end">
+    <h2>PowerUP plans, over days, on the real timeline</h2>
+    <div class="small muted" style="text-align:right">Starts from SCE's own list of circuits it may cut.</div>
+  </div>
+  <div class="ladder">
+    <div class="rung" style="background:var(--watch); min-height:170px"><div class="when">Fri Oct 9, 3 AM</div><h3>Watch</h3>First wind warning. Medical Baseline homes fill to 100% and hold.</div>
+    <div class="rung" style="background:var(--ask); min-height:195px"><div class="when">Mon Oct 12, 9 AM</div><h3>Ask</h3>SCE names Cuthbert. Owners are asked to pre-fill; everyone else keeps a 50% floor.</div>
+    <div class="rung" style="background:var(--fill); min-height:220px"><div class="when">Wed Oct 14, 7 AM</div><h3>Fill</h3>The shutoff is sure. Every battery whose owner said yes fills, under the circuit's headroom. Nothing is sold.</div>
+    <div class="rung" style="background:var(--ember); min-height:245px"><div class="when">Thu Oct 15, 4 PM</div><h3>Hold</h3>Power off. Every battery islands, never exports, and runs its home on a budget: 8, 16 or 32 kWh a day.</div>
+    <div class="rung dark" style="background:var(--ink); min-height:270px"><div class="when" style="color:var(--ember)">Sat Oct 17, 8 PM</div><h3 style="color:var(--ember)">Hand</h3>Winds stop. PowerUP proposes a staggered recharge, one circuit at a time; SCE's shutoff officer approves.</div>
+  </div>
+  <div class="row" style="grid-template-columns: 1fr 640px; gap:60px; align-items:center">
+    <svg id="fleet" viewBox="0 0 3700 470" width="100%" height="470"></svg>
+    <div class="col" style="gap:22px">
+      <div class="tag">Fleet charge, 189 batteries, Oct 7 to 18 (simulated on real data)</div>
+      <div class="legend" style="flex-direction:column; align-items:flex-start; gap:16px"><span><i class="sw" style="background:var(--teal)"></i>Guard on</span><span><i class="sw" style="background:var(--red)"></i>Guard off</span></div>
+      <p class="small">With the guard off, a market bid sells the fleet down to 9% three hours before the shutoff, and every battery home is dark by midnight. With it on, the fleet enters the shutoff at 99% and carries every home to the restart.</p>
+    </div>
+  </div>
+</section>
+
+<!-- 4. Interlock -->
+<section class="band dark" style="padding-top:40px; padding-bottom:40px">
+  <div class="row" style="grid-template-columns: 1fr 1fr; align-items:start">
+    <div class="col">
+      <h2 style="color:var(--paper)">Interlock guards, in seconds</h2>
+      <p>Every order to the fleet, from any sender, passes eight checks in order. Each check answers on the gentlest rung that keeps homes and the circuit safe. <span class="stat">It can only shrink, slow or stop an order, never create one.</span> PowerUP's own orders pass through it too, and the reserve PowerUP plans for each home becomes the floor Interlock keeps against every sender: our daily optimizer, a market bid and SCE's emergency event.</p>
+    </div>
+    <div class="col">
+      <div class="tag">Five rungs, gentlest first</div>
+      <div class="rungs5">
+        <div style="background:var(--watch)"><b>Run</b>The order passes as sent.</div>
+        <div style="background:var(--ask)"><b>Clamp</b>Slowed or capped to the safe part.</div>
+        <div style="background:var(--fill)"><b>Canary</b>1% of homes, then 10%, then all.</div>
+        <div style="background:var(--ember)"><b>Hold</b>Nothing runs until it is safe.</div>
+        <div style="background:var(--paper)"><b>Hand</b>A person decides.</div>
+      </div>
+      <p class="small muted">Orders are shaped like OpenADR 3 events. Policy packs change the limits per region without changing the engine.</p>
+    </div>
+  </div>
+  <div class="checks">
+    <div class="card"><div class="n">1</div><h3>Schema validation</h3>A malformed order never reaches a battery.</div>
+    <div class="card"><div class="n">2</div><h3>Authentication</h3>Signed by a sender on the trusted list, or held for a person.</div>
+    <div class="card"><div class="n">3</div><h3>Replay protection</h3>Issued in the last 15 minutes and never seen before.</div>
+    <div class="card"><div class="n">4</div><h3>Primacy</h3>Safety and PowerUP's plan outrank trading and market bids.</div>
+    <div class="card"><div class="n">5</div><h3>Backup reserve</h3>Never below 20%, 50% for Medical Baseline, or the reserve PowerUP planned.</div>
+    <div class="card"><div class="n">6</div><h3>Rated power</h3>Within the 20 kW inverter and the room left in each battery.</div>
+    <div class="card"><div class="n">7</div><h3>Hosting capacity</h3>No export onto a de-energized line; no charging over the circuit's limit.</div>
+    <div class="card"><div class="n">8</div><h3>Staged rollout</h3>New fleet-wide orders go out to 1%, then 10%, then everyone.</div>
+  </div>
+  <div class="row" style="grid-template-columns: 1fr 2fr; gap:60px; align-items:start">
+    <div class="col" style="gap:18px">
+      <div class="tag">A silent battery is never counted as power</div>
+      <p class="small">Interlock tells why a battery went quiet by what went quiet with it. Before the cell towers fail, PowerUP sends each battery its full plan, so a silent battery keeps following it alone, and homes report over mesh radio to a Starlink dish.</p>
+    </div>
+    <div class="classes" style="grid-template-columns: repeat(4, 1fr)">
+      <div class="card"><h3>Tripped</h3>Its whole circuit went quiet together.</div>
+      <div class="card"><h3>Not talking</h3>Its cell tower or internet went quiet. It follows its plan alone.</div>
+      <div class="card"><h3>Broken</h3>Quiet alone, after a fault code: to a person.</div>
+      <div class="card"><h3>Unsure</h3>Anything else: ask the owner first.</div>
+    </div>
+  </div>
+</section>
+
+<!-- 5. Proof 1 -->
+<section class="band ember" style="padding-top:40px; padding-bottom:40px">
+  <div class="row" style="grid-template-columns: 1fr auto; align-items:end">
+    <h2>Proof 1: the same shutoff, six failures, guard off vs guard on</h2>
+    <div class="eyebrow" style="text-align:right">RAR8848 pilot · Oct 7 to 18, 2026</div>
+  </div>
+  <div class="maps">
+    <figure><img src="map-off.png" alt="Pilot map with the guard off: battery homes empty"><figcaption><span class="dot" style="background:var(--red)"></span>Guard off, a day into the shutoff: every battery is empty</figcaption></figure>
+    <figure><img src="map-on.png" alt="Pilot map with the guard on: battery homes islanded"><figcaption><span class="dot" style="background:var(--teal)"></span>Guard on, the same hour: every battery home has power</figcaption></figure>
+    <div class="results">
+    <div class="res"><div class="label">Battery homes that go dark</div><div class="num">189<span class="arrow">→</span>0</div></div>
+    <div class="res"><div class="label">Medical Baseline homes that go dark</div><div class="num">16<span class="arrow">→</span>0</div></div>
+    <div class="res"><div class="label">Fleet charge when the power goes off</div><div class="num">9%<span class="arrow">→</span>99%</div></div>
+    <div class="res"><div class="label">Battery-hours pushed onto a dead line</div><div class="num">567<span class="arrow">→</span>0</div></div>
+    <div class="res"><div class="label">Overload over Cuthbert's cap at the restart</div><div class="num">3.4<small> MW</small><span class="arrow">→</span>0</div></div>
+    <div class="res"><div class="label">Home-hours kept powered by batteries</div><div class="num">945<span class="arrow">→</span>11,596</div></div>
+  </div>
+  </div>
+  <table>
+    <tr><th>When (2026)</th><th>Injected failure (simulated)</th><th>Interlock</th><th>What the check found</th><th class="r">Guard off</th></tr>
+    <tr><td>Tue Oct 13, 5 PM</td><td>SCE emergency event: every home exports 5 kW for 2 hours</td><td class="verdict">Clamp</td><td>Slowed on 34 homes so no backup drops below its floor</td><td class="r">189 homes drained</td></tr>
+    <tr><td>Wed Oct 14, 5 PM</td><td>Replay: a captured Oct 8 discharge order is sent again</td><td class="verdict">Hold</td><td>Issued 8,700 minutes ago, id already seen</td><td class="r">130 kWh drained</td></tr>
+    <tr><td>Thu Oct 15, 1 PM</td><td>Market bid: sell every battery down to 10% by 4 PM</td><td class="verdict">Clamp</td><td>PowerUP's Fill outranks it; target raised to the floor</td><td class="r">6,668 kWh sold</td></tr>
+    <tr><td>Thu Oct 15, 8 PM</td><td>Stolen key posing as SCE: discharge every battery at 20 kW</td><td class="verdict">Hold · hand</td><td>Signer not on the trusted list; a person reviews it</td><td class="r">189 batt-hours on a dead line</td></tr>
+    <tr><td>Fri Oct 16, noon</td><td>Market export onto the de-energized Cuthbert line</td><td class="verdict">Hold</td><td>Circuit open: homes island and serve themselves</td><td class="r">378 batt-hours on a dead line</td></tr>
+    <tr><td>Sun Oct 18, 6 AM</td><td>Optimizer rebound: recharge everything at 20 kW when power returns</td><td class="verdict">Clamp</td><td>3.83 MW against a 0.97 MW limit: all slowed to 11%</td><td class="r">3.4 MW over the cap</td></tr>
+  </table>
+  <p class="small">PowerUP's own five orders: 5 of 5 pass, none held or clamped. The same run on all six Malibu circuits (1,032 battery homes): 1,028 dark with the guard off, none with it on. At Malibu's real battery share today, 7.1 per 100 homes (SCE interconnection records): 483 of 484 dark with it off, none with it on.</p>
+</section>
+
+<!-- 6. Proof 2, islands, business -->
+<section class="band" style="padding-top:40px">
+  <div class="row" style="grid-template-columns: 1fr 1.1fr 1.1fr; gap:80px; align-items:start">
+    <div class="col">
+      <div class="eyebrow">Proof 2: the evening before</div>
+      <h3 style="font-size:58px">Wed Oct 14, 2026: an ordinary trading evening, Interlock alone</h3>
+      <p class="small">The same 189 battery homes, Cuthbert's real October load shape scaled to the branch (assumed), SCE time-of-use prices (assumed), one SCE event and eleven failures (simulated): a stolen key, a replay, a price glitch, a bad forecast, a market export while SCE has RAR8848 open, and more.</p>
+      <table>
+        <tr><th>Guard</th><th class="r">Off</th><th class="r">On</th></tr>
+        <tr><td>Homes drained below their backup</td><td class="r">189</td><td class="r"><b>0</b></td></tr>
+        <tr><td>Export onto the opened line, battery-minutes</td><td class="r">2,385</td><td class="r"><b>0</b></td></tr>
+        <tr><td>Over the branch's 0.97 MW cap, MW-minutes</td><td class="r">306</td><td class="r"><b>0</b></td></tr>
+        <tr><td>Revenue that evening</td><td class="r">$2,795</td><td class="r"><b>$3,331</b></td></tr>
+      </table>
+      <p class="small muted">Safe and still earning: the guarded fleet makes 1.19 times what the unguarded one does. Interlock doubles as our test bench: replay a new dispatch policy, then roll it out to 1%, 10% and 100% of the fleet.</p>
+    </div>
+    <div class="col">
+      <div class="eyebrow">Islands behind SCE's switch</div>
+      <p class="small">SCE already opens partial circuits: 13 of the 55 shutoffs on these six circuits since 2019 were opened at a switch on the line (real). The island planner finds homes that go dark only because their feed runs through a risky stretch, and plans an opt-in island behind the existing switch, with SCE opening and closing it. Three hard rules:</p>
+      <div class="rules">
+        <div><b class="k">1</b>Never re-energize overhead line in a fire area.</div>
+        <div><b class="k">2</b>A switch between the island and every dead neighbor.</div>
+        <div><b class="k">3</b>At least one grid-forming source on the island.</div>
+      </div>
+      <div class="card" style="padding:28px 34px">
+        <div class="tag">Stated assumptions, taken as given</div>
+        <p class="small">SCE can open RAR8848 and run the 456 homes behind it as an island. Our batteries are grid-forming: they set the island's voltage and frequency, not only follow it.</p>
+      </div>
+      <p class="small"><span class="stat">The pilot carries all 16 real shutoffs</span> for every subscriber at the critical budget with clear-sky solar (150 batteries is the minimum), and 15 of 16 with smoke halving the solar (all 16 would take 228).</p>
+    </div>
+    <div class="col">
+      <div class="eyebrow">The pilot business</div>
+      <p class="small"><span class="stat">160 free Base Cores</span> in volunteer homes: Medical Baseline first, then solar roofs, which refill every day. <span class="stat">$9.99 a month</span> buys emergency power for a home with no battery (226 homes at an assumed 90% opt-in). In a shutoff, everyone on the island pays <span class="stat">$1.20 per kWh</span>, twice SCE's top time-of-use rate (assumed); SCE bills it and keeps $0.20 for delivery, sellers get $1.00. A host uses the bottom 20% of our battery first, at the same price.</p>
+      <table>
+        <tr><th>Income per battery</th><th>Label</th><th class="r">$ / yr</th></tr>
+        <tr><td>Trading, CAISO prices for SCE</td><td>real prices</td><td class="r">334</td></tr>
+        <tr><td>Capacity payments</td><td>assumed</td><td class="r">941</td></tr>
+        <tr><td>Emergency grid events</td><td>assumed count</td><td class="r">627</td></tr>
+        <tr><td>Subscriptions</td><td>assumed opt-in</td><td class="r">169</td></tr>
+        <tr><td>Shutoff power sales</td><td>assumed rates</td><td class="r">90</td></tr>
+        <tr><td>Holding full from SCE's notice</td><td>real prices</td><td class="r">−28</td></tr>
+      </table>
+      <p class="small muted">Fleet about $2.24M after the 30% tax credit (installed cost assumed), net about $341,000 a year. Payback 6.6 years with all income, 25 on trading, subscriptions and shutoff sales, 46 on trading alone.</p>
+    </div>
+  </div>
+  <div class="row" style="grid-template-columns: 1fr 1fr; gap:80px; align-items:start; margin-top:6px">
+    <p class="small"><span class="tag">Funding</span> DOE SBIR Phase I through the Office of Electricity and CESER first; DOE GRIP with SCE as the applicant to scale; FEMA's Hazard Mitigation Grant Program after a declared disaster, with California's Microgrid Incentive Program for the shared battery. Built: the bridge reports what grant programs score: homes kept powered, Medical Baseline hours protected, overload avoided.</p>
+    <p class="small"><span class="tag">Global</span> South Africa's load shedding is a planned outage, announced ahead and repeated several times a day: PowerUP's ladder running daily, with hospitals and clinics in the Medical Baseline role. Built: region policy packs swap the risk signal, the priority register and the limits without changing the engine.</p>
+  </div>
+</section>
+
+<div class="fill"></div>
+
+<!-- 7. Footer -->
+<section class="band dark" style="padding-top:40px; padding-bottom:40px">
+  <div class="foot">
+    <div class="qr" id="qr"></div>
+    <div class="col" style="gap:18px">
+      <div class="eyebrow">Run the replay yourself</div>
+      <div class="link" id="link">mrbese.github.io/PowerUp</div>
+      <div class="small muted">Code: github.com/mrbese/PowerUp · 60 node tests (npm test)</div>
+    </div>
+    <div class="col" style="gap:14px">
+      <div class="eyebrow">Data</div>
+      <p class="small">SCE shutoff records, circuit lines, load profiles and interconnection records; NIFC fire perimeter; California Energy Commission transmission map; CAISO day-ahead prices; NWS Los Angeles forecasts. Switch positions and transformers are estimated.</p>
+    </div>
+    <div class="col" style="gap:14px">
+      <div class="eyebrow">Responsible use</div>
+      <p class="small">Misuse: locking owners out of their batteries, a single point of attack, or pricing power up mid-crisis. Limits: Interlock never goes below a home's own backup, PowerUP sees a priority tier, not a medical record, a person approves every restart and island, and the price is fixed in advance.</p>
+    </div>
+  </div>
+</section>
+
+<script>
+// Shutoff history: the 16 real SCE shutoffs that cut the homes behind RAR8848 (pilot/data.json events).
+(function () {
+  const ev = [['Oct 2019',20.8,0],['Dec 2020',18.1,1],['Dec 2020',26.3,0],['Jan 2021',16.4,0],['Nov 2021',9.9,0],['Nov 2021',28.7,0],['Oct 2023',15.6,0],['Oct 2024',23.9,0],['Nov 2024',36.3,0],['Dec 2024',40.9,0],['Jan 2025',79.8,0],['Jan 2025',16.9,0],['Jan 2025',28.6,0],['Jan 2025',29.1,0],['Jan 2025',14.7,0],['Jan 2025',29.1,0]];
+  const svg = document.getElementById('history'); const W = 2700, top = 50, base = 385, max = 80;
+  const bw = W / ev.length; let s = '';
+  for (const y of [0, 20, 40, 60, 80]) {
+    const yy = base - (y / max) * (base - top);
+    s += `<line x1="0" x2="${W}" y1="${yy}" y2="${yy}" stroke="#AFC0C8" stroke-width="2"/>`;
+  }
+  ev.forEach(([d, h, sw], i) => {
+    const x = i * bw + 14, w = bw - 28, y = base - (h / max) * (base - top);
+    s += `<rect x="${x}" y="${y}" width="${w}" height="${base - y}" rx="6" fill="${sw ? '#E8913F' : '#4A5A63'}"/>`;
+    s += `<text x="${x + w / 2}" y="${y - 12}" text-anchor="middle" font-size="30" font-weight="600" fill="#13202A">${Math.round(h)}</text>`;
+    s += `<text x="${x + w / 2}" y="${base + 40}" text-anchor="middle" font-size="25" fill="#4A5A63">${d.split(' ')[0]}</text>`;
+    if (i === 0 || ev[i - 1][0].split(' ')[1] !== d.split(' ')[1]) s += `<text x="${x + w / 2}" y="${base + 76}" text-anchor="middle" font-size="25" font-weight="600" fill="#13202A">${d.split(' ')[1]}</text>`;
+  });
+  s += `<text x="${W}" y="${top - 16}" text-anchor="end" font-size="28" fill="#4A5A63">hours dark</text>`;
+  svg.innerHTML = s;
+})();
+
+// Fleet chart: filled in by render.mjs from fleet-series.json.
+window.drawFleet = function (d) {
+  const svg = document.getElementById('fleet'); const W = 3700, L = 110, R = 20, T = 60, B = 410;
+  const n = d.on.soc.length, x = (h) => L + (h / (n - 1)) * (W - L - R), y = (v) => B - (v / 100) * (B - T);
+  let s = '';
+  const back = 270; // Sun Oct 18, 6 AM: Cuthbert is back (cli.mjs)
+  s += `<rect x="${x(d.rungs.hold)}" y="${T}" width="${x(back) - x(d.rungs.hold)}" height="${B - T}" fill="#13202A" opacity="0.08"/>`;
+  s += `<text x="${(x(d.rungs.hold) + x(back)) / 2}" y="${T + 40}" text-anchor="middle" font-size="30" font-weight="600" fill="#13202A">POWER OFF</text>`;
+  for (const v of [0, 25, 50, 75, 100]) {
+    s += `<line x1="${L}" x2="${W - R}" y1="${y(v)}" y2="${y(v)}" stroke="#AFC0C8" stroke-width="2"/>`;
+    s += `<text x="${L - 16}" y="${y(v) + 10}" text-anchor="end" font-size="28" fill="#4A5A63">${v}%</text>`;
+  }
+  for (let day = 0; day <= 11; day++) {
+    const h = day * 24; if (h >= n) break;
+    s += `<text x="${x(h + 12)}" y="${B + 50}" text-anchor="middle" font-size="28" fill="#4A5A63">Oct ${7 + day}</text>`;
+    s += `<line x1="${x(h)}" x2="${x(h)}" y1="${B}" y2="${B + 14}" stroke="#4A5A63" stroke-width="2"/>`;
+  }
+  const names = { watch: 'Watch', ask: 'Ask', fill: 'Fill', hold: 'Hold', hand: 'Hand' };
+  for (const [k, h] of Object.entries(d.rungs)) {
+    s += `<line x1="${x(h)}" x2="${x(h)}" y1="${T - 10}" y2="${B}" stroke="#B35A14" stroke-width="3" stroke-dasharray="10 8"/>`;
+    s += `<text x="${x(h)}" y="${T - 22}" text-anchor="middle" font-size="32" font-weight="600" fill="#B35A14">${names[k].toUpperCase()}</text>`;
+  }
+  const path = (a) => a.map((v, i) => `${i ? 'L' : 'M'}${x(i).toFixed(1)},${y(v).toFixed(1)}`).join('');
+  s += `<path d="${path(d.off.soc)}" fill="none" stroke="#D1352A" stroke-width="7" stroke-linejoin="round"/>`;
+  s += `<path d="${path(d.on.soc)}" fill="none" stroke="#1A9FB3" stroke-width="7" stroke-linejoin="round"/>`;
+  svg.innerHTML = s;
+};
+</script>
+</body>
+</html>
