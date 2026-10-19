@@ -15,7 +15,7 @@ PowerUP has three parts that share one ladder, the one the hackathon prompt asks
 | **Islands** (`islands/`) | A shutoff that cuts a whole circuit when only part of it is risky | Finds the homes that are dark only because their feed runs through a risky stretch, and plans an opt-in neighborhood island behind SCE's existing switches, with donors, receivers and settlement | Ask (opt in), hand (SCE opens the switch) |
 
 
-My Contributions
+## My Contributions
 
 Brainstorming & Ideation: Participated in initial team brainstorming sessions, contributing to problem identification, solution ideation, and the overall direction of PowerUP.
 
