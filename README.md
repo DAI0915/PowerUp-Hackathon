@@ -14,6 +14,21 @@ PowerUP has three parts that share one ladder, the one the hackathon prompt asks
 | **Interlock** (`interlock/`) | One that comes without warning: an order that is forged, stale, unsafe or simply wrong, and batteries that go quiet | Every order passes eight checks and gets the gentlest rung that keeps each home's backup and the local circuit safe. It can only shrink, slow or stop an order, never create one | In seconds: watch, ask, slow, hold, hand |
 | **Islands** (`islands/`) | A shutoff that cuts a whole circuit when only part of it is risky | Finds the homes that are dark only because their feed runs through a risky stretch, and plans an opt-in neighborhood island behind SCE's existing switches, with donors, receivers and settlement | Ask (opt in), hand (SCE opens the switch) |
 
+
+My Contributions
+
+Brainstorming & Ideation: Participated in initial team brainstorming sessions, contributing to problem identification, solution ideation, and the overall direction of PowerUP.
+
+AI Voice Assistant Development: Developed and integrated a Retell AI-powered voice assistant that collects residents' consent to reduce optional EV charging during simulated power outages.
+
+Backend Development & Cloud Deployment: Built the browser-based voice calling interface and deployed a Node.js backend on Render, implementing secure webhook handling and Cloudflare Turnstile protection.
+
+System Integration: Integrated confirmed resident responses into PowerUP's battery backup planning workflow, enabling dispatcher approval and automatic recalculation of backup duration.
+
+Testing & Evaluation: Conducted functional testing, scenario-based evaluation, and end-to-end validation of PowerUP and its AI integration.
+
+
+
 ## The joint: PowerUP plans, Interlock guards
 
 PowerUP never talks to a battery directly. `pilot/app/src/bridge.js` turns each PowerUP decision into a signed, OpenADR-style order that goes through Interlock like any other sender's. The reserve PowerUP plans for each home becomes the floor Interlock enforces against **every** sender, including our own daily optimizer, a market bid, a forged order and the utility's own emergency event:
